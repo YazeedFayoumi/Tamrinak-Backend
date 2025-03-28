@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Repository\UnitOfWork\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>
