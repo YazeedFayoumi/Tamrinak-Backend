@@ -3,7 +3,7 @@ using Tamrinak_API.DataAccess.Configurartions;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DataAccess.Seeding;
 
-namespace Tamrinak_API.DataAccess.DbContext
+namespace Tamrinak_API.DataAccess
 {
     public class DatabaseContext : DbContext
     {
