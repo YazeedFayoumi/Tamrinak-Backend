@@ -1,6 +1,6 @@
 @Tamrinak_API_HostAddress = http://localhost:5114
 
-GET {{Tamrinak_API_HostAddress}}/weatherforecast/
+GET {{Tamrinak_API_HostAddress}}
 Accept: application/json
 
 ###
