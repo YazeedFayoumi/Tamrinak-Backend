@@ -27,14 +27,14 @@ namespace Tamrinak_API.DataAccess
         {
             base.OnModelCreating(modelBuilder);
 
-            // Apply all entity configurations
+            
             modelBuilder.ApplyConfiguration(new UserRoleConfig());
             modelBuilder.ApplyConfiguration(new SportFieldConfig());
             modelBuilder.ApplyConfiguration(new ReviewConfig());
             modelBuilder.ApplyConfiguration(new BookingConfig());
             modelBuilder.ApplyConfiguration(new MembershipConfig());
 
-            // Seed initial data
+            
             RoleSeeder.SeedRoles(modelBuilder);
             SportSeeder.SeedSports(modelBuilder);
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tamrinak_API.DataAccess;
 
@@ -11,9 +12,11 @@ using Tamrinak_API.DataAccess;
 namespace Tamrinak_API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250404140601_ChangeSport")]
+    partial class ChangeSport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -356,104 +359,164 @@ namespace Tamrinak_API.Migrations
                         new
                         {
                             SportId = 3,
-                            Description = "Individual sport performed in a pool or open water",
-                            Name = "Swimming"
-                        },
-                        new
-                        {
-                            SportId = 4,
-                            Description = "Racket sport played individually or in pairs",
-                            Name = "Tennis"
-                        },
-                        new
-                        {
-                            SportId = 5,
-                            Description = "Team sport where players pass and shoot a ball",
-                            Name = "Handball"
-                        },
-                        new
-                        {
-                            SportId = 6,
-                            Description = "Indoor racket sport played on a table",
-                            Name = "Table Tennis"
-                        },
-                        new
-                        {
-                            SportId = 7,
-                            Description = "Gaming counter",
-                            Name = "E-Sports"
-                        },
-                        new
-                        {
-                            SportId = 8,
-                            Description = "Bowling is a target sport and recreational activity in which a player rolls a ball toward pins to get the highest score",
-                            Name = "Bowling"
-                        },
-                        new
-                        {
-                            SportId = 9,
-                            Description = "Racket sport played in an indoor court",
-                            Name = "Squash"
-                        },
-                        new
-                        {
-                            SportId = 10,
-                            Description = "Strength sport involving lifting heavy weights",
-                            Name = "Weightlifting"
-                        },
-                        new
-                        {
-                            SportId = 11,
-                            Description = "Combat sport involving punching and defensive techniques",
-                            Name = "Boxing"
-                        },
-                        new
-                        {
-                            SportId = 12,
-                            Description = "Combat sport involving grappling techniques",
-                            Name = "Wrestling"
-                        },
-                        new
-                        {
-                            SportId = 13,
-                            Description = "Japanese martial art focusing on striking techniques",
-                            Name = "Karate"
-                        },
-                        new
-                        {
-                            SportId = 14,
-                            Description = "Korean martial art known for high kicks and strikes",
-                            Name = "Taekwondo"
-                        },
-                        new
-                        {
-                            SportId = 15,
-                            Description = "Mind-body practice focusing on strength, flexibility, and meditation",
-                            Name = "Yoga"
-                        },
-                        new
-                        {
-                            SportId = 16,
-                            Description = "Form of rock climbing performed without ropes",
-                            Name = "Bouldering"
-                        },
-                        new
-                        {
-                            SportId = 17,
                             Description = "Team sport played with a ball over a net",
                             Name = "Volleyball"
                         },
                         new
                         {
-                            SportId = 18,
+                            SportId = 4,
+                            Description = "Bat-and-ball game popular in many countries",
+                            Name = "Cricket"
+                        },
+                        new
+                        {
+                            SportId = 5,
+                            Description = "Physical contact team sport with oval-shaped ball",
+                            Name = "Rugby"
+                        },
+                        new
+                        {
+                            SportId = 6,
+                            Description = "Team sport where players pass and shoot a ball",
+                            Name = "Handball"
+                        },
+                        new
+                        {
+                            SportId = 7,
+                            Description = "Team sport played on ice with a puck",
+                            Name = "Ice Hockey"
+                        },
+                        new
+                        {
+                            SportId = 8,
+                            Description = "Bat-and-ball game popular in North America",
+                            Name = "Baseball"
+                        },
+                        new
+                        {
+                            SportId = 9,
+                            Description = "Racket sport played individually or in pairs",
+                            Name = "Tennis"
+                        },
+                        new
+                        {
+                            SportId = 10,
+                            Description = "Racket sport played with a lightweight shuttlecock",
+                            Name = "Badminton"
+                        },
+                        new
+                        {
+                            SportId = 11,
+                            Description = "Indoor racket sport played on a table",
+                            Name = "Table Tennis"
+                        },
+                        new
+                        {
+                            SportId = 12,
+                            Description = "Individual sport performed in a pool or open water",
+                            Name = "Swimming"
+                        },
+                        new
+                        {
+                            SportId = 13,
                             Description = "Track and field sports including running, jumping, and throwing",
                             Name = "Athletics"
+                        },
+                        new
+                        {
+                            SportId = 14,
+                            Description = "Combat sport involving punching and defensive techniques",
+                            Name = "Boxing"
+                        },
+                        new
+                        {
+                            SportId = 15,
+                            Description = "Combat sport involving grappling techniques",
+                            Name = "Wrestling"
+                        },
+                        new
+                        {
+                            SportId = 16,
+                            Description = "Japanese martial art focusing on striking techniques",
+                            Name = "Karate"
+                        },
+                        new
+                        {
+                            SportId = 17,
+                            Description = "Japanese martial art focusing on throws and grappling",
+                            Name = "Judo"
+                        },
+                        new
+                        {
+                            SportId = 18,
+                            Description = "Korean martial art known for high kicks and strikes",
+                            Name = "Taekwondo"
                         },
                         new
                         {
                             SportId = 19,
                             Description = "Martial art focusing on ground fighting and submission",
                             Name = "Brazilian Jiu-Jitsu"
+                        },
+                        new
+                        {
+                            SportId = 20,
+                            Description = "Racket sport played in an indoor court",
+                            Name = "Squash"
+                        },
+                        new
+                        {
+                            SportId = 21,
+                            Description = "Racket sport combining elements of tennis and squash",
+                            Name = "Padel"
+                        },
+                        new
+                        {
+                            SportId = 22,
+                            Description = "Mind-body practice focusing on strength, flexibility, and meditation",
+                            Name = "Yoga"
+                        },
+                        new
+                        {
+                            SportId = 23,
+                            Description = "Low-impact exercise method focusing on core strength",
+                            Name = "Pilates"
+                        },
+                        new
+                        {
+                            SportId = 24,
+                            Description = "Strength sport involving lifting heavy weights",
+                            Name = "Weightlifting"
+                        },
+                        new
+                        {
+                            SportId = 25,
+                            Description = "Sport involving climbing natural rock formations or artificial walls",
+                            Name = "Rock Climbing"
+                        },
+                        new
+                        {
+                            SportId = 26,
+                            Description = "Form of rock climbing performed without ropes",
+                            Name = "Bouldering"
+                        },
+                        new
+                        {
+                            SportId = 27,
+                            Description = "Simulated skydiving experience in a vertical wind tunnel",
+                            Name = "Indoor Skydiving"
+                        },
+                        new
+                        {
+                            SportId = 28,
+                            Description = "Team sport played in a swimming pool",
+                            Name = "Water Polo"
+                        },
+                        new
+                        {
+                            SportId = 29,
+                            Description = "Artistic swimming performed in synchronized routines",
+                            Name = "Synchronized Swimming"
                         });
                 });
 
