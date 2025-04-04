@@ -18,14 +18,15 @@ namespace Tamrinak_API.Controllers
             _userService = userService;
         }
 
-        [HttpPost("Register"), Authorize]
+        [HttpPost("Register")]
         public async Task<IActionResult> Register(UserRegisterDto registerDto)
         {
             var createdUser = await _userService.CreateUserAsync(registerDto);
             return Ok(createdUser);
         }
-        [HttpPatch("AddRole")]
-        public async Task<ActionResult> AddRoleToCustomer([FromBody] AssignRoleDto model)
+
+        [HttpPatch("AddRole"), AuthorizeRole(Roles ="SuperAdmin,Admin")]
+        public async Task<ActionResult> AddRoleToUser([FromBody] AssignRoleDto model)
         {
             try
             {
@@ -36,20 +37,20 @@ namespace Tamrinak_API.Controllers
             {
                 return NotFound(ex.Message);
             }
-
         }
+
         [HttpPost("GetUserRoles"), Authorize]
         public async Task<ActionResult> GetUserRoles([FromBody] int id)
         {
             var roles = await _userService.GetUserRolesAsync(id);
             return Ok(roles);
         }
+
         [HttpPost("GetUserRolesEmail"), AuthorizeRole(Roles = "Admin")]
         public async Task<ActionResult> GetUserRoles([FromBody] string email)
         {
             var roles = await _userService.GetUserRolesAsync(email);
             return Ok(roles);
-
         }
     }
 }

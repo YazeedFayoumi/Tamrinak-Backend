@@ -52,13 +52,9 @@ namespace Tamrinak_API.Services.UserService
                 await _userRoleRepo.AddAsync(userRole);
             }
             await _genericRepo.SaveAsync();
-          /*  List<RoleDto> roleDtos = roles.Select(role => new RoleDto
-            {
-                RoleName = role.RoleName
-            }).ToList();*/
+         
 
             await _genericRepo.UpdateAsync(user);
-            //return (roleDtos);
         }
         public async Task<List<string>> GetUserRolesAsync(int userId)
         {
