@@ -24,6 +24,8 @@ namespace Tamrinak_API.DataAccess.Models
         [DataType(DataType.Date)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public string? ProfileImageUrl { get; set; }
+
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<Membership> Memberships { get; set; } = new List<Membership>();

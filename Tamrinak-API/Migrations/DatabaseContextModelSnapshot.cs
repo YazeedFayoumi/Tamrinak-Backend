@@ -48,6 +48,9 @@ namespace Tamrinak_API.Migrations
                     b.Property<int>("NumberOfPeople")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SportId")
+                        .HasColumnType("int");
+
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
@@ -59,11 +62,11 @@ namespace Tamrinak_API.Migrations
 
                     b.HasKey("BookingId");
 
-                    b.HasIndex("FacilityId");
-
                     b.HasIndex("FieldId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("SportId", "FacilityId");
 
                     b.ToTable("Bookings");
                 });
@@ -91,7 +94,7 @@ namespace Tamrinak_API.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("PricePerHour")
+                    b.Property<decimal>("PricePerMonth")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Type")
@@ -113,14 +116,22 @@ namespace Tamrinak_API.Migrations
                     b.Property<int>("Capacity")
                         .HasColumnType("int");
 
-                    b.Property<int>("FacilityId")
+                    b.Property<int?>("FacilityId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("HasLighting")
+                    b.Property<bool?>("HasLighting")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsIndoor")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("PricePerHour")
                         .HasColumnType("decimal(18,2)");
@@ -132,7 +143,41 @@ namespace Tamrinak_API.Migrations
 
                     b.HasIndex("FacilityId");
 
+                    b.HasIndex("SportId");
+
                     b.ToTable("Fields");
+                });
+
+            modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("FacilityId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("FieldId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SportId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FacilityId");
+
+                    b.HasIndex("FieldId");
+
+                    b.HasIndex("SportId");
+
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Membership", b =>
@@ -368,7 +413,7 @@ namespace Tamrinak_API.Migrations
                         new
                         {
                             SportId = 5,
-                            Description = "Team sport where players pass and shoot a ball",
+                            Description = "Team sport where playe_I(rs pass and shoot a ball",
                             Name = "Handball"
                         },
                         new
@@ -457,19 +502,19 @@ namespace Tamrinak_API.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Tamrinak_API.DataAccess.Models.SportField", b =>
+            modelBuilder.Entity("Tamrinak_API.DataAccess.Models.SportFacility", b =>
                 {
-                    b.Property<int>("FieldId")
+                    b.Property<int>("FacilityId")
                         .HasColumnType("int");
 
                     b.Property<int>("SportId")
                         .HasColumnType("int");
 
-                    b.HasKey("FieldId", "SportId");
+                    b.HasKey("FacilityId", "SportId");
 
                     b.HasIndex("SportId");
 
-                    b.ToTable("FieldSports");
+                    b.ToTable("SportFacilities");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.User", b =>
@@ -505,6 +550,9 @@ namespace Tamrinak_API.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProfileImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
@@ -530,10 +578,6 @@ namespace Tamrinak_API.Migrations
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Booking", b =>
                 {
-                    b.HasOne("Tamrinak_API.DataAccess.Models.Facility", null)
-                        .WithMany("Bookings")
-                        .HasForeignKey("FacilityId");
-
                     b.HasOne("Tamrinak_API.DataAccess.Models.Field", "Field")
                         .WithMany("Bookings")
                         .HasForeignKey("FieldId")
@@ -546,7 +590,14 @@ namespace Tamrinak_API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Tamrinak_API.DataAccess.Models.SportFacility", "SportFacility")
+                        .WithMany("Bookings")
+                        .HasForeignKey("SportId", "FacilityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Field");
+
+                    b.Navigation("SportFacility");
 
                     b.Navigation("User");
                 });
@@ -555,11 +606,41 @@ namespace Tamrinak_API.Migrations
                 {
                     b.HasOne("Tamrinak_API.DataAccess.Models.Facility", "Facility")
                         .WithMany("Fields")
-                        .HasForeignKey("FacilityId")
+                        .HasForeignKey("FacilityId");
+
+                    b.HasOne("Tamrinak_API.DataAccess.Models.Sport", "Sport")
+                        .WithMany("Fields")
+                        .HasForeignKey("SportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Facility");
+
+                    b.Navigation("Sport");
+                });
+
+            modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Image", b =>
+                {
+                    b.HasOne("Tamrinak_API.DataAccess.Models.Facility", "Facility")
+                        .WithMany("Images")
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Tamrinak_API.DataAccess.Models.Field", "Field")
+                        .WithMany("Images")
+                        .HasForeignKey("FieldId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Tamrinak_API.DataAccess.Models.Sport", "Sport")
+                        .WithMany("Images")
+                        .HasForeignKey("SportId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Facility");
+
+                    b.Navigation("Field");
+
+                    b.Navigation("Sport");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Membership", b =>
@@ -625,21 +706,21 @@ namespace Tamrinak_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Tamrinak_API.DataAccess.Models.SportField", b =>
+            modelBuilder.Entity("Tamrinak_API.DataAccess.Models.SportFacility", b =>
                 {
-                    b.HasOne("Tamrinak_API.DataAccess.Models.Field", "Field")
-                        .WithMany("SportFields")
-                        .HasForeignKey("FieldId")
+                    b.HasOne("Tamrinak_API.DataAccess.Models.Facility", "Facility")
+                        .WithMany("SportFacilities")
+                        .HasForeignKey("FacilityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Tamrinak_API.DataAccess.Models.Sport", "Sport")
-                        .WithMany("SportFields")
+                        .WithMany("SportFacilities")
                         .HasForeignKey("SportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Field");
+                    b.Navigation("Facility");
 
                     b.Navigation("Sport");
                 });
@@ -671,18 +752,20 @@ namespace Tamrinak_API.Migrations
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Facility", b =>
                 {
-                    b.Navigation("Bookings");
-
                     b.Navigation("Fields");
 
+                    b.Navigation("Images");
+
                     b.Navigation("Memberships");
+
+                    b.Navigation("SportFacilities");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Field", b =>
                 {
                     b.Navigation("Bookings");
 
-                    b.Navigation("SportFields");
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Membership", b =>
@@ -698,7 +781,16 @@ namespace Tamrinak_API.Migrations
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Sport", b =>
                 {
-                    b.Navigation("SportFields");
+                    b.Navigation("Fields");
+
+                    b.Navigation("Images");
+
+                    b.Navigation("SportFacilities");
+                });
+
+            modelBuilder.Entity("Tamrinak_API.DataAccess.Models.SportFacility", b =>
+                {
+                    b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.User", b =>

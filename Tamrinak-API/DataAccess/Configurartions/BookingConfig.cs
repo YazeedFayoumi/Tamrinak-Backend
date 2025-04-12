@@ -18,6 +18,11 @@ namespace Tamrinak_API.DataAccess.Configurartions
                 .HasForeignKey(b => b.FieldId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(b => b.SportFacility)
+                .WithMany(sf => sf.Bookings)
+                .HasForeignKey(b => new { b.SportId, b.FacilityId }).
+                OnDelete(DeleteBehavior.Restrict);  
+
             builder.HasOne(b => b.Payment)
                 .WithOne(p => p.Booking)
                 .HasForeignKey<Payment>(p => p.BookingId)

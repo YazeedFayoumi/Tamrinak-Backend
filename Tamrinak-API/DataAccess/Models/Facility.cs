@@ -16,7 +16,7 @@ namespace Tamrinak_API.DataAccess.Models
         public string Location { get; set; }
 
         [Required]
-        public decimal? PricePerHour { get; set; }
+        public decimal? PricePerMonth { get; set; }
 
         public bool? IsAvailable { get; set; } = true;
 
@@ -30,18 +30,20 @@ namespace Tamrinak_API.DataAccess.Models
 
         public FacilityType Type { get; set; }
         public ICollection<Field> Fields { get; set; }
-        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<Membership> Memberships { get; set; } = new List<Membership>();
-
-
+        public ICollection<SportFacility> SportFacilities { get; set;} = new List<SportFacility>();
+        public ICollection<Image> Images { get; set; } = new List<Image>();
     }
+
     public enum FacilityType
     {
         FootballClub,
         Gym,
         BasketballClub,
         TennisClub,
-        SwimmingClub
+        SwimmingClub,
+        MartialArts,
+        Other
     }
 
 }

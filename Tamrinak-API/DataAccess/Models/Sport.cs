@@ -13,6 +13,8 @@ namespace Tamrinak_API.DataAccess.Models
 
         public string Description { get; set; }
 
-        public ICollection<SportField> SportFields { get; set; } = new List<SportField>();
+        public ICollection<SportFacility> SportFacilities { get; set; } = new List<SportFacility>();
+        public List<Field> Fields { get; set; } = new List<Field> ();
+        public ICollection<Image> Images { get; set; } = new List<Image>();
     }
 }

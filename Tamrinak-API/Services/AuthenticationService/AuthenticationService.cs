@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO;
-using Tamrinak_API.Repository.Repositories.GenericRepo;
+using Tamrinak_API.Repository.GenericRepo;
 
 namespace Tamrinak_API.Services.AuthenticationService
 {

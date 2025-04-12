@@ -16,10 +16,11 @@ namespace Tamrinak_API.DataAccess
         public DbSet<Facility> Facilities { get; set; }
         public DbSet<Field> Fields { get; set; }
         public DbSet<Sport> Sports { get; set; }
-        public DbSet<SportField> FieldSports { get; set; }
+        public DbSet<SportFacility> SportFacilities { get; set; }
         public DbSet<Membership> Memberships { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<Image> Images { get; set; }
         public DbSet<Review> Reviews { get; set; }
 
 
@@ -29,10 +30,11 @@ namespace Tamrinak_API.DataAccess
 
             
             modelBuilder.ApplyConfiguration(new UserRoleConfig());
-            modelBuilder.ApplyConfiguration(new SportFieldConfig());
+            modelBuilder.ApplyConfiguration(new SportFacilityConfig());
             modelBuilder.ApplyConfiguration(new ReviewConfig());
             modelBuilder.ApplyConfiguration(new BookingConfig());
             modelBuilder.ApplyConfiguration(new MembershipConfig());
+            modelBuilder.ApplyConfiguration(new ImageConfig());
 
             
             RoleSeeder.SeedRoles(modelBuilder);
