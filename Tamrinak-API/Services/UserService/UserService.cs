@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO;
-using Tamrinak_API.Repository.Repositories.GenericRepo;
+using Tamrinak_API.Repository.GenericRepo;
 
 namespace Tamrinak_API.Services.UserService
 {
@@ -20,6 +20,10 @@ namespace Tamrinak_API.Services.UserService
 
         public async Task<User> CreateUserAsync(UserRegisterDto user)
         {
+            if (await _genericRepo.ExistsAsync(e=>e.Email ==user.Email))
+            {
+                throw new InvalidOperationException($"Email {user.Email} is already registered.");
+            }
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
 
             User newUser = new User
@@ -78,5 +82,44 @@ namespace Tamrinak_API.Services.UserService
                    .Select(r => r.RoleName)
                    .ToList();
         }
+
+        public async Task DeleteUserAsync(int id)
+        {
+            var user = await _genericRepo.GetAsync(id);
+
+            await _genericRepo.DeleteAsync(user);
+            await _genericRepo.SaveAsync();
+        }
+
+        public async Task<User> GetUserAsync(int id)
+        {
+           var user = await _genericRepo.GetAsync(id);
+           return user;
+        }
+
+        public async Task<List<UserListInfo>> GetAllUsersAsync()
+        {
+            var users = await _genericRepo.GetAllAsync();
+
+            return users.Select(u => new UserListInfo
+            {
+                UserId = u.UserId,
+                Email = u.Email,
+                Name = u.Name  
+            }).ToList();
+        }
+        public async Task UpdateUserAsync(User user)
+        {
+            await _genericRepo.UpdateAsync(user);
+            await _genericRepo.SaveAsync();
+        }
+
+        public async Task<bool> CanAddUserImageAsync(int userId)
+        {
+            var user = await _genericRepo.GetByConditionAsync(u => u.UserId == userId);
+            return string.IsNullOrEmpty(user.ProfileImageUrl); // true if user has no image yet
+        }
+   
+
     }
 }

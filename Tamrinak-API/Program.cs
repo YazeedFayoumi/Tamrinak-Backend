@@ -5,8 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Tamrinak_API.DataAccess;
-using Tamrinak_API.Repository.Repositories.GenericRepo;
+using Tamrinak_API.Repository.GenericRepo;
 using Tamrinak_API.Services.AuthenticationService;
+using Tamrinak_API.Services.ImageService;
 using Tamrinak_API.Services.UserService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,9 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("https://MousaKhaleel.github.io") 
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -73,6 +74,7 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 
 builder.Services.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<Tamrinak_API.Services.AuthenticationService.IAuthenticationService, 
     Tamrinak_API.Services.AuthenticationService.AuthenticationService >();
 
@@ -83,7 +85,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

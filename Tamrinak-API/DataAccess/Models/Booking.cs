@@ -30,5 +30,8 @@ namespace Tamrinak_API.DataAccess.Models
         public User User { get; set; }
         public Field Field { get; set; }
         public Payment Payment { get; set; }
+        public int? FacilityId { get; set; }
+        public int? SportId { get; set; }
+        public SportFacility SportFacility { get; set; }
     }
 }

@@ -13,7 +13,9 @@ namespace Tamrinak_API.DataAccess.Seeding
                 new Sport { SportId = 2, Name = "Basketball", Description = "Fast-paced team sport played on a rectangular court" },
                 new Sport { SportId = 3, Name = "Swimming", Description = "Individual sport performed in a pool or open water" },
                 new Sport { SportId = 4, Name = "Tennis", Description = "Racket sport played individually or in pairs" },
-                new Sport { SportId = 5, Name = "Handball", Description = "Team sport where players pass and shoot a ball" },
+                new Sport { SportId = 5, Name = "Handball", Description = "Team sport where playe_I(rs pass and shoot a ball" },
+
+              
                 new Sport { SportId = 6, Name = "Table Tennis", Description = "Indoor racket sport played on a table" },
                 new Sport { SportId = 7, Name = "E-Sports", Description = "Gaming counter" },
                 new Sport { SportId = 8, Name = "Bowling", Description = "Bowling is a target sport and recreational activity in which a player rolls a ball toward pins to get the highest score" },
@@ -34,5 +36,5 @@ namespace Tamrinak_API.DataAccess.Seeding
             );
         }
     }
-
+      
 }
