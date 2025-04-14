@@ -18,23 +18,48 @@ namespace Tamrinak_API.Services.UserService
         }
 
 
-        public async Task<User> CreateUserAsync(UserRegisterDto user)
+        public async Task<UserDto> CreateUserAsync(UserRegisterDto user)
         {
             if (await _genericRepo.ExistsAsync(e=>e.Email ==user.Email))
             {
                 throw new InvalidOperationException($"Email {user.Email} is already registered.");
             }
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
+            var role = await _roleRepo.GetByConditionAsync(r => r.RoleName == "User");
 
             User newUser = new User
             {
                 Email = user.Email,
                 PasswordHash = hashedPassword,
-                Name = user.Name
+                Name = user.Name,
+                UserRoles = new List<UserRole>()
+               
             };
+            var userRole = new UserRole
+            {
+                RoleId = role.RoleId,
+                Role = role,        
+                User = newUser,     
+                AssignedDate = DateTime.Now
+            };
+           /* var userDto = new UserDto
+            {
+                Id = newUser.UserId,
+                Email = newUser.Name, 
+                ImageUrl = newUser.ProfileImageUrl,
+                Roles = newUser.UserRoles.Select(ur => ur.Role.RoleName).ToList() 
+            };*/
+            newUser.UserRoles.Add(userRole);
 
             var createdUser = await _genericRepo.CreateAsync(newUser);
-            return createdUser; 
+            return new UserDto
+            {
+                Id = newUser.UserId,
+                Email = newUser.Email,  // Fixed: Was using Name instead of Email
+                Name = newUser.Name,
+                ImageUrl = newUser.ProfileImageUrl,
+                Roles = newUser.UserRoles.Select(ur => ur.Role.RoleName).ToList()
+            }; 
         }
 
         public async Task AssignRoleAsync(AssignRoleDto assignRoleDto)
