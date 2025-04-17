@@ -7,6 +7,7 @@ using System.Text;
 using Tamrinak_API.DataAccess;
 using Tamrinak_API.Repository.GenericRepo;
 using Tamrinak_API.Services.AuthenticationService;
+using Tamrinak_API.Services.EmailService;
 using Tamrinak_API.Services.ImageService;
 using Tamrinak_API.Services.UserService;
 
@@ -77,6 +78,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<Tamrinak_API.Services.AuthenticationService.IAuthenticationService, 
     Tamrinak_API.Services.AuthenticationService.AuthenticationService >();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 

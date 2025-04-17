@@ -84,7 +84,7 @@ namespace Tamrinak_API.Controllers
             return Ok(user);
         }
 
-        [HttpPost("upload-profile-picture")]
+        [HttpPatch("upload-profile-picture")]
         public async Task<IActionResult> UploadProfilePicture(IFormFile file, int userId)
         {
             if (file == null || file.Length == 0)
@@ -190,7 +190,6 @@ namespace Tamrinak_API.Controllers
 
             /* if (!System.IO.File.Exists(imagePath))
                  return NotFound("Image file not found on server.");*/
-
             try
             {
                 var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
