@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tamrinak_API.DTO.BookingDtos;
 using Tamrinak_API.Services.BookingService;
 
 namespace Tamrinak_API.Controllers
 {
-    [Route("api/[controller]")]
+	//[Authorize(Roles = "User")]//TODO
+	[Route("api/[controller]")]
     [ApiController]
     public class BookingController : ControllerBase
     {

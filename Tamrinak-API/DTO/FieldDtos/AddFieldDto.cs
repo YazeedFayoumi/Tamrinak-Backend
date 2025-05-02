@@ -19,7 +19,7 @@ namespace Tamrinak_API.DTO.FieldDtos
         //[Phone, MinLength =10]
         [Required, Phone]
         public string? PhoneNumber { get; set; }
-        public int? Capacity { get; set; }
+        public int? Capacity { get; set; }//TODO
         
         public string? LocationMap { get; set; }
         public bool? HasLighting { get; set; }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Tamrinak_API.DTO.SportDtos;
 using Tamrinak_API.Services.SportService;
 
@@ -14,7 +15,8 @@ namespace Tamrinak_API.Controllers
             _sportService = sportService;
         }
 
-        [HttpPost("add-sport")]
+		//[Authorize(Roles = "Admin")]//TODO
+		[HttpPost("add-sport")]
         public async Task<IActionResult> AddSport(AddSportDto dto, IFormFile formFile)
         {
             try
