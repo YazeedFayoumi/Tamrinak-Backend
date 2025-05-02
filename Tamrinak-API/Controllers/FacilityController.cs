@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FacilityDtos;
@@ -19,7 +20,8 @@ namespace Tamrinak_API.Controllers
             _facilityService = facilityService;
             _imageService = imageService;
         }
-        [HttpPost("add-facility")]
+		//[Authorize(Roles = "Admin")]//TODO
+		[HttpPost("add-facility")]
         public async Task<IActionResult> AddFacility(AddFacilityDto dto)
         {
             try

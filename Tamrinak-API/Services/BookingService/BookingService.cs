@@ -154,6 +154,8 @@ namespace Tamrinak_API.Services.BookingService
             var field = await _fieldRepo.GetAsync(id);
             if (field == null) return "Field not found.";
 
+            //TODO: check feild capasety before updating no. of people
+
             var validationError = await ValidateBookingAsync(new AddBookingDto
             {
                 FieldId = field.FieldId,    

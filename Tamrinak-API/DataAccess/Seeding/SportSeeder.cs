@@ -8,7 +8,7 @@ namespace Tamrinak_API.DataAccess.Seeding
         public static void SeedSports(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Sport>().HasData(
-
+                //TODO
                 new Sport { SportId = 1, Name = "Football", Description = "Popular team sport played with a spherical ball" },
                 new Sport { SportId = 2, Name = "Basketball", Description = "Fast-paced team sport played on a rectangular court" },
                 new Sport { SportId = 3, Name = "Swimming", Description = "Individual sport performed in a pool or open water" },

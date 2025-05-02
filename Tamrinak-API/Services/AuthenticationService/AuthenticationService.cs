@@ -124,7 +124,7 @@ namespace Tamrinak_API.Services.AuthenticationService
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        public async Task SendConfirmationEmailAsync(string userEmail)
+        public async Task SendConfirmationEmailAsync(string userEmail)//TODO
         {
             var user = await _genericRepo.GetByConditionAsync(u => u.Email == userEmail);
             if (user == null)

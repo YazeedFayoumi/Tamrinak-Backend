@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FieldDtos;
@@ -19,7 +20,8 @@ namespace Tamrinak_API.Controllers
             _imageService = imageService;
         }
 
-        [HttpPost("add-field")]
+		//[Authorize(Roles = "Admin")]//TODO
+		[HttpPost("add-field")]
         public async Task<IActionResult> AddField(AddFieldDto dto)
         {
             try
@@ -148,6 +150,8 @@ namespace Tamrinak_API.Controllers
 
             return Ok(result);
         }
+
+        //TODO: get feilds by sport
 
     }
 }
