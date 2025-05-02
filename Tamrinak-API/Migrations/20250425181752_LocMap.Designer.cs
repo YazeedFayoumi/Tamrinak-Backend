@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tamrinak_API.DataAccess;
 
@@ -11,9 +12,11 @@ using Tamrinak_API.DataAccess;
 namespace Tamrinak_API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250425181752_LocMap")]
+    partial class LocMap
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,19 +36,13 @@ namespace Tamrinak_API.Migrations
                     b.Property<DateTime>("BookingDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<TimeOnly>("EndTime")
+                    b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time");
 
                     b.Property<int?>("FacilityId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("FieldId")
+                    b.Property<int>("FieldId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsPaid")
@@ -54,17 +51,11 @@ namespace Tamrinak_API.Migrations
                     b.Property<int>("NumberOfPeople")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PaymentId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("SportId")
                         .HasColumnType("int");
 
-                    b.Property<TimeOnly>("StartTime")
+                    b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("TotalCost")
                         .HasColumnType("decimal(18,2)");
@@ -91,20 +82,14 @@ namespace Tamrinak_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FacilityId"));
 
-                    b.Property<TimeOnly>("CloseTime")
-                        .HasColumnType("time");
-
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool?>("IsAvailable")
                         .HasColumnType("bit");
 
-                    b.Property<string>("LocationDesc")
+                    b.Property<string>("Location")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LocationMap")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -112,19 +97,7 @@ namespace Tamrinak_API.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("OfferDurationInMonths")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("OfferPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<TimeOnly>("OpenTime")
-                        .HasColumnType("time");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("PricePerMonth")
+                    b.Property<decimal>("PricePerMonth")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Type")
@@ -146,9 +119,6 @@ namespace Tamrinak_API.Migrations
                     b.Property<int?>("Capacity")
                         .HasColumnType("int");
 
-                    b.Property<TimeOnly>("CloseTime")
-                        .HasColumnType("time");
-
                     b.Property<int?>("FacilityId")
                         .HasColumnType("int");
 
@@ -167,12 +137,6 @@ namespace Tamrinak_API.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<TimeOnly>("OpenTime")
-                        .HasColumnType("time");
-
-                    b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("PricePerHour")
@@ -623,7 +587,8 @@ namespace Tamrinak_API.Migrations
                     b.HasOne("Tamrinak_API.DataAccess.Models.Field", "Field")
                         .WithMany("Bookings")
                         .HasForeignKey("FieldId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Tamrinak_API.DataAccess.Models.User", "User")
                         .WithMany("Bookings")

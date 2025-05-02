@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using Tamrinak_API.DataAccess.Models;
-using Tamrinak_API.DTO;
+using Tamrinak_API.DTO.UserAuthDtos;
+using Tamrinak_API.Helpers;
 using Tamrinak_API.Services.ImageService;
 using Tamrinak_API.Services.UserService;
 
@@ -72,16 +73,16 @@ namespace Tamrinak_API.Controllers
 
 
         [HttpGet("{id}")]
-        [Authorize]
-        public async Task<ActionResult<User>> GetUserById(int id)
+        //[Authorize]
+        public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
-            var user = await _userService.GetUserAsync(id);
+            var userDto = await _userService.GetUserDtoAsync(id);
 
-            if (user == null)
+            if (userDto == null)
             {
                 return NotFound($"User with ID {id} not found");
             }
-            return Ok(user);
+            return Ok(userDto);
         }
 
         [HttpPatch("upload-profile-picture")]
@@ -193,7 +194,7 @@ namespace Tamrinak_API.Controllers
             try
             {
                 var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                var contentType = GetContentType(imagePath);
+                var contentType = _imageService.GetContentType(imagePath);
                 return File(stream, contentType);
             }
             catch (UnauthorizedAccessException)
@@ -205,17 +206,7 @@ namespace Tamrinak_API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Error: {ex.Message}");
             }
         }
-        private string GetContentType(string path)
-        {
-            var ext = Path.GetExtension(path).ToLowerInvariant();
-            return ext switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".png" => "image/png",
-                ".gif" => "image/gif",
-                _ => "application/octet-stream"
-            };
-        }
+        
     }
 
 

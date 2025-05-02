@@ -14,10 +14,10 @@ namespace Tamrinak_API.DataAccess.Models
         [Required]
         public int FacilityId { get; set; }
 
-        [Required]
+        [Required, DataType(DataType.Date)]
         public DateTime StartDate { get; set; }
 
-        [Required]
+        [Required, DataType(DataType.Date)]
         public DateTime ExpirationDate { get; set; }
 
         public bool IsActive { get; set; } = true;

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Tamrinak_API.DataAccess.Models;
-using Tamrinak_API.DTO;
+using Tamrinak_API.DTO.UserAuthDtos;
 
 namespace Tamrinak_API.Services.AuthenticationService
 {
