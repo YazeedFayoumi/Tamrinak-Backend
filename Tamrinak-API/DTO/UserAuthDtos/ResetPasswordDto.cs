@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Tamrinak_API.DTO
+namespace Tamrinak_API.DTO.UserAuthDtos
 {
     public class ResetPasswordDto
     {

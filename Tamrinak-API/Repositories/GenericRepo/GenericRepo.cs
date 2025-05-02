@@ -49,7 +49,8 @@ namespace Tamrinak_API.Repository.GenericRepo
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<TEntity> GetByConditionAsync(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> include = null)
+        public async Task<TEntity> GetByConditionAsync(Expression<Func<TEntity, bool>> predicate,
+            Expression<Func<TEntity, object>> include = null)
         {
             IQueryable<TEntity> query = _dbSet;
             if (include != null)
@@ -57,12 +58,33 @@ namespace Tamrinak_API.Repository.GenericRepo
 
             return await query.FirstOrDefaultAsync(predicate);
         }
+        public async Task<TEntity> GetByConditionIncludeAsync(
+          Expression<Func<TEntity, bool>> predicate,
+          Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null
+         )
+        {
+            IQueryable<TEntity> query = _dbSet;
 
+            if (include != null)
+                query = include(query); // Apply the include logic to the query
+
+            return await query.FirstOrDefaultAsync(predicate);
+        }
         public async Task<List<TEntity>> GetListByConditionAsync(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> include = null)
         {
             IQueryable<TEntity> query = _dbSet;
             if (include != null)
                 query = query.Include(include);
+
+            return await query.Where(predicate).ToListAsync();
+        }
+
+        public async Task<List<TEntity>> GetListByConditionIncludeAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null)
+        {
+            IQueryable<TEntity> query = _dbSet;
+
+            if (include != null)
+                query = include(query); // Apply the include logic to the query
 
             return await query.Where(predicate).ToListAsync();
         }

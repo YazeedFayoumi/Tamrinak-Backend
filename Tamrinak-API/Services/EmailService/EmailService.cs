@@ -41,7 +41,7 @@ namespace Tamrinak_API.Services.EmailService
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody, string plainTextBody = "")
         {
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Tamrinak Team", "noreply@tamrinal.com"));
+            message.From.Add(new MailboxAddress("Tamrinak Team", "noreply@tamrinak.com"));
             message.To.Add(new MailboxAddress("", toEmail));
             message.Subject = subject;
 

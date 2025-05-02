@@ -11,8 +11,17 @@ namespace Tamrinak_API.Repository.GenericRepo
 
         Task<TEntity> GetByConditionAsync(Expression<Func<TEntity, bool>> predicate,
             Expression<Func<TEntity, object>> include = null);
+        Task<TEntity> GetByConditionIncludeAsync(
+             Expression<Func<TEntity, bool>> predicate,
+             Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null);
+
+
         Task<List<TEntity>> GetListByConditionAsync(Expression<Func<TEntity, bool>> predicate,
             Expression<Func<TEntity, object>> include = null);
+
+        Task<List<TEntity>> GetListByConditionIncludeAsync(
+            Expression<Func<TEntity, bool>> predicate,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null);
 
         Task<bool> SaveAsync();
         Task UpdateAsync(TEntity entity);

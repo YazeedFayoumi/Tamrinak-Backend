@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace Tamrinak_API.Controllers
+namespace Tamrinak_API.Helpers
 {
     public class AuthorizeRoleAttribute : AuthorizeAttribute
     {

@@ -5,6 +5,7 @@ using Tamrinak_API.Repository.GenericRepo;
 //using SixLabors.ImageSharp;
 using SystemImage = System.Drawing.Image;
 using Image = Tamrinak_API.DataAccess.Models.Image;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Tamrinak_API.Services.ImageService
 {
@@ -35,13 +36,18 @@ namespace Tamrinak_API.Services.ImageService
                 if (width < 150 || height < 150)
                     throw new InvalidOperationException("User profile image is too small. Minimum 150x150 required.");
 
-                if (Math.Abs(width - height) > 10) // allow slight variance (e.g., 302x300)
+                if (Math.Abs(width - height) > 10) 
                     throw new InvalidOperationException("User profile image must be square.");
             }
-            else if (folderName == "facility" || folderName == "field")
+            else if (folderName == "facilities" || folderName == "fields")
             {
                 if (width < 800 || height < 600)
                     throw new InvalidOperationException("Image resolution too low for field/facility. Minimum 800x600 required.");
+            }
+            else
+            {
+                if (width < 300 || height < 300)
+                    throw new InvalidOperationException("Image resolution too low for sport. Minimum 300 required.");
             }
             var uploadsPath = Path.Combine(_env.WebRootPath, "uploads", folderName);
 
@@ -73,13 +79,14 @@ namespace Tamrinak_API.Services.ImageService
         }
         public async Task<bool> DeleteImageAsync(string imageUrl)
         {
+            var image = await _imageRepo.GetByConditionAsync(u => u.Url == imageUrl);
             try
             {
                 var uriParts = imageUrl.Split('/', StringSplitOptions.RemoveEmptyEntries);
                 if (uriParts.Length < 3)
                     return false;
 
-                var folder = uriParts[1]; // "users"
+                var folder = uriParts[1]; 
                 var fileName = uriParts[2];
                 var filePath = Path.Combine(_env.WebRootPath, "uploads", folder, fileName);
 
@@ -88,6 +95,7 @@ namespace Tamrinak_API.Services.ImageService
                 {
                     File.Delete(filePath);
                 }
+                await _imageRepo.DeleteAsync(image);
                 await _imageRepo.SaveAsync();
                 return true;
             }
@@ -97,6 +105,46 @@ namespace Tamrinak_API.Services.ImageService
                 return false;
             }
             
+        }
+        public async Task UpdateImageAsync(Image image)
+        {
+            await _imageRepo.UpdateAsync(image);
+            await _imageRepo.SaveAsync();
+        }
+        public async Task AddImageAsync(Image image)
+        {
+            await _imageRepo.AddAsync(image);
+            await _imageRepo.SaveAsync();
+        }
+        public async Task<Image> GetImageAsync(int id)
+        {
+            var image = await _imageRepo.GetAsync(id);
+            return image;
+        }
+        public string GetContentType(string path)
+        {
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return ext switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                ".webp" => "image/webp",
+                ".svg" => "image/svg+xml",
+                _ => "application/octet-stream",
+            };
+        }
+
+        public async Task<IEnumerable<Image>> GetImagesAsync(int entityId, string entityType)
+        {
+            var images = await _imageRepo.GetListByConditionAsync(i =>
+            (entityType == "field" && i.FieldId == entityId) ||
+            (entityType == "sport" && i.SportId == entityId) ||
+            (entityType == "facility" && i.FacilityId == entityId)
+           );
+               
+            return images;
         }
     }
 }

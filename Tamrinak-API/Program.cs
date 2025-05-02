@@ -5,10 +5,16 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Tamrinak_API.DataAccess;
+using Tamrinak_API.Helpers;
 using Tamrinak_API.Repository.GenericRepo;
 using Tamrinak_API.Services.AuthenticationService;
+using Tamrinak_API.Services.BookingService;
 using Tamrinak_API.Services.EmailService;
+using Tamrinak_API.Services.FacilityService;
+using Tamrinak_API.Services.FieldService;
 using Tamrinak_API.Services.ImageService;
+using Tamrinak_API.Services.MembershipService;
+using Tamrinak_API.Services.SportService;
 using Tamrinak_API.Services.UserService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +34,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new TimeSpanConverter());
+    });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -79,6 +90,11 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<Tamrinak_API.Services.AuthenticationService.IAuthenticationService, 
     Tamrinak_API.Services.AuthenticationService.AuthenticationService >();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISportService, SportService>();
+builder.Services.AddScoped<IFieldService, FieldService>();
+builder.Services.AddScoped<IFacilityService, FacilityService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IMembershipService, MembershipService>();
 
 var app = builder.Build();
 

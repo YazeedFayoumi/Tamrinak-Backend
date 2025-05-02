@@ -29,5 +29,6 @@ namespace Tamrinak_API.DataAccess.Models
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<Membership> Memberships { get; set; } = new List<Membership>();
+       
     }
 }

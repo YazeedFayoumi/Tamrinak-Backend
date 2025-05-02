@@ -1,6 +1,7 @@
-﻿using System.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Data;
 using Tamrinak_API.DataAccess.Models;
-using Tamrinak_API.DTO;
+using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Repository.GenericRepo;
 
 namespace Tamrinak_API.Services.UserService
@@ -42,22 +43,15 @@ namespace Tamrinak_API.Services.UserService
                 User = newUser,     
                 AssignedDate = DateTime.Now
             };
-           /* var userDto = new UserDto
-            {
-                Id = newUser.UserId,
-                Email = newUser.Name, 
-                ImageUrl = newUser.ProfileImageUrl,
-                Roles = newUser.UserRoles.Select(ur => ur.Role.RoleName).ToList() 
-            };*/
             newUser.UserRoles.Add(userRole);
 
             var createdUser = await _genericRepo.CreateAsync(newUser);
             return new UserDto
             {
                 Id = newUser.UserId,
-                Email = newUser.Email,  // Fixed: Was using Name instead of Email
+                Email = newUser.Email,  
                 Name = newUser.Name,
-                ImageUrl = newUser.ProfileImageUrl,
+                ProfileImageUrl = newUser.ProfileImageUrl,
                 Roles = newUser.UserRoles.Select(ur => ur.Role.RoleName).ToList()
             }; 
         }
@@ -115,11 +109,27 @@ namespace Tamrinak_API.Services.UserService
             await _genericRepo.DeleteAsync(user);
             await _genericRepo.SaveAsync();
         }
-
         public async Task<User> GetUserAsync(int id)
         {
-           var user = await _genericRepo.GetAsync(id);
-           return user;
+            var user = await _genericRepo.GetAsync(id);       
+            return user;
+        }
+        public async Task<UserDto> GetUserDtoAsync(int id)
+        {
+            var user = await _genericRepo.GetAsync(id);
+            var userRoles = await _userRoleRepo.GetListByConditionIncludeAsync(
+                ur => ur.UserId == id,
+                q => q.Include(ur => ur.Role)
+            );
+            var userDto = new UserDto
+            {
+                Id = user.UserId,
+                Name = user.Name,
+                Email = user.Email,
+                ProfileImageUrl = user.ProfileImageUrl,
+                Roles = userRoles.Select(ur => ur.Role.RoleName).ToList(),
+            };
+            return userDto;
         }
 
         public async Task<List<UserListInfo>> GetAllUsersAsync()

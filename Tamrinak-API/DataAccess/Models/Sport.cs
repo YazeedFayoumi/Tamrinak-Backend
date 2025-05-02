@@ -17,4 +17,5 @@ namespace Tamrinak_API.DataAccess.Models
         public List<Field> Fields { get; set; } = new List<Field> ();
         public ICollection<Image> Images { get; set; } = new List<Image>();
     }
+
 }

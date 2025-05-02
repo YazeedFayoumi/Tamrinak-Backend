@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Tamrinak_API.DTO;
+using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Services.AuthenticationService;
 
 namespace Tamrinak_API.Controllers
@@ -28,15 +28,7 @@ namespace Tamrinak_API.Controllers
             Response.Cookies.Delete("jwt"); 
             return Ok("Logged out successfully.");
         }
-       /* [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
-        {
-            var newTokens = await _authService.RefreshTokenAsync(refreshToken);
-            if (newTokens == null)
-                return Unauthorized("Invalid or expired refresh token.");
 
-            return Ok(newTokens); // Return new access + refresh tokens
-        }*/
         [Authorize]
         [HttpPost("send-confirmation-email")]
         public async Task<IActionResult> SendConfirmationEmail()

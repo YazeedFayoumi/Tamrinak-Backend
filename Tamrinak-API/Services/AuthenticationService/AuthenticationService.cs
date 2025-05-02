@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Tamrinak_API.DataAccess.Models;
-using Tamrinak_API.DTO;
+using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Repository.GenericRepo;
 using Tamrinak_API.Services.EmailService;
 
