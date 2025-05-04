@@ -154,7 +154,25 @@ namespace Tamrinak_API.Services.UserService
             var user = await _genericRepo.GetByConditionAsync(u => u.UserId == userId);
             return string.IsNullOrEmpty(user.ProfileImageUrl); // true if user has no image yet
         }
-   
+
+        public async Task<ProfileDto> GetUserProfileAsync(string email)
+        {
+            var user = await _genericRepo.GetByConditionIncludeAsync(
+                u => u.Email == email,
+                include: q => q.Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+            );
+
+            if (user == null)
+                throw new KeyNotFoundException("User not found");
+
+            return new ProfileDto
+            {
+                Name = user.Name,
+                Email = user.Email,
+                Roles = user.UserRoles.Select(ur => ur.Role.RoleName).ToList()
+            };
+        }
+
 
     }
 }

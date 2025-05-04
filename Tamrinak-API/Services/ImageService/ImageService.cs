@@ -30,6 +30,12 @@ namespace Tamrinak_API.Services.ImageService
             var width = image.Width;
             var height = image.Height;
 
+            const int maxWidth = 2000;
+            const int maxHeight = 2000;
+
+            if (width > maxWidth || height > maxHeight)
+                throw new InvalidOperationException($"Image resolution is too high. Maximum allowed is {maxWidth}x{maxHeight}.");
+
             if (folderName == "users")
             {
                 

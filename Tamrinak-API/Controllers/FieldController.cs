@@ -38,7 +38,7 @@ namespace Tamrinak_API.Controllers
         [HttpGet("get-field")]
         public async Task<IActionResult> GetField(int id)
         {
-            var field = await _fieldService.GetFieldAsync(id);
+            var field = await _fieldService.GetFieldDetailsAsync(id);
             return Ok(field);
         }
 
@@ -50,7 +50,7 @@ namespace Tamrinak_API.Controllers
         }
 
         [HttpPut("update-field")]
-        public async Task<IActionResult> UpdateField(int id, FieldDto dto)
+        public async Task<IActionResult> UpdateField(int id, UpdateFieldDto dto)
         {
             await _fieldService.UpdateFieldDtoAsync(id, dto);
             var newField = _fieldService.GetFieldAsync(id);
@@ -61,16 +61,26 @@ namespace Tamrinak_API.Controllers
         public async Task<IActionResult> AddFieldImage(int fieldId, IFormFile formFile)
         {
             var field = await _fieldService.GetFieldAsync(fieldId);
-            var url = await _imageService.UploadImageAsync(formFile, "fields");
-            var image = new Image
+            var canAdd = await _imageService.CanAddEntityImagesAsync<Field>(fieldId, 10);
+            if (canAdd)
             {
-                FieldId = fieldId,
-                Url = url
-            };
-            await _imageService.AddImageAsync(image);
-            await _imageService.UpdateImageAsync(image);
-            await _fieldService.UpdateFieldAsync(field);
-            return Ok();
+                var url = await _imageService.UploadImageAsync(formFile, "fields");
+                var image = new Image
+                {
+                    FieldId = fieldId,
+                    Url = url
+                };
+                await _imageService.AddImageAsync(image);
+                await _imageService.UpdateImageAsync(image);
+                await _fieldService.UpdateFieldAsync(field);
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Max number of images for this field");
+            }
+            
+          
         }
 
         [HttpDelete("remove-field")]
@@ -151,7 +161,28 @@ namespace Tamrinak_API.Controllers
             return Ok(result);
         }
 
-        //TODO: get feilds by sport
+        [HttpGet("by-sport/{sportId}")]
+        public async Task<IActionResult> GetFieldsBySport(int sportId)
+        {
+            var result = await _fieldService.GetFieldsBySportAsync(sportId);
+            if (!result.Any())
+                return NotFound("No fields found for this sport.");
+            return Ok(result);
+        }
+
+        [HttpGet("get-sport-images/{sportId}")]
+        public async Task<IActionResult> GetSportImages(int sportId)
+        {
+            var images = await _imageService.GetImagesAsync(sportId, "sport");
+
+            if (!images.Any())
+                return NotFound("No images found for this sport.");
+
+            var imageUrls = images.Select(i => i.Url).ToList();
+
+            return Ok(imageUrls);
+        }
+
 
     }
 }

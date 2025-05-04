@@ -2,6 +2,7 @@
 using Org.BouncyCastle.Asn1.X9;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FieldDtos;
+using Tamrinak_API.DTO.SportDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Repository.GenericRepo;
 
@@ -17,7 +18,7 @@ namespace Tamrinak_API.Services.FieldService
             _imageRepo = imageRepo;
         }
 
-        public async Task<Field> AddFieldAsync(AddFieldDto dto)
+        public async Task<FieldDto> AddFieldAsync(AddFieldDto dto)
         {
             var field = new Field
             {
@@ -36,7 +37,21 @@ namespace Tamrinak_API.Services.FieldService
 
             var createdField = await _fieldRepo.CreateAsync(field);
             await _fieldRepo.SaveAsync();
-            return createdField;
+            return new FieldDto
+            {
+                Id = createdField.FieldId,
+                Name = createdField.Name,
+                LocationDesc = createdField.LocationDesc,
+                LocationMap = createdField.LocationMap,
+                IsIndoor = createdField.IsIndoor,
+                HasLighting = createdField.HasLighting,
+                OpenTime = createdField.OpenTime,
+                CloseTime = createdField.CloseTime,
+                Capacity = createdField.Capacity,
+                PhoneNumber = createdField.PhoneNumber,
+                PricePerHour = createdField.PricePerHour,
+                SportId = createdField.SportId,
+            };
         }
 
         public async Task<bool> DeleteFieldAsync(int id)
@@ -46,11 +61,11 @@ namespace Tamrinak_API.Services.FieldService
             if (field == null)
                 return false;
 
-            var imagesToDelete = field.Images.ToList(); 
+            var imagesToDelete = field.Images.ToList();
 
             foreach (var image in imagesToDelete)
             {
-                await _imageRepo.DeleteAsync(image); 
+                await _imageRepo.DeleteAsync(image);
             }
 
             await _fieldRepo.DeleteAsync(field);
@@ -62,6 +77,37 @@ namespace Tamrinak_API.Services.FieldService
         {
             return await _fieldRepo.GetAsync(id) ?? throw new KeyNotFoundException("Field not found");
         }
+        public async Task<FieldDetailsDto> GetFieldDetailsAsync(int id)
+        {
+            var field = await _fieldRepo.GetByConditionIncludeAsync(
+                f => f.FieldId == id,
+                include: q => q.Include(f => f.Sport)
+            );
+
+            if (field == null)
+                throw new KeyNotFoundException("Field not found");
+
+            return new FieldDetailsDto
+            {
+                FieldId = field.FieldId,
+                Name = field.Name,
+                LocationDesc = field.LocationDesc,
+                LocationMap = field.LocationMap,
+                PhoneNumber = field.PhoneNumber,
+                Capacity = field.Capacity,
+                PricePerHour = (decimal) field.PricePerHour,
+                HasLighting = field.HasLighting,
+                IsIndoor = field.IsIndoor,
+                OpenTime = field.OpenTime,
+                CloseTime = field.CloseTime,
+                Sport = new SportBasicDto
+                {
+                    Id = field.Sport.SportId,
+                    Name = field.Sport.Name
+                }
+            };
+        }
+
 
         public async Task<IEnumerable<FieldDto>> GetFieldsAsync()
         {
@@ -80,7 +126,7 @@ namespace Tamrinak_API.Services.FieldService
             }).ToList();
         }
 
-        public async Task UpdateFieldDtoAsync(int id, FieldDto dto)
+        public async Task UpdateFieldDtoAsync(int id, UpdateFieldDto dto)
         {
             var field = await _fieldRepo.GetAsync(id);
             if (field == null)
@@ -90,15 +136,21 @@ namespace Tamrinak_API.Services.FieldService
             field.LocationDesc = dto.LocationDesc;
             field.LocationMap = dto.LocationMap;
             field.PricePerHour = dto.PricePerHour;
+            field.OpenTime = dto.OpenTime;
+            field.CloseTime = dto.CloseTime;
+            field.PhoneNumber = dto.PhoneNumber;
+            field.Capacity = dto.Capacity;
+            field.HasLighting = dto.HasLighting;
+            field.IsIndoor = dto.IsIndoor;
 
             await _fieldRepo.UpdateAsync(field);
-            await _fieldRepo.SaveAsync();    
+            await _fieldRepo.SaveAsync();
         }
 
         public async Task UpdateFieldAsync(Field field)
         {
             var oldField = await _fieldRepo.GetAsync(field.FieldId);
-         
+
             await _fieldRepo.UpdateAsync(oldField);
             await _fieldRepo.SaveAsync();
         }
@@ -109,6 +161,32 @@ namespace Tamrinak_API.Services.FieldService
                f => f.FieldId == fieldId,
                q => q.Include(f => f.Images)
            );
+        }
+
+        public async Task<List<FieldBySportDto>> GetFieldsBySportAsync(int sportId)
+        {
+            var fields = await _fieldRepo.GetListByConditionIncludeAsync(
+                f => f.SportId == sportId,
+                include: q => q.Include(f => f.Sport).Include(f => f.Images)
+            );
+
+            var result = fields.Select(f => new FieldBySportDto
+            {
+                Id = f.FieldId,
+                Name = f.Name,
+                LocationDesc = f.LocationDesc,
+                PricePerHour = f.PricePerHour,
+                Sport = new SportBasicDto
+                {
+                    Id = f.Sport.SportId,
+                    Name = f.Sport.Name
+                },
+                Images = f.Images.Select(img => img.Url).ToList()
+            }).ToList();
+
+
+            return result;
+
         }
     }
 }

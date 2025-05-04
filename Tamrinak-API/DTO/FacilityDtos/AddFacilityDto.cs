@@ -12,6 +12,7 @@ namespace Tamrinak_API.DTO.FacilityDtos
         [Required]
         public string LocationDesc { get; set; }
         public FacilityType Type { get; set; }
+        public List<int> SportIds { get; set; }
 
         [Required]
         public TimeOnly OpenTime { get; set; }
@@ -22,11 +23,12 @@ namespace Tamrinak_API.DTO.FacilityDtos
         public string? LocationMap { get; set; }
         [Phone]
         public string? PhoneNumber { get; set; }
+        public string? Description { get; set; }
         public decimal? PricePerMonth { get; set; }
         public int? OfferDurationInMonths { get; set; }
         public decimal? OfferPrice { get; set; }
         public bool? IsAvailable { get; set; } = true;
 
-        public string? Description { get; set; }
+        
     }
 }

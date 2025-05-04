@@ -79,7 +79,7 @@ namespace Tamrinak_API.Repository.GenericRepo
             return await query.Where(predicate).ToListAsync();
         }
 
-        public async Task<List<TEntity>> GetListByConditionIncludeAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null)
+        public async Task<List<TEntity>> GetListByConditionIncludeAsync(Expression<Func<TEntity, bool>> predicate , Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null)
         {
             IQueryable<TEntity> query = _dbSet;
 

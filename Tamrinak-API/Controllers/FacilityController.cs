@@ -38,7 +38,7 @@ namespace Tamrinak_API.Controllers
         [HttpGet("get-facility")]
         public async Task<IActionResult> GetFacility(int id)
         {
-            var facility = await _facilityService.GetFacilityAsync(id);
+            var facility = await _facilityService.GetFacilityDetailsAsync(id);
             return Ok(facility);
         }
 
@@ -50,10 +50,9 @@ namespace Tamrinak_API.Controllers
         }
 
         [HttpPut("update-facility")]
-        public async Task<IActionResult> UpdateFacility(int id, FacilityDto dto)
+        public async Task<IActionResult> UpdateFacility(int id, UpdateFacilityDto dto)
         {
-            await _facilityService.UpdateFacilityDtoAsync(id, dto);
-            var newFacility = _facilityService.GetFacilityAsync(id);
+            var newFacility = await _facilityService.UpdateFacilityDtoAsync(id, dto);// _facilityService.GetFacilityAsync(id);
             return Ok(newFacility);
         }
 
@@ -61,16 +60,25 @@ namespace Tamrinak_API.Controllers
         public async Task<IActionResult> AddFacilityImage(int facilityId, IFormFile formFile)
         {
             var facility = await _facilityService.GetFacilityAsync(facilityId);
-            var url = await _imageService.UploadImageAsync(formFile, "facilities");
-            var image = new Image
+            var canAdd = await _imageService.CanAddEntityImagesAsync<Facility>(facilityId, 15);
+            if (canAdd)
             {
-                FacilityId = facilityId,
-                Url = url
-            };
-            await _imageService.AddImageAsync(image);
-            await _imageService.UpdateImageAsync(image);
-            await _facilityService.UpdateFacilityAsync(facility);
-            return Ok();
+                var url = await _imageService.UploadImageAsync(formFile, "facilities");
+                var image = new Image
+                {
+                    FacilityId = facilityId,
+                    Url = url
+                };
+                await _imageService.AddImageAsync(image);
+                await _imageService.UpdateImageAsync(image);
+                await _facilityService.UpdateFacilityAsync(facility);
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Max number of images for this facility");
+            }
+            
         }
 
         [HttpDelete("remove-facility")]
@@ -149,7 +157,14 @@ namespace Tamrinak_API.Controllers
             return Ok(result);
         }
 
-
+        [HttpGet("by-sport/{sportId}")]
+        public async Task<IActionResult> GetFacilitiesBySport(int sportId)
+        {
+            var result = await _facilityService.GetFacilitiesBySportAsync(sportId);
+            if (!result.Any())
+                return NotFound("No facilities found for this sport.");
+            return Ok(result);
+        }
 
     }
 }
