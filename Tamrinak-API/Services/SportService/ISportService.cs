@@ -13,7 +13,9 @@ namespace Tamrinak_API.Services.SportService
         Task<SportDto> AddSportAsync(AddSportDto dto);
         Task<IEnumerable<SportDto>> GetAllSportsAsync();
         Task<Sport> GetSportByIdAsync(int id);
-        Task UpdateSportAsync(int id, SportDto dto);
+        Task<SportDetailsDto> GetSportDetailAsync(int id);
+        Task UpdateSportDtoAsync(int id, UpdateSportDto dto);
+        Task UpdateSportAsync(Sport sport);
         Task DeleteSportAsync(int id);
     }
 }

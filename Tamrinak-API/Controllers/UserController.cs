@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
+using System.Security.Claims;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Helpers;
+using Tamrinak_API.Services.AuthenticationService;
 using Tamrinak_API.Services.ImageService;
 using Tamrinak_API.Services.UserService;
 
@@ -15,10 +17,12 @@ namespace Tamrinak_API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IAuthenticationService _authService;
         private readonly IImageService _imageService;
-        public UserController(IUserService userService, IImageService imageService)
+        public UserController(IUserService userService, IImageService imageService, IAuthenticationService authenticationService)
         {
             _userService = userService;
+            _authService = authenticationService;
             _imageService = imageService;
         }
 
@@ -206,7 +210,19 @@ namespace Tamrinak_API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Error: {ex.Message}");
             }
         }
-        
+
+        [HttpGet("profile")]
+        [Authorize]
+        public async Task<IActionResult> GetUserProfile()
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
+
+            var profile = await _userService.GetUserProfileAsync(email);
+            return Ok(profile);
+        }
+
     }
 
 
