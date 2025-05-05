@@ -5,9 +5,6 @@ namespace Tamrinak_API.DTO.BookingDtos
     public class AddBookingDto
     {
         [Required]
-        public int UserId { get; set; }
-
-        [Required]
         public int FieldId { get; set; }
 
         [Required,DataType(DataType.Date)]

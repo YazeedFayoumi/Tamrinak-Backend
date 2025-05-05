@@ -57,6 +57,7 @@ namespace Tamrinak_API.Services.AuthenticationService
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
 
             };
 

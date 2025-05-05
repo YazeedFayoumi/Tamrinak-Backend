@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.BookingDtos;
 using Tamrinak_API.Repository.GenericRepo;
@@ -9,20 +10,33 @@ namespace Tamrinak_API.Services.BookingService
     {
         private readonly IGenericRepo<Booking> _bookingRepo;
         private readonly IGenericRepo<Field> _fieldRepo;
-
-        public BookingService( IGenericRepo<Booking> bookingRepo, IGenericRepo<Field> fieldRepo)
+        private readonly IGenericRepo<User> _userRepo;
+        public BookingService( IGenericRepo<Booking> bookingRepo, IGenericRepo<Field> fieldRepo, IGenericRepo<User> userRepo)
         {
             _bookingRepo = bookingRepo;
             _fieldRepo = fieldRepo;
+            _userRepo = userRepo;
         }
 
-        public async Task<BookingDto> CreateFieldBookingAsync(AddBookingDto dto)
+        public async Task<BookingDto> CreateFieldBookingAsync(AddBookingDto dto, string email)
         {
+          
+            if (string.IsNullOrEmpty(email))
+                throw new UnauthorizedAccessException();
+
+            var user = await _userRepo.GetByConditionAsync(u => u.Email == email);
+
+            if (!user.IsEmailConfirmed)
+                throw new InvalidOperationException("Please verify your email to continue.");
+
+            // Now use user.UserId to create the booking
+
             var validationError = await ValidateBookingAsync(dto);
             if (validationError != null)
                 throw new Exception(validationError);
 
             var field = await _fieldRepo.GetAsync(dto.FieldId);
+    
 
             decimal noP = dto.NumberOfPeople;
             if (field.PricePerHour == null)
@@ -31,10 +45,10 @@ namespace Tamrinak_API.Services.BookingService
             decimal price = (decimal)field.PricePerHour.Value;
             decimal duration =(decimal) (dto.EndTime - dto.StartTime).TotalHours;
             decimal totalCost = noP * price * duration;
-
+            
             var booking = new Booking
             {
-                UserId = dto.UserId,
+                UserId = user.UserId,
                 FieldId = dto.FieldId,
                 BookingDate = dto.BookingDate,
                 StartTime = dto.StartTime,
@@ -159,7 +173,6 @@ namespace Tamrinak_API.Services.BookingService
             var validationError = await ValidateBookingAsync(new AddBookingDto
             {
                 FieldId = field.FieldId,    
-                UserId = booking.UserId,
                 BookingDate = dto.BookingDate,
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,

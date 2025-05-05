@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Tamrinak_API.DTO.BookingDtos;
 using Tamrinak_API.Services.BookingService;
 
@@ -17,10 +18,11 @@ namespace Tamrinak_API.Controllers
             _bookingService = bookingService;
         }
 
-        [HttpPost("book-field")]
+        [HttpPost("book-field"), Authorize]
         public async Task<IActionResult> CreateFieldBooking(AddBookingDto dto)
         {
-            var booking = await _bookingService.CreateFieldBookingAsync(dto);
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var booking = await _bookingService.CreateFieldBookingAsync(dto, email);
             return Ok(booking);
         }
 

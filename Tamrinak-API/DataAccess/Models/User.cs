@@ -21,7 +21,7 @@ namespace Tamrinak_API.DataAccess.Models
         public string? PhoneNumber { get; set; }
 
         public bool IsActive { get; set; } = true;
-        public bool? IsEmailConfirmed { get; set; } = false;
+        public bool IsEmailConfirmed { get; set; } = false;
         [DataType(DataType.Date)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
