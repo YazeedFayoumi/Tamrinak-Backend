@@ -126,6 +126,7 @@ namespace Tamrinak_API.Controllers
 
             return Ok(publicUrl);
         }
+
         [HttpGet("get-ren-facility-photo")]
         public async Task<IActionResult> GetRenFacilityPhoto(int id)
         {
@@ -141,6 +142,7 @@ namespace Tamrinak_API.Controllers
             return File(stream, contentType);
 
         }
+
         [HttpGet("get-facility-photo-list")]
         public async Task<IActionResult> GetFacilityPhotoList(int facilityId)
         {

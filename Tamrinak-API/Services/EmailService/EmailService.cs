@@ -72,12 +72,15 @@ namespace Tamrinak_API.Services.EmailService
             string subject = "Please Confirm Your Email Address";
             string htmlBody = $@"
             <html>
-            <p>Hello,</p>
-            <p>Thanks for registering with Tamrinak! Please confirm your email address by clicking the link below:</p>
-            <p><a href='{confirmationLink}'>Confirm My Email</a></p>
-            <p>If you didn’t request this, you can safely ignore this email.</p>
-            <p>– The Tamrinak Team</p>
+              <body>
+                <p>Hello,</p>
+                <p>Thanks for registering with Tamrinak! Please confirm your email address by clicking the link below:</p>
+                <p><a href='{confirmationLink}' style='background-color:#4CAF50;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;'>Confirm My Email</a></p>
+                <p>If you didn’t request this, you can safely ignore this email.</p>
+                <p>– The Tamrinak Team</p>
+              </body>
             </html>";
+
 
             string plainTextBody = $"Hello,\n\nThanks for registering with Tamrinak! Please confirm your email by clicking the link below:\n{confirmationLink}\n\n– The Tamrinak Team";
 
