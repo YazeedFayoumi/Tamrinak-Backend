@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Tamrinak_API.DataAccess;
+using Tamrinak_API.DataAccess.Seeding;
 using Tamrinak_API.Helpers;
 using Tamrinak_API.Repository.GenericRepo;
 using Tamrinak_API.Services.AuthenticationService;
@@ -96,6 +97,8 @@ builder.Services.AddScoped<IFacilityService, FacilityService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IMembershipService, MembershipService>();
 
+builder.Services.AddScoped<DatabaseInitializer>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -111,5 +114,11 @@ app.UseAuthorization();
 app.UseCors("AllowAll");
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+	var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
+	await initializer.InitializeAsync();
+}
 
 app.Run();
