@@ -55,8 +55,8 @@ namespace Tamrinak_API.Controllers
             }
         }
 
-        [HttpPost("GetUserRoles"), Authorize]
-        public async Task<ActionResult> GetUserRoles([FromBody] int id)
+        [HttpGet("GetUserRoles/{id}"), Authorize]
+        public async Task<ActionResult> GetUserRoles(int id)
         {
             var roles = await _userService.GetUserRolesAsync(id);
             return Ok(roles);
