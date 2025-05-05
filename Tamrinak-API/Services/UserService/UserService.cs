@@ -167,6 +167,7 @@ namespace Tamrinak_API.Services.UserService
 
             return new ProfileDto
             {
+                Id = user.UserId,
                 Name = user.Name,
                 Email = user.Email,
                 Roles = user.UserRoles.Select(ur => ur.Role.RoleName).ToList()
