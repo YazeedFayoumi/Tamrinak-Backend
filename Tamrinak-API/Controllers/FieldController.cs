@@ -42,7 +42,7 @@ namespace Tamrinak_API.Controllers
             return Ok(field);
         }
 
-        [HttpGet("get-fields")]
+        [HttpGet("get-all-fields")]
         public async Task<IActionResult> GetFields()
         {
             var fields = await _fieldService.GetFieldsAsync();
