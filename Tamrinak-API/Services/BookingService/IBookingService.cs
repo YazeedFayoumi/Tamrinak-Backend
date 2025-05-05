@@ -4,7 +4,7 @@ namespace Tamrinak_API.Services.BookingService
 {
     public interface IBookingService
     {
-        Task<BookingDto> CreateFieldBookingAsync(AddBookingDto dto);
+        Task<BookingDto> CreateFieldBookingAsync(AddBookingDto dto, string email);
         Task<BookingDto?> GetBookingByIdAsync(int bookingId);
         Task<List<BookingDto>> GetUserBookingsAsync(int userId);
         Task<bool> DeleteBookingAsync(int bookingId);
