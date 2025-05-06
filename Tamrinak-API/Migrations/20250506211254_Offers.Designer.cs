@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tamrinak_API.DataAccess;
 
@@ -11,9 +12,11 @@ using Tamrinak_API.DataAccess;
 namespace Tamrinak_API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250506211254_Offers")]
+    partial class Offers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,7 +83,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasIndex("SportId", "FacilityId");
 
-                    b.ToTable("Bookings", (string)null);
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Facility", b =>
@@ -132,7 +135,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasKey("FacilityId");
 
-                    b.ToTable("Facilities", (string)null);
+                    b.ToTable("Facilities");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Field", b =>
@@ -187,7 +190,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasIndex("SportId");
 
-                    b.ToTable("Fields", (string)null);
+                    b.ToTable("Fields");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Image", b =>
@@ -219,7 +222,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasIndex("SportId");
 
-                    b.ToTable("Images", (string)null);
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Membership", b =>
@@ -254,7 +257,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Memberships", (string)null);
+                    b.ToTable("Memberships");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.MembershipOffer", b =>
@@ -278,7 +281,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasIndex("FacilityId");
 
-                    b.ToTable("MembershipsOffer", (string)null);
+                    b.ToTable("MembershipsOffer");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Payment", b =>
@@ -317,7 +320,7 @@ namespace Tamrinak_API.Migrations
                     b.HasIndex("MembershipId")
                         .IsUnique();
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Review", b =>
@@ -364,7 +367,7 @@ namespace Tamrinak_API.Migrations
                         .IsUnique()
                         .HasFilter("[FacilityId] IS NOT NULL AND [FieldId] IS NOT NULL");
 
-                    b.ToTable("Reviews", null, t =>
+                    b.ToTable("Reviews", t =>
                         {
                             t.HasCheckConstraint("CK_Review_SingleTarget", "(FacilityId IS NOT NULL AND FieldId IS NULL) OR (FacilityId IS NULL AND FieldId IS NOT NULL)");
                         });
@@ -389,7 +392,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
 
                     b.HasData(
                         new
@@ -449,7 +452,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasKey("SportId");
 
-                    b.ToTable("Sports", (string)null);
+                    b.ToTable("Sports");
 
                     b.HasData(
                         new
@@ -580,7 +583,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasIndex("SportId");
 
-                    b.ToTable("SportFacilities", (string)null);
+                    b.ToTable("SportFacilities");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.User", b =>
@@ -621,7 +624,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.UserRole", b =>
@@ -639,7 +642,7 @@ namespace Tamrinak_API.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles", (string)null);
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Booking", b =>

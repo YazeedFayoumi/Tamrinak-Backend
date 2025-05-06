@@ -22,7 +22,7 @@ namespace Tamrinak_API.DataAccess
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<Review> Reviews { get; set; }
-
+        public DbSet<MembershipOffer> MembershipsOffer { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

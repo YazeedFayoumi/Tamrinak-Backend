@@ -41,6 +41,7 @@ namespace Tamrinak_API.DataAccess.Models
         public ICollection<Membership> Memberships { get; set; } = new List<Membership>();
         public ICollection<SportFacility> SportFacilities { get; set;} = new List<SportFacility>();
         public ICollection<Image> Images { get; set; } = new List<Image>();
+        public ICollection<MembershipOffer> MembershipOffers { get; set; } = new List<MembershipOffer>();
     }
 
     public enum FacilityType
