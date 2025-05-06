@@ -19,7 +19,7 @@ namespace Tamrinak_API.Controllers
             _membershipService = membershipService;
         }
         
-        [HttpPost("Add")]
+        [HttpPost("new")]
         public async Task<IActionResult> AddMembership([FromBody] AddMembershipDto dto)
         {
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
