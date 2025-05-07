@@ -15,10 +15,10 @@ namespace Tamrinak_API.DTO.FacilityDtos
         public List<int> SportIds { get; set; }
 
         [Required]
-        public TimeOnly OpenTime { get; set; }
+        public string OpenTime { get; set; }
 
         [Required]
-        public TimeOnly CloseTime { get; set; }
+        public string CloseTime { get; set; }
 
         public string? LocationMap { get; set; }
         [Phone]

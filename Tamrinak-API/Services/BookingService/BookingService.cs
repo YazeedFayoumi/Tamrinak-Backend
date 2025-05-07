@@ -42,8 +42,11 @@ namespace Tamrinak_API.Services.BookingService
             if (field.PricePerHour == null)
                 throw new Exception("Start time and end time are required.");
 
+            var start = TimeOnly.Parse(dto.StartTime);
+            var end = TimeOnly.Parse(dto.EndTime);
+            
             decimal price = (decimal)field.PricePerHour.Value;
-            decimal duration =(decimal) (dto.EndTime - dto.StartTime).TotalHours;
+            decimal duration =(decimal) (end - start).TotalHours;
             decimal totalCost = noP * price * duration;
             
             var booking = new Booking
@@ -51,8 +54,8 @@ namespace Tamrinak_API.Services.BookingService
                 UserId = user.UserId,
                 FieldId = dto.FieldId,
                 BookingDate = dto.BookingDate,
-                StartTime = dto.StartTime,
-                EndTime = dto.EndTime,
+                StartTime = start,
+                EndTime = end,
                 TotalCost = totalCost,
                 NumberOfPeople = dto.NumberOfPeople,
                 Status = BookingStatus.Pending,
@@ -69,8 +72,8 @@ namespace Tamrinak_API.Services.BookingService
                 UserId = newBooking.UserId,
                 FieldId = newBooking.FieldId,
                 Status = newBooking.Status,
-                StartTime = newBooking.StartTime,
-                EndTime = newBooking.EndTime,
+                StartTime = newBooking.StartTime.ToString("HH:mm"),
+                EndTime = newBooking.EndTime.ToString("HH:mm"),
                 TotalCost = totalCost,
                 NumberOfPeople = newBooking.NumberOfPeople,
                 Duration = newBooking.Duration,
@@ -93,8 +96,8 @@ namespace Tamrinak_API.Services.BookingService
                 FieldId = booking.FieldId,
                 UserId = booking.UserId,
                 BookingDate = booking.BookingDate,
-                StartTime = booking.StartTime,
-                EndTime = booking.EndTime,
+                StartTime = booking.StartTime.ToString("HH:mm"),
+                EndTime = booking.EndTime.ToString("HH:mm"),
                 TotalCost = booking.TotalCost,
                 IsPaid = booking.IsPaid,
                 NumberOfPeople = booking.NumberOfPeople,
@@ -118,8 +121,8 @@ namespace Tamrinak_API.Services.BookingService
                 FieldId = b.FieldId,
                 UserId = b.UserId,
                 BookingDate = b.BookingDate,
-                StartTime = b.StartTime,
-                EndTime = b.EndTime,
+                StartTime = b.StartTime.ToString("HH:mm"),
+                EndTime = b.EndTime.ToString("HH:mm"),
                 TotalCost = b.TotalCost,
                 IsPaid = b.IsPaid,
                 NumberOfPeople = b.NumberOfPeople,
@@ -154,6 +157,8 @@ namespace Tamrinak_API.Services.BookingService
         public async Task<string?> ChangeBookingAsync(int bookingId, UpdateBookingDto dto)
         {
             var booking = await _bookingRepo.GetAsync(bookingId);
+            var start = TimeOnly.Parse(dto.StartTime);
+            var end = TimeOnly.Parse(dto.EndTime);
             if (booking == null)
                 return "Booking not found.";
 
@@ -161,7 +166,7 @@ namespace Tamrinak_API.Services.BookingService
                 return "Cannot edit a cancelled booking.";
 
             if (booking.BookingDate < DateTime.Now.Date ||
-                (booking.BookingDate == DateTime.Now.Date && dto.StartTime <= TimeOnly.FromDateTime(DateTime.Now)))
+                (booking.BookingDate == DateTime.Now.Date && start <= TimeOnly.FromDateTime(DateTime.Now)))
                 return "Cannot modify a past or ongoing booking.";
 
             int id = (int)booking.FieldId;
@@ -182,16 +187,16 @@ namespace Tamrinak_API.Services.BookingService
             if (validationError != null)
                 return validationError;
            
-            decimal duration =(decimal) (dto.EndTime > dto.StartTime
-                ? dto.EndTime - dto.StartTime
-                : dto.EndTime.AddHours(24) - dto.StartTime).TotalHours;
+            decimal duration =(decimal) (end > start
+                ? end - start
+                : end.AddHours(24) - start).TotalHours;
 
             decimal totalCost = field.PricePerHour.Value * dto.NumberOfPeople * (decimal)duration;
 
             // Update the booking
             booking.BookingDate = dto.BookingDate;
-            booking.StartTime = dto.StartTime;
-            booking.EndTime = dto.EndTime;
+            booking.StartTime = start;
+            booking.EndTime = end;
             booking.NumberOfPeople = dto.NumberOfPeople;
             booking.TotalCost = totalCost;
             booking.Status = BookingStatus.Pending;
@@ -244,9 +249,18 @@ namespace Tamrinak_API.Services.BookingService
 
         private async Task<string?> ValidateBookingAsync(AddBookingDto bookingDto)
         {
-            var bookingStartDateTime = bookingDto.BookingDate.Add(bookingDto.StartTime.ToTimeSpan());
+            var start = TimeOnly.Parse(bookingDto.StartTime);
+            var end = TimeOnly.Parse(bookingDto.EndTime);
+
+            var bookingStartDateTime = bookingDto.BookingDate.Add(start.ToTimeSpan());
             if (bookingStartDateTime < DateTime.Now)
                 return "Booking date cannot be in the past.";
+
+            int maxBookingDaysAhead = 90; // Or make this configurable via appsettings
+            if (bookingDto.BookingDate.Date > DateTime.UtcNow.Date.AddDays(maxBookingDaysAhead))
+            {
+                return $"You can only book up to {maxBookingDaysAhead} days in advance.";
+            }
 
             var field = await _fieldRepo.GetAsync(bookingDto.FieldId);
             if (field == null)
@@ -263,31 +277,32 @@ namespace Tamrinak_API.Services.BookingService
 
             if (!isOpen24Hours)
             {
-                if (!IsWithinOperatingHours(bookingDto.StartTime, bookingDto.EndTime, field.OpenTime, field.CloseTime))
+                if (!IsWithinOperatingHours(start, end, field.OpenTime, field.CloseTime))
                 {
                     return $"Booking time must be within the field's working hours ({field.OpenTime:hh\\:mm} - {field.CloseTime:hh\\:mm}).";
                 }
             }
 
             // Calculate duration
-            TimeSpan duration = bookingDto.StartTime < bookingDto.EndTime
-                ? bookingDto.EndTime - bookingDto.StartTime
-                : (TimeOnly.MaxValue - bookingDto.StartTime + bookingDto.EndTime.ToTimeSpan() + TimeSpan.FromSeconds(1)); // accounts for overnight
+            TimeSpan duration = start < end
+                ? end - start
+                : (TimeOnly.MaxValue - start + end.ToTimeSpan() + TimeSpan.FromSeconds(1)); // accounts for overnight
 
             if (duration.TotalMinutes < 30 || duration.TotalHours > 4)
                 return "Booking duration must be between 30 minutes and 4 hours.";
 
             // Build absolute DateTime ranges
             // Step 1: Convert input times to DateTime
-            var startDateTime = bookingDto.BookingDate.Add(bookingDto.StartTime.ToTimeSpan());
-            var endDateTime = bookingDto.StartTime < bookingDto.EndTime
-                ? bookingDto.BookingDate.Add(bookingDto.EndTime.ToTimeSpan())
-                : bookingDto.BookingDate.AddDays(1).Add(bookingDto.EndTime.ToTimeSpan());
+            var startDateTime = bookingDto.BookingDate.Add(start.ToTimeSpan());
+            var endDateTime = start < end
+                ? bookingDto.BookingDate.Add(end.ToTimeSpan())
+                : bookingDto.BookingDate.AddDays(1).Add(end.ToTimeSpan());
 
             // Step 2: Get all bookings for the same field and date (and next day in case of overnight)
             var relevantBookings = await _bookingRepo.GetListByConditionAsync(
                 b => b.FieldId == bookingDto.FieldId &&
-                     (b.BookingDate == bookingDto.BookingDate || b.BookingDate == bookingDto.BookingDate.AddDays(1))
+                     (b.BookingDate == bookingDto.BookingDate || b.BookingDate == bookingDto.BookingDate.AddDays(1) ||
+                     b.BookingDate == bookingDto.BookingDate.AddDays(-1))
             );
 
             bool isConflict = relevantBookings.Any(b =>

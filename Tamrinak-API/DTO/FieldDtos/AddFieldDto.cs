@@ -13,9 +13,9 @@ namespace Tamrinak_API.DTO.FieldDtos
         public int SportId { get; set; }
         public decimal PricePerHour { get; set; }
         [Required]
-        public TimeOnly OpenTime { get; set; }
+        public string OpenTime { get; set; }
         [Required]
-        public TimeOnly CloseTime { get; set; }
+        public string CloseTime { get; set; }
         //[Phone, MinLength =10]
         [Required, Phone]
         public string? PhoneNumber { get; set; }

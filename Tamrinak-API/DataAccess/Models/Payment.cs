@@ -8,30 +8,48 @@ namespace Tamrinak_API.DataAccess.Models
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int PaymentId { get; set; }
 
-        [Required]
-        public int BookingId { get; set; }
-        [Required] 
-        public int MembershipId { get; set; }
+        
+        public int? BookingId { get; set; }
+        public int? MembershipId { get; set; }
 
-        [Required]
+        [Required] 
+        [Column(TypeName = "decimal(10,2)")]
         public decimal Amount { get; set; }
 
-        [Required]
-        public DateTime PaymentDate { get; set; }
+        [Required]    
+        public DateTime PaymentDate { get; set; } = DateTime.UtcNow;    
 
         [Required]
-        public string PaymentMethod { get; set; }  
+        public PaymentMethod Method { get; set; }
 
-        public string TransactionId { get; set; }
+        [Required]
+        public PaymentStatus Status { get; set; }   
 
-        public Booking Booking { get; set; }
-        public Membership Membership { get; set; }
+        public string? TransactionId { get; set; }
+        [Required]
+        public bool IsConfirmed { get; set; } = false;
+
+        public bool IsRefunded { get; set; } = false;
+
+        public DateTime? CancelledAt { get; set; }
+        public DateTime? RefundedAt { get; set; }
+        public Booking? Booking { get; set; }
+        public Membership? Membership { get; set; }
     }
     public enum PaymentMethod
     {
-        CreditCard,
-        PayPal,
-        ClQ,
-        Cash
+        Cash,
+        Stripe,
+        CliQ,
+        Card
+    }
+
+    public enum PaymentStatus
+    {
+        Pending,
+        Confirmed,
+        Refunded,
+        Cancelled,
+        Failed
     }
 }

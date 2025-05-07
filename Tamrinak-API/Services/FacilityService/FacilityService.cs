@@ -36,8 +36,8 @@ namespace Tamrinak_API.Services.FacilityService
                 OfferDurationInMonths = dto.OfferDurationInMonths,
                 OfferPrice = dto.OfferPrice,
                 Description = dto.Description,
-                OpenTime = dto.OpenTime,
-                CloseTime = dto.CloseTime
+                OpenTime = TimeOnly.Parse(dto.OpenTime),
+                CloseTime = TimeOnly.Parse(dto.CloseTime)
             };
 
             var createdFac = await _facilityRepo.CreateAsync(facility);
@@ -71,8 +71,8 @@ namespace Tamrinak_API.Services.FacilityService
                 OfferDurationInMonths = facility.OfferDurationInMonths,
                 OfferPrice = facility.OfferPrice,
                 IsAvailable = facility.IsAvailable,
-                OpenTime = facility.OpenTime,
-                CloseTime = facility.CloseTime,
+                OpenTime = facility.OpenTime.ToString("HH:mm"),
+                CloseTime = facility.CloseTime.ToString("HH:mm"),
                 Description = facility.Description,
                 Type = facility.Type
             };
@@ -114,8 +114,8 @@ namespace Tamrinak_API.Services.FacilityService
                 OfferDurationInMonths = f.OfferDurationInMonths,
                 OfferPrice = f.OfferPrice,
                 Description = f.Description,
-                OpenTime = f.OpenTime,
-                CloseTime = f.CloseTime,
+                OpenTime = f.OpenTime.ToString("HH:mm"),
+                CloseTime = f.CloseTime.ToString("HH:mm"),
             }).ToList();
         }
 
@@ -146,8 +146,8 @@ namespace Tamrinak_API.Services.FacilityService
                 OfferDurationInMonths = facility.OfferDurationInMonths,
                 OfferPrice = facility.OfferPrice,
                 IsAvailable = facility.IsAvailable,
-                OpenTime = facility.OpenTime,
-                CloseTime = facility.CloseTime,
+                OpenTime = facility.OpenTime.ToString("HH:mm"),
+                CloseTime = facility.CloseTime.ToString("HH:mm"),
                 Description = facility.Description,
                 Type = facility.Type,
                 AverageRating = facility.AverageRating,
@@ -192,8 +192,8 @@ namespace Tamrinak_API.Services.FacilityService
             facility.Type = dto.Type;
             facility.PhoneNumber = dto.PhoneNumber;
             facility.IsAvailable = dto.IsAvailable;
-            facility.OpenTime = dto.OpenTime;
-            facility.CloseTime = dto.CloseTime;
+            facility.OpenTime = TimeOnly.Parse(dto.OpenTime);
+            facility.CloseTime = TimeOnly.Parse(dto.CloseTime);
 
             await _facilityRepo.UpdateAsync(facility);
             if (dto.SportIds is not null)
@@ -227,8 +227,8 @@ namespace Tamrinak_API.Services.FacilityService
                 OfferDurationInMonths = facility.OfferDurationInMonths,
                 OfferPrice = facility.OfferPrice,
                 IsAvailable = facility.IsAvailable,
-                OpenTime = facility.OpenTime,
-                CloseTime = facility.CloseTime,
+                OpenTime = facility.OpenTime.ToString("HH:mm"),
+                CloseTime = facility.CloseTime.ToString("HH:mm"),
                 Description = facility.Description,
                 Type = facility.Type
             };

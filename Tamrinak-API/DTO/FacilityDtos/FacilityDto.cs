@@ -9,8 +9,8 @@ namespace Tamrinak_API.DTO.FacilityDtos
         public string Name { get; set; }
         public string LocationDesc { get; set; }
         public FacilityType Type { get; set; }
-        public TimeOnly OpenTime { get; set; }
-        public TimeOnly CloseTime { get; set; }
+        public string OpenTime { get; set; }
+        public string CloseTime { get; set; }
 
         public string? LocationMap { get; set; }
         public string? PhoneNumber { get; set; }

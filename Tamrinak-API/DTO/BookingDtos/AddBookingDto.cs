@@ -11,10 +11,10 @@ namespace Tamrinak_API.DTO.BookingDtos
         public DateTime BookingDate { get; set; }
 
         [Required]
-        public TimeOnly StartTime { get; set; }
+        public string StartTime { get; set; }
 
         [Required]
-        public TimeOnly EndTime { get; set; }
+        public string EndTime { get; set; }
 
         [Range(1, 25)]
         public int NumberOfPeople { get; set; } = 1;
