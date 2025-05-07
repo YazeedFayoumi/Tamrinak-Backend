@@ -25,10 +25,10 @@ namespace Tamrinak_API.DTO.FacilityDtos
         public bool? IsAvailable { get; set; }
 
         [Required]
-        public TimeOnly OpenTime { get; set; }
+        public string OpenTime { get; set; }
 
         [Required]
-        public TimeOnly CloseTime { get; set; }
+        public string CloseTime { get; set; }
 
         public string? Description { get; set; }
 

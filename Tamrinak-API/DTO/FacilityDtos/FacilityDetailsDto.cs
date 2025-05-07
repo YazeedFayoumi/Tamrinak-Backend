@@ -14,8 +14,8 @@ namespace Tamrinak_API.DTO.FacilityDtos
         public int? OfferDurationInMonths { get; set; }
         public decimal? OfferPrice { get; set; }
         public bool? IsAvailable { get; set; }
-        public TimeOnly OpenTime { get; set; }
-        public TimeOnly CloseTime { get; set; }
+        public string OpenTime { get; set; }
+        public string CloseTime { get; set; }
         public string? Description { get; set; }
         public FacilityType Type { get; set; }
         public double AverageRating { get; set; }

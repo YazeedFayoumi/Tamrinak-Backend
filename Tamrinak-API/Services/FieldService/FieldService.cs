@@ -29,8 +29,8 @@ namespace Tamrinak_API.Services.FieldService
                 LocationMap = dto.LocationMap,
                 IsIndoor = dto.IsIndoor,
                 HasLighting = dto.HasLighting,
-                OpenTime = dto.OpenTime,
-                CloseTime = dto.CloseTime,
+                OpenTime = TimeOnly.Parse(dto.OpenTime),
+                CloseTime = TimeOnly.Parse(dto.CloseTime),
                 Capacity = dto.Capacity,
                 PricePerHour = dto.PricePerHour
             };
@@ -45,8 +45,8 @@ namespace Tamrinak_API.Services.FieldService
                 LocationMap = createdField.LocationMap,
                 IsIndoor = createdField.IsIndoor,
                 HasLighting = createdField.HasLighting,
-                OpenTime = createdField.OpenTime,
-                CloseTime = createdField.CloseTime,
+                OpenTime = createdField.OpenTime.ToString("HH:mm"),
+                CloseTime = createdField.CloseTime.ToString("HH:mm"),
                 Capacity = createdField.Capacity,
                 PhoneNumber = createdField.PhoneNumber,
                 PricePerHour = createdField.PricePerHour,
@@ -98,8 +98,8 @@ namespace Tamrinak_API.Services.FieldService
                 PricePerHour = (decimal) field.PricePerHour,
                 HasLighting = field.HasLighting,
                 IsIndoor = field.IsIndoor,
-                OpenTime = field.OpenTime,
-                CloseTime = field.CloseTime,
+                OpenTime = field.OpenTime.ToString("HH:mm"),
+                CloseTime = field.CloseTime.ToString("HH:mm"),
                 Sport = new SportBasicDto
                 {
                     Id = field.Sport.SportId,
@@ -119,8 +119,8 @@ namespace Tamrinak_API.Services.FieldService
                 Name = f.Name,
                 LocationDesc = f.LocationDesc,
                 PhoneNumber = f.PhoneNumber,
-                OpenTime = f.OpenTime,
-                CloseTime = f.CloseTime,
+                OpenTime = f.OpenTime.ToString("HH:mm"),
+                CloseTime = f.CloseTime.ToString("HH:mm"),
                 PricePerHour = f.PricePerHour
 
             }).ToList();
@@ -136,8 +136,8 @@ namespace Tamrinak_API.Services.FieldService
             field.LocationDesc = dto.LocationDesc;
             field.LocationMap = dto.LocationMap;
             field.PricePerHour = dto.PricePerHour;
-            field.OpenTime = dto.OpenTime;
-            field.CloseTime = dto.CloseTime;
+            field.OpenTime = TimeOnly.Parse(dto.OpenTime);
+            field.CloseTime = TimeOnly.Parse(dto.CloseTime);
             field.PhoneNumber = dto.PhoneNumber;
             field.Capacity = dto.Capacity;
             field.HasLighting = dto.HasLighting;

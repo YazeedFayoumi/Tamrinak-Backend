@@ -8,8 +8,8 @@ namespace Tamrinak_API.DTO.BookingDtos
         public int? FieldId { get; set; }
         public int UserId { get; set; }
         public DateTime BookingDate { get; set; }
-        public TimeOnly StartTime { get; set; }
-        public TimeOnly EndTime { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
         public TimeSpan Duration { get; set; }
         public decimal TotalCost { get; set; }
         public bool IsPaid { get; set; }

@@ -16,6 +16,7 @@ using Tamrinak_API.Services.FieldService;
 using Tamrinak_API.Services.ImageService;
 using Tamrinak_API.Services.MembershipOfferService;
 using Tamrinak_API.Services.MembershipService;
+using Tamrinak_API.Services.PaymentService;
 using Tamrinak_API.Services.SportService;
 using Tamrinak_API.Services.UserService;
 
@@ -98,6 +99,8 @@ builder.Services.AddScoped<IFacilityService, FacilityService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IMembershipService, MembershipService>();
 builder.Services.AddScoped<IMembershipOfferService, MembershipOfferService>();
+builder.Services.AddScoped<IMembershipOfferService, MembershipOfferService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddScoped<DatabaseInitializer>();
 

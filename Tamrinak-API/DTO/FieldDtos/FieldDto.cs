@@ -8,8 +8,8 @@ namespace Tamrinak_API.DTO.FieldDtos
         public string Name { get; set; }
         public string LocationDesc { get; set; }
         public int SportId { get; set; }
-        public TimeOnly OpenTime { get; set; }
-        public TimeOnly CloseTime { get; set; }
+        public string OpenTime { get; set; }
+        public string CloseTime { get; set; }
 
         public string? PhoneNumber { get; set; }
 

@@ -24,10 +24,10 @@ namespace Tamrinak_API.DTO.FieldDtos
         public bool? IsIndoor { get; set; }
 
         [Required]
-        public TimeOnly OpenTime { get; set; }
+        public string OpenTime { get; set; }
 
         [Required]
-        public TimeOnly CloseTime { get; set; }
+        public string CloseTime { get; set; }
 
         public int SportId { get; set; }
 
