@@ -21,7 +21,7 @@ namespace Tamrinak_API.Controllers
 			_imageService = imageService;
 		}
 
-		//[Authorize(Roles = "Admin")]//TODO
+		//[Authorize(Roles = "Admin")] // TODO
 		[HttpPost("add-field")]
 		public async Task<IActionResult> AddField(AddFieldDto dto)
 		{
@@ -54,7 +54,7 @@ namespace Tamrinak_API.Controllers
 		public async Task<IActionResult> UpdateField(int id, UpdateFieldDto dto)
 		{
 			await _fieldService.UpdateFieldDtoAsync(id, dto);
-			var newField = _fieldService.GetFieldAsync(id);
+			var newField = await _fieldService.GetFieldAsync(id);
 			return Ok(newField);
 		}
 
@@ -81,11 +81,12 @@ namespace Tamrinak_API.Controllers
 
 				foreach (var file in filesToUpload)
 				{
-					var url = await _imageService.UploadImageAsync(file, "fields");
+					// Upload image as Base64 and save in the database
+					var base64Image = await _imageService.UploadImageAsync(file, "fields");
 					var image = new Image
 					{
 						FieldId = fieldId,
-						Url = url
+						Base64Data = base64Image // Save Base64 image data
 					};
 					await _imageService.AddImageAsync(image);
 				}
@@ -100,20 +101,20 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-
-
-
 		[HttpDelete("remove-field")]
 		public async Task<IActionResult> DeleteField(int fieldId)
 		{
 			var field = await _fieldService.GetFieldWithImagesAsync(fieldId);
 			if (field == null)
 				return NotFound();
+
+			// Delete images based on Base64 data
 			var fieldImages = field.Images.ToList();
 			foreach (var image in fieldImages)
 			{
-				await _imageService.DeleteImageAsync(image.Url);
+				await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
 			}
+
 			var result = await _fieldService.DeleteFieldAsync(fieldId);
 			if (!result)
 				return NotFound("Field not found");
@@ -128,10 +129,8 @@ namespace Tamrinak_API.Controllers
 			if (image == null || image.FieldId != fieldId)
 				return NotFound("Image not found for this field.");
 
-			await _imageService.DeleteImageAsync(image.Url);
-
+			await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
 			return Ok("Image deleted successfully.");
-
 		}
 
 		[HttpGet("get-field-photo")]
@@ -141,12 +140,11 @@ namespace Tamrinak_API.Controllers
 			if (image == null)
 				return NotFound("Image not found.");
 
-			var imageFileName = Path.GetFileName(image.Url);
+			// Return Base64 image as data URI
+			var base64Image = image.Base64Data;
+			var dataUri = $"data:image/jpeg;base64,{base64Image}";
 
-
-			var publicUrl = $"{Request.Scheme}://{Request.Host}/uploads/fields/{imageFileName}";
-
-			return Ok(publicUrl);
+			return Ok(new { Image = dataUri });
 		}
 
 		[HttpGet("get-ren-field-photo")]
@@ -156,13 +154,12 @@ namespace Tamrinak_API.Controllers
 			if (image == null)
 				return NotFound("Image not found.");
 
-			var imageFileName = Path.GetFileName(image.Url);
-			var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "fields", imageFileName);
+			// Return Base64 image as file content
+			var base64Image = image.Base64Data;
+			var byteArray = Convert.FromBase64String(base64Image);
+			var contentType = _imageService.GetContentTypeFromBase64(base64Image);
 
-			var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-			var contentType = _imageService.GetContentType(imagePath);
-			return File(stream, contentType);
-
+			return File(byteArray, contentType);
 		}
 
 		[HttpGet("get-field-photo-list")]
@@ -172,10 +169,11 @@ namespace Tamrinak_API.Controllers
 			if (images == null)
 				return NotFound("Images not found.");
 
+			// Return Base64 data for each image
 			var result = images.Select(img => new
 			{
 				img.Id,
-				FilePath = $"{Request.Scheme}://{Request.Host}/uploads/fields/{Path.GetFileName(img.Url)}"
+				ImageData = $"data:image/jpeg;base64,{img.Base64Data}"
 			});
 
 			return Ok(result);
@@ -198,12 +196,9 @@ namespace Tamrinak_API.Controllers
 			if (!images.Any())
 				return NotFound("No images found for this sport.");
 
-			var imageUrls = images.Select(i => i.Url).ToList();
+			var imageData = images.Select(i => $"data:image/jpeg;base64,{i.Base64Data}").ToList();
 
-			return Ok(imageUrls);
+			return Ok(imageData);
 		}
-
-
 	}
 }
-

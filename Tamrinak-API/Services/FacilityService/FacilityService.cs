@@ -255,7 +255,7 @@ namespace Tamrinak_API.Services.FacilityService
 					Id = sf.Sport.SportId,
 					Name = sf.Sport.Name
 				}).ToList(),
-				Images = f.Images.Select(img => img.Url).ToList()
+				Images = f.Images.Select(img => img.Base64Data).ToList()
 			}).ToList();
 		}
 	}

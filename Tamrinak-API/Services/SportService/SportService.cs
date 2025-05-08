@@ -34,33 +34,21 @@ namespace Tamrinak_API.Services.SportService
 				Name = newSport.Name,
 				Description = newSport.Description
 			};
-
-
 		}
 
 		public async Task<IEnumerable<SportDto>> GetAllSportsAsync()
 		{
-			/*var sports = await _sportRepo.GetAllAsync();
-            return sports.Select(s => new SportDto
-            {
-                Id = s.SportId,
-                Name = s.Name,
-                Description = s.Description
-                
-            }).ToList();*/
-
-			var sports = await _sportRepo.GetListByConditionIncludeAsync(predicate: s => true,
-				include: q => q.Include(s => s.Images));
-
+			var sports = await _sportRepo.GetListByConditionIncludeAsync(
+				predicate: s => true,
+				include: q => q.Include(s => s.Images)
+			);
 
 			return sports.Select(s => new SportDto
 			{
 				Id = s.SportId,
 				Name = s.Name,
-				IconUrl = s.Images.FirstOrDefault()?.Url // ⬅️ fetch sport icon
+				IconUrl = s.Images.FirstOrDefault()?.Base64Data // Fetch sport icon as Base64 data
 			}).ToList();
-
-
 		}
 
 		public async Task<Sport> GetSportByIdAsync(int id)
@@ -78,16 +66,13 @@ namespace Tamrinak_API.Services.SportService
 			sport.Description = dto.Description;
 
 			await _sportRepo.UpdateAsync(sport);
-
 		}
+
 		public async Task UpdateSportAsync(Sport sport)
 		{
-
 			await _sportRepo.UpdateAsync(sport);
 			await _sportRepo.SaveAsync();
-
 		}
-
 
 		public async Task DeleteSportAsync(int id)
 		{
@@ -99,10 +84,10 @@ namespace Tamrinak_API.Services.SportService
 			if (sport == null)
 				throw new KeyNotFoundException("Sport not found");
 
-			// Delete associated images first
+			// Delete associated images first (Base64Data)
 			foreach (var image in sport.Images.ToList())
 			{
-				await _imageService.DeleteImageAsync(image.Url); // make sure this removes from DB and storage if needed
+				await _imageService.DeleteImageAsync(image.Base64Data); // Deleting based on Base64Data
 			}
 			await _sportRepo.DeleteAsync(sport);
 			await _sportRepo.SaveAsync();
@@ -112,12 +97,13 @@ namespace Tamrinak_API.Services.SportService
 		{
 			var sport = await _sportRepo.GetAsync(id);
 			if (sport == null) throw new KeyNotFoundException("Not Found");
+
 			return new SportDetailsDto
 			{
 				Id = sport.SportId,
 				Name = sport.Name,
 				Description = sport.Description,
-				ImageUrls = sport.Images.Select(u => u.Url).ToList(),
+				ImageUrls = sport.Images.Select(u => u.Base64Data).ToList(), // Fetch images in Base64 format
 			};
 		}
 	}

@@ -15,12 +15,14 @@ namespace Tamrinak_API.Controllers
 	{
 		private readonly IFacilityService _facilityService;
 		private readonly IImageService _imageService;
+
 		public FacilityController(IFacilityService facilityService, IImageService imageService)
 		{
 			_facilityService = facilityService;
 			_imageService = imageService;
 		}
-		//[Authorize(Roles = "Admin")]//TODO
+
+		//[Authorize(Roles = "Admin")] // TODO
 		[HttpPost("add-facility")]
 		public async Task<IActionResult> AddFacility(AddFacilityDto dto)
 		{
@@ -63,11 +65,13 @@ namespace Tamrinak_API.Controllers
 			var canAdd = await _imageService.CanAddEntityImagesAsync<Facility>(facilityId, 15);
 			if (canAdd)
 			{
-				var url = await _imageService.UploadImageAsync(formFile, "facilities");
+				// Upload the image as Base64
+				var base64Image = await _imageService.UploadImageAsync(formFile, "facilities");
+
 				var image = new Image
 				{
 					FacilityId = facilityId,
-					Url = url
+					Base64Data = base64Image // Store as Base64
 				};
 				await _imageService.AddImageAsync(image);
 				await _imageService.UpdateImageAsync(image);
@@ -78,7 +82,6 @@ namespace Tamrinak_API.Controllers
 			{
 				return BadRequest("Max number of images for this facility");
 			}
-
 		}
 
 		[HttpDelete("remove-facility")]
@@ -87,11 +90,13 @@ namespace Tamrinak_API.Controllers
 			var facility = await _facilityService.GetFacilityWithImagesAsync(facilityId);
 			if (facility == null)
 				return NotFound();
+
 			var facilityImages = facility.Images.ToList();
 			foreach (var image in facilityImages)
 			{
-				await _imageService.DeleteImageAsync(image.Url);
+				await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
 			}
+
 			var result = await _facilityService.DeleteFacilityAsync(facilityId);
 			if (!result)
 				return NotFound("Facility not found");
@@ -106,10 +111,9 @@ namespace Tamrinak_API.Controllers
 			if (image == null || image.FacilityId != facilityId)
 				return NotFound("Image not found for this Facility.");
 
-			await _imageService.DeleteImageAsync(image.Url);
+			await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
 
 			return Ok("Image deleted successfully.");
-
 		}
 
 		[HttpGet("get-facility-photo")]
@@ -119,12 +123,8 @@ namespace Tamrinak_API.Controllers
 			if (image == null)
 				return NotFound("Image not found.");
 
-			var imageFileName = Path.GetFileName(image.Url);
-
-
-			var publicUrl = $"{Request.Scheme}://{Request.Host}/uploads/fields/{imageFileName}";
-
-			return Ok(publicUrl);
+			// Return the Base64 data as the response
+			return Ok(image.Base64Data);
 		}
 
 		[HttpGet("get-ren-facility-photo")]
@@ -134,13 +134,10 @@ namespace Tamrinak_API.Controllers
 			if (image == null)
 				return NotFound("Image not found.");
 
-			var imageFileName = Path.GetFileName(image.Url);
-			var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "facilities", imageFileName);
+			var base64Image = image.Base64Data;
 
-			var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-			var contentType = _imageService.GetContentType(imagePath);
-			return File(stream, contentType);
-
+			// Return the Base64 data as a response
+			return Ok(base64Image);
 		}
 
 		[HttpGet("get-facility-photo-list")]
@@ -153,7 +150,7 @@ namespace Tamrinak_API.Controllers
 			var result = images.Select(img => new
 			{
 				img.Id,
-				FilePath = $"{Request.Scheme}://{Request.Host}/uploads/facilities/{Path.GetFileName(img.Url)}"
+				Base64Data = img.Base64Data // Return Base64 data
 			});
 
 			return Ok(result);
@@ -167,6 +164,5 @@ namespace Tamrinak_API.Controllers
 				return NotFound("No facilities found for this sport.");
 			return Ok(result);
 		}
-
 	}
 }
