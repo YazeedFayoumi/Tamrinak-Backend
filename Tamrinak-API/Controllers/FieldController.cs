@@ -57,14 +57,24 @@ namespace Tamrinak_API.Controllers
 			return Ok(newField);
 		}
 
-		[HttpPost("add-field-image")]
-		public async Task<IActionResult> AddFieldImage(int fieldId, IFormFile formFile)
+		[HttpPost("add-field-images")]
+		public async Task<IActionResult> AddFieldImages(int fieldId, List<IFormFile> formFiles)
 		{
 			var field = await _fieldService.GetFieldAsync(fieldId);
 			var canAdd = await _imageService.CanAddEntityImagesAsync<Field>(fieldId, 10);
-			if (canAdd)
+
+			if (!canAdd)
+				return BadRequest("Max number of images for this field");
+
+			if (formFiles == null || !formFiles.Any())
+				return BadRequest("No files uploaded.");
+
+			int existingCount = (await _imageService.GetImagesAsync(fieldId, "field")).Count();
+			int allowed = 10 - existingCount;
+
+			foreach (var file in formFiles.Take(allowed))
 			{
-				var url = await _imageService.UploadImageAsync(formFile, "fields");
+				var url = await _imageService.UploadImageAsync(file, "fields");
 				var image = new Image
 				{
 					FieldId = fieldId,
@@ -72,16 +82,13 @@ namespace Tamrinak_API.Controllers
 				};
 				await _imageService.AddImageAsync(image);
 				await _imageService.UpdateImageAsync(image);
-				await _fieldService.UpdateFieldAsync(field);
-				return Ok();
-			}
-			else
-			{
-				return BadRequest("Max number of images for this field");
 			}
 
-
+			await _fieldService.UpdateFieldAsync(field);
+			return Ok("Images uploaded successfully.");
 		}
+
+
 
 		[HttpDelete("remove-field")]
 		public async Task<IActionResult> DeleteField(int fieldId)
