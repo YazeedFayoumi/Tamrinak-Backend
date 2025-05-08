@@ -3,49 +3,49 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Tamrinak_API.DataAccess.Models
 {
-    public class Field
-    {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int FieldId { get; set; }   
-        [Required]
-        public string Name { get; set; }
-        [Required]
-        public int SportId { get; set; }
-     
-        
-        [Required]
-        public required string LocationDesc { get; set; }
-        public string? LocationMap {  get; set; }
+	public class Field
+	{
+		[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public int FieldId { get; set; }
+		[Required]
+		public string Name { get; set; }
+		[Required]
+		public int SportId { get; set; }
 
-        [Phone]
-        public string? PhoneNumber { get; set; }
 
-        [Required]
-        public TimeOnly OpenTime { get; set; }
-        [Required]
-        public TimeOnly CloseTime { get; set; }
+		[Required]
+		public required string LocationDesc { get; set; }
+		public string? LocationMap { get; set; }
 
-        public int? Capacity { get; set; }
-     
-        public decimal? PricePerHour { get; set; }
+		[Phone]
+		public string? PhoneNumber { get; set; }
 
-        public bool? HasLighting { get; set; }
-        
+		[Required]
+		public TimeOnly OpenTime { get; set; }
+		[Required]
+		public TimeOnly CloseTime { get; set; }
 
-        public bool? IsIndoor { get; set; }
+		public int? Capacity { get; set; }
 
-        [NotMapped]
-        public double AverageRating { get; set; }
+		public decimal? PricePerHour { get; set; }
 
-        [NotMapped]
-        public int TotalReviews { get; set; }
+		public bool? HasLighting { get; set; }
 
-        
-        public int? FacilityId { get; set; }
-        public Facility Facility { get; set; }
-        
-        public Sport Sport { get; set; }
-        public List<Booking> Bookings { get; set; } = new();
-        public ICollection<Image> Images { get; set; } = new List<Image>();
-    }
+
+		public bool? IsIndoor { get; set; }
+
+		[NotMapped]
+		public double AverageRating { get; set; }
+
+		[NotMapped]
+		public int TotalReviews { get; set; }
+
+
+		public int? FacilityId { get; set; }
+		public Facility Facility { get; set; }
+
+		public Sport Sport { get; set; }
+		public List<Booking> Bookings { get; set; } = new();
+		public ICollection<Image> Images { get; set; } = new List<Image>();
+	}
 }

@@ -7,70 +7,70 @@ using Google.Apis.Gmail.v1.Data;
 
 namespace Tamrinak_API.Services.EmailService
 {
-    public class EmailService : IEmailService
-    {
-        private readonly IConfiguration _config;
-        private readonly GmailService _gmailService;
+	public class EmailService : IEmailService
+	{
+		private readonly IConfiguration _config;
+		private readonly GmailService _gmailService;
 
-        public EmailService(IConfiguration config)
-        {
-            _config = config;
+		public EmailService(IConfiguration config)
+		{
+			_config = config;
 
-            UserCredential credential;
-            using (var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
-            {
-   
-                var receiver = new LocalServerCodeReceiver( "http://127.0.0.1:5005/authorize/");
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                  GoogleClientSecrets.FromStream(stream).Secrets,
-                  new[] { GmailService.Scope.GmailSend },
-                  "user",
-                  CancellationToken.None,
-                  new FileDataStore("token.json", true),
-                  receiver
-              ).Result;
-            }
+			UserCredential credential;
+			using (var stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
+			{
 
-            _gmailService = new GmailService(new BaseClientService.Initializer
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "Tamrinak Mailer"
-            });
-        }
+				var receiver = new LocalServerCodeReceiver("http://127.0.0.1:5005/authorize/");
+				credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+				  GoogleClientSecrets.FromStream(stream).Secrets,
+				  new[] { GmailService.Scope.GmailSend },
+				  "user",
+				  CancellationToken.None,
+				  new FileDataStore("token.json", true),
+				  receiver
+			  ).Result;
+			}
 
-        public async Task SendEmailAsync(string toEmail, string subject, string htmlBody, string plainTextBody = "")
-        {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Tamrinak Team", "noreply@tamrinak.com"));
-            message.To.Add(new MailboxAddress("", toEmail));
-            message.Subject = subject;
+			_gmailService = new GmailService(new BaseClientService.Initializer
+			{
+				HttpClientInitializer = credential,
+				ApplicationName = "Tamrinak Mailer"
+			});
+		}
 
-            var builder = new BodyBuilder
-            {
-                HtmlBody = htmlBody,
-                TextBody = plainTextBody
-            };
-            message.Body = builder.ToMessageBody();
+		public async Task SendEmailAsync(string toEmail, string subject, string htmlBody, string plainTextBody = "")
+		{
+			var message = new MimeMessage();
+			message.From.Add(new MailboxAddress("Tamrinak Team", "noreply@tamrinak.com"));
+			message.To.Add(new MailboxAddress("", toEmail));
+			message.Subject = subject;
 
-            using (var stream = new MemoryStream())
-            {
-                await message.WriteToAsync(stream);
-                var rawMessage = Convert.ToBase64String(stream.ToArray())
-                    .Replace("+", "-").Replace("/", "_").Replace("=", "");
+			var builder = new BodyBuilder
+			{
+				HtmlBody = htmlBody,
+				TextBody = plainTextBody
+			};
+			message.Body = builder.ToMessageBody();
 
-                var gmailMessage = new Message
-                {
-                    Raw = rawMessage
-                };
+			using (var stream = new MemoryStream())
+			{
+				await message.WriteToAsync(stream);
+				var rawMessage = Convert.ToBase64String(stream.ToArray())
+					.Replace("+", "-").Replace("/", "_").Replace("=", "");
 
-                await _gmailService.Users.Messages.Send(gmailMessage, "me").ExecuteAsync();
-            }
-        }
+				var gmailMessage = new Message
+				{
+					Raw = rawMessage
+				};
 
-        public async Task SendConfirmationEmailAsync(string toEmail, string confirmationLink)
-        {
-            string subject = "Please Confirm Your Email Address";
-            string htmlBody = $@"
+				await _gmailService.Users.Messages.Send(gmailMessage, "me").ExecuteAsync();
+			}
+		}
+
+		public async Task SendConfirmationEmailAsync(string toEmail, string confirmationLink)
+		{
+			string subject = "Please Confirm Your Email Address";
+			string htmlBody = $@"
             <html>
               <body>
                 <p>Hello,</p>
@@ -82,16 +82,16 @@ namespace Tamrinak_API.Services.EmailService
             </html>";
 
 
-            string plainTextBody = $"Hello,\n\nThanks for registering with Tamrinak! Please confirm your email by clicking the link below:\n{confirmationLink}\n\n– The Tamrinak Team";
+			string plainTextBody = $"Hello,\n\nThanks for registering with Tamrinak! Please confirm your email by clicking the link below:\n{confirmationLink}\n\n– The Tamrinak Team";
 
-            await SendEmailAsync(toEmail, subject, htmlBody, plainTextBody);
-        }
+			await SendEmailAsync(toEmail, subject, htmlBody, plainTextBody);
+		}
 
-        public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink)
-        {
+		public async Task SendPasswordResetEmailAsync(string toEmail, string resetLink)
+		{
 
-            string subject = "Reset Your Tamrinak Password";
-            string htmlBody = $@"
+			string subject = "Reset Your Tamrinak Password";
+			string htmlBody = $@"
             <html>
             <p>Hello,</p>
             <p>We received a request to reset your Tamrinak password. You can reset it using the link below:</p>
@@ -100,9 +100,9 @@ namespace Tamrinak_API.Services.EmailService
             <p>– The Tamrinak Team</p>
             </html>";
 
-            string plainTextBody = $"Hello,\n\nWe received a request to reset your Tamrinak password. Use the link below to reset it:\n{resetLink}\n\nIf you didn’t request this, ignore this email.\n\n– The Tamrinak Team";
+			string plainTextBody = $"Hello,\n\nWe received a request to reset your Tamrinak password. Use the link below to reset it:\n{resetLink}\n\nIf you didn’t request this, ignore this email.\n\n– The Tamrinak Team";
 
-            await SendEmailAsync(toEmail, subject, htmlBody, plainTextBody);
-        }
-    }
+			await SendEmailAsync(toEmail, subject, htmlBody, plainTextBody);
+		}
+	}
 }
