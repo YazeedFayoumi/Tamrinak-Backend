@@ -23,7 +23,9 @@ namespace Tamrinak_API.DTO.FieldDtos
 
 		public bool? IsIndoor { get; set; }
 
-		[Required]
+        public bool IsAvailable { get; set; }
+
+        [Required]
 		public string OpenTime { get; set; }
 
 		[Required]

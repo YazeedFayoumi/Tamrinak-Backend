@@ -14,5 +14,9 @@ namespace Tamrinak_API.Services.FieldService
 		Task<bool> DeleteFieldAsync(int id);
 		Task<Field> GetFieldWithImagesAsync(int fieldId);
 		Task<List<FieldBySportDto>> GetFieldsBySportAsync(int sportId);
-	}
+
+        Task<bool> SetUnavailableFieldAsync(int fieldId);
+		Task<bool> ReactivateFieldAsync(int fieldId);
+
+    }
 }

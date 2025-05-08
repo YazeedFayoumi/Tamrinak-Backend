@@ -10,8 +10,8 @@ namespace Tamrinak_API.DTO.FieldDtos
 		public int SportId { get; set; }
 		public string OpenTime { get; set; }
 		public string CloseTime { get; set; }
-
-		public string? PhoneNumber { get; set; }
+        public bool IsAvailable { get; set; }
+        public string? PhoneNumber { get; set; }
 
 		public int? Capacity { get; set; }
 

@@ -84,7 +84,7 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-		[HttpDelete("remove-facility")]
+        [HttpDelete("remove-facility")]
 		public async Task<IActionResult> DeleteFacility(int facilityId)
 		{
 			var facility = await _facilityService.GetFacilityWithImagesAsync(facilityId);
@@ -164,5 +164,38 @@ namespace Tamrinak_API.Controllers
 				return NotFound("No facilities found for this sport.");
 			return Ok(result);
 		}
-	}
+
+        [HttpDelete("delete-facility-images/{facilityId}")]
+        //[Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> DeleteFieldImages(int fieldId)
+        {
+            var images = await _imageService.GetImagesAsync(fieldId, "facility");
+            foreach (var img in images)
+            {
+                await _imageService.DeleteImageAsync(img.Url);
+            }
+            return Ok("All images deleted.");
+        }
+
+        [HttpPut("{facilityId}/archive")]
+        //[Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> SetUnavailableFacility(int facilityId)
+        {
+            var success = await _facilityService.SetUnavailableFacilityAsync(facilityId);
+            if (!success)
+                return NotFound("Facility not found");
+
+            return Ok("Facility has been archived (soft deleted).");
+        }
+
+        [HttpPut("{facilityId}/reactivate")]
+        //[Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> ReactivateFacility(int facilityId)
+        {
+            var result = await _facilityService.ReactivateFacilityAsync(facilityId);
+            if (!result)
+                return NotFound("Facility not found.");
+            return Ok("Facility reactivated.");
+        }
+    }
 }

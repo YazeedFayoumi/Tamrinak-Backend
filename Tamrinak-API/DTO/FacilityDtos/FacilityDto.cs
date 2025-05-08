@@ -15,8 +15,6 @@ namespace Tamrinak_API.DTO.FacilityDtos
 		public string? LocationMap { get; set; }
 		public string? PhoneNumber { get; set; }
 		public decimal? PricePerMonth { get; set; }
-		public int? OfferDurationInMonths { get; set; }
-		public decimal? OfferPrice { get; set; }
 		public bool? IsAvailable { get; set; } = true;
 
 		public string? Description { get; set; }

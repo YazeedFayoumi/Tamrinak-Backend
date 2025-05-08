@@ -60,7 +60,20 @@ namespace Tamrinak_API.Services.ImageService
 			return base64;
 		}
 
-		public async Task<bool> CanAddEntityImagesAsync<TEntity>(int entityId, int maxImages) where TEntity : class
+        public async Task<List<string>> UploadImagesAsync(List<IFormFile> files, string folderName)
+        {
+            var urls = new List<string>();
+
+            foreach (var file in files)
+            {
+                var url = await UploadImageAsync(file, folderName); // Reuse your single-upload logic
+                urls.Add(url);
+            }
+
+            return urls;
+        }
+
+        public async Task<bool> CanAddEntityImagesAsync<TEntity>(int entityId, int maxImages) where TEntity : class
 		{
 			Expression<Func<Image, bool>> condition = entity =>
 				typeof(TEntity) == typeof(Facility) && entity.FacilityId == entityId ||

@@ -18,10 +18,6 @@ namespace Tamrinak_API.DTO.FacilityDtos
 
 		public decimal? PricePerMonth { get; set; }
 
-		public int? OfferDurationInMonths { get; set; }
-
-		public decimal? OfferPrice { get; set; }
-
 		public bool? IsAvailable { get; set; }
 
 		[Required]

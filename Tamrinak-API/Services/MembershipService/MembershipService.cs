@@ -26,7 +26,10 @@ namespace Tamrinak_API.Services.MembershipService
 
 			var facility = await _facilityRepo.GetAsync(dto.FacilityId)
 						  ?? throw new Exception("Facility not found");
-
+			if ((bool)!facility.IsAvailable)
+			{
+                throw new Exception("Facility not Available");
+            }
 			var startDate = DateTime.UtcNow.Date;
 			DateTime expirationDate;
 			decimal monthlyFee;
