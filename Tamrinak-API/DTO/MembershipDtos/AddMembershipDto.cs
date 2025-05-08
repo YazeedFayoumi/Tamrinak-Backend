@@ -2,9 +2,9 @@
 
 namespace Tamrinak_API.DTO.MembershipDtos
 {
-    public class AddMembershipDto
-    {
-        [Required]
-        public int FacilityId { get; set; }
-    }
+	public class AddMembershipDto
+	{
+		[Required]
+		public int FacilityId { get; set; }
+	}
 }

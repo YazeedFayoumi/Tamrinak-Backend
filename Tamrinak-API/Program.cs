@@ -25,12 +25,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
+	options.AddPolicy("AllowAll", policy =>
+	{
+		policy.AllowAnyOrigin()
+			  .AllowAnyHeader()
+			  .AllowAnyMethod();
+	});
 });
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -38,60 +38,60 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new TimeSpanConverter());
-    });
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.Converters.Add(new TimeSpanConverter());
+	});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:TokenKey").Value!)),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
-    });
+	.AddJwtBearer(options =>
+	{
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuerSigningKey = true,
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:TokenKey").Value!)),
+			ValidateIssuer = false,
+			ValidateAudience = false
+		};
+	});
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title ="TamrinakAPI", Version ="v1" });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In=ParameterLocation.Header,
-        Description="Standard Authorization header using the bearer scheme(\"bearer {token}\")",
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        BearerFormat = "JWT",
-        Scheme = "bearer"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-        {
-            new OpenApiSecurityScheme{
+	c.SwaggerDoc("v1", new OpenApiInfo { Title = "TamrinakAPI", Version = "v1" });
+	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+	{
+		In = ParameterLocation.Header,
+		Description = "Standard Authorization header using the bearer scheme(\"bearer {token}\")",
+		Name = "Authorization",
+		Type = SecuritySchemeType.ApiKey,
+		BearerFormat = "JWT",
+		Scheme = "bearer"
+	});
+	c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+		{
+			new OpenApiSecurityScheme{
 
-                Reference = new OpenApiReference
-                {
-                     Type = ReferenceType.SecurityScheme,
-                     Id = "Bearer"
-                }
-            },
-            new string[]{}
-        }
-    });
+				Reference = new OpenApiReference
+				{
+					 Type = ReferenceType.SecurityScheme,
+					 Id = "Bearer"
+				}
+			},
+			new string[]{}
+		}
+	});
 });
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.AddScoped<Tamrinak_API.Services.AuthenticationService.IAuthenticationService, 
-    Tamrinak_API.Services.AuthenticationService.AuthenticationService >();
+builder.Services.AddScoped<Tamrinak_API.Services.AuthenticationService.IAuthenticationService,
+	Tamrinak_API.Services.AuthenticationService.AuthenticationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISportService, SportService>();
 builder.Services.AddScoped<IFieldService, FieldService>();
@@ -108,8 +108,8 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 app.UseStaticFiles();
 app.UseHttpsRedirection();

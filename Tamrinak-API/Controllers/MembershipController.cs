@@ -7,56 +7,56 @@ using Tamrinak_API.Services.MembershipService;
 
 namespace Tamrinak_API.Controllers
 {
-    [Authorize(Roles = "User")]
-    [Route("api/[controller]")]
-    [ApiController]
+	[Authorize(Roles = "User")]
+	[Route("api/[controller]")]
+	[ApiController]
 
-    public class MembershipController : ControllerBase
-    {
-        private readonly IMembershipService _membershipService;
-        public MembershipController(IMembershipService membershipService)
-        {
-            _membershipService = membershipService;
-        }
-        
-        [HttpPost("new")]
-        public async Task<IActionResult> AddMembership([FromBody] AddMembershipDto dto)
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var result = await _membershipService.AddMembershipAsync(dto, email);
-            return Ok(result);
-        }
+	public class MembershipController : ControllerBase
+	{
+		private readonly IMembershipService _membershipService;
+		public MembershipController(IMembershipService membershipService)
+		{
+			_membershipService = membershipService;
+		}
 
-        [HttpGet("user")]
-        public async Task<IActionResult> GetUserMemberships()
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var memberships = await _membershipService.GetUserMembershipsAsync(email);
-            return Ok(memberships);
-        }
+		[HttpPost("new")]
+		public async Task<IActionResult> AddMembership([FromBody] AddMembershipDto dto)
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			var result = await _membershipService.AddMembershipAsync(dto, email);
+			return Ok(result);
+		}
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetMembershipById(int id)
-        {
-            var membership = await _membershipService.GetMembershipByIdAsync(id);
-            return Ok(membership);
-        }
+		[HttpGet("user")]
+		public async Task<IActionResult> GetUserMemberships()
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			var memberships = await _membershipService.GetUserMembershipsAsync(email);
+			return Ok(memberships);
+		}
 
-        [HttpPut("{id}/cancel")]
-        public async Task<IActionResult> CancelMembership(int id)
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            await _membershipService.CancelMembershipAsync(id, email);
-            return NoContent();
-        }
+		[HttpGet("{id}")]
+		public async Task<IActionResult> GetMembershipById(int id)
+		{
+			var membership = await _membershipService.GetMembershipByIdAsync(id);
+			return Ok(membership);
+		}
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMembership(int id)
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            await _membershipService.DeleteMembershipAsync(id, email);
-            return Ok("Membership deleted");
-        }
-    }
+		[HttpPut("{id}/cancel")]
+		public async Task<IActionResult> CancelMembership(int id)
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			await _membershipService.CancelMembershipAsync(id, email);
+			return NoContent();
+		}
+
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteMembership(int id)
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			await _membershipService.DeleteMembershipAsync(id, email);
+			return Ok("Membership deleted");
+		}
+	}
 
 }

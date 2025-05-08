@@ -60,7 +60,6 @@ namespace Tamrinak_API.DataAccess.Seeding
 					Name = "Admin",
 					Email = email,
 					IsEmailConfirmed = true,
-					PhoneNumber = "1234567890",
 					CreatedAt = DateTime.UtcNow,
 					IsActive = true,
 					PasswordHash = password,

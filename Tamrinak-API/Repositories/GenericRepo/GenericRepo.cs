@@ -5,99 +5,99 @@ using Tamrinak_API.DataAccess;
 
 namespace Tamrinak_API.Repository.GenericRepo
 {
-    public class GenericRepo<TEntity> : IGenericRepo<TEntity> where TEntity : class
-    {
-        private readonly DatabaseContext _context;
-        private DbSet<TEntity> _dbSet;
-        public GenericRepo(DatabaseContext context)
-        {
-            _context = context;
-            _dbSet = context.Set<TEntity>();
-        }
+	public class GenericRepo<TEntity> : IGenericRepo<TEntity> where TEntity : class
+	{
+		private readonly DatabaseContext _context;
+		private DbSet<TEntity> _dbSet;
+		public GenericRepo(DatabaseContext context)
+		{
+			_context = context;
+			_dbSet = context.Set<TEntity>();
+		}
 
-        public async Task AddAsync(TEntity entity)
-        {
-            await _dbSet.AddAsync(entity);
-            await SaveAsync();
-        }
+		public async Task AddAsync(TEntity entity)
+		{
+			await _dbSet.AddAsync(entity);
+			await SaveAsync();
+		}
 
-        public async Task<TEntity> CreateAsync(TEntity entity)
-        {
-            await _dbSet.AddAsync(entity);
-            await SaveAsync();
-            return entity;
-        }
+		public async Task<TEntity> CreateAsync(TEntity entity)
+		{
+			await _dbSet.AddAsync(entity);
+			await SaveAsync();
+			return entity;
+		}
 
-        public async Task DeleteAsync(TEntity entity)
-        {
-            _dbSet.Remove(entity);
-            await SaveAsync();
-        }
+		public async Task DeleteAsync(TEntity entity)
+		{
+			_dbSet.Remove(entity);
+			await SaveAsync();
+		}
 
-        public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
-        {
-            return await _dbSet.AnyAsync(predicate);
-        }
+		public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
+		{
+			return await _dbSet.AnyAsync(predicate);
+		}
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
-        {
-            return await _dbSet.ToListAsync();
-        }
+		public async Task<IEnumerable<TEntity>> GetAllAsync()
+		{
+			return await _dbSet.ToListAsync();
+		}
 
-        public async Task<TEntity> GetAsync(int id)
-        {
-            return await _dbSet.FindAsync(id);
-        }
+		public async Task<TEntity> GetAsync(int id)
+		{
+			return await _dbSet.FindAsync(id);
+		}
 
-        public async Task<TEntity> GetByConditionAsync(Expression<Func<TEntity, bool>> predicate,
-            Expression<Func<TEntity, object>> include = null)
-        {
-            IQueryable<TEntity> query = _dbSet;
-            if (include != null)
-                query = query.Include(include);
+		public async Task<TEntity> GetByConditionAsync(Expression<Func<TEntity, bool>> predicate,
+			Expression<Func<TEntity, object>> include = null)
+		{
+			IQueryable<TEntity> query = _dbSet;
+			if (include != null)
+				query = query.Include(include);
 
-            return await query.FirstOrDefaultAsync(predicate);
-        }
-        public async Task<TEntity> GetByConditionIncludeAsync(
-          Expression<Func<TEntity, bool>> predicate,
-          Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null
-         )
-        {
-            IQueryable<TEntity> query = _dbSet;
+			return await query.FirstOrDefaultAsync(predicate);
+		}
+		public async Task<TEntity> GetByConditionIncludeAsync(
+		  Expression<Func<TEntity, bool>> predicate,
+		  Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null
+		 )
+		{
+			IQueryable<TEntity> query = _dbSet;
 
-            if (include != null)
-                query = include(query); // Apply the include logic to the query
+			if (include != null)
+				query = include(query); // Apply the include logic to the query
 
-            return await query.FirstOrDefaultAsync(predicate);
-        }
-        public async Task<List<TEntity>> GetListByConditionAsync(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> include = null)
-        {
-            IQueryable<TEntity> query = _dbSet;
-            if (include != null)
-                query = query.Include(include);
+			return await query.FirstOrDefaultAsync(predicate);
+		}
+		public async Task<List<TEntity>> GetListByConditionAsync(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>> include = null)
+		{
+			IQueryable<TEntity> query = _dbSet;
+			if (include != null)
+				query = query.Include(include);
 
-            return await query.Where(predicate).ToListAsync();
-        }
+			return await query.Where(predicate).ToListAsync();
+		}
 
-        public async Task<List<TEntity>> GetListByConditionIncludeAsync(Expression<Func<TEntity, bool>> predicate , Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null)
-        {
-            IQueryable<TEntity> query = _dbSet;
+		public async Task<List<TEntity>> GetListByConditionIncludeAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null)
+		{
+			IQueryable<TEntity> query = _dbSet;
 
-            if (include != null)
-                query = include(query); // Apply the include logic to the query
+			if (include != null)
+				query = include(query); // Apply the include logic to the query
 
-            return await query.Where(predicate).ToListAsync();
-        }
+			return await query.Where(predicate).ToListAsync();
+		}
 
-        public async Task<bool> SaveAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
+		public async Task<bool> SaveAsync()
+		{
+			return await _context.SaveChangesAsync() > 0;
+		}
 
-        public async Task UpdateAsync(TEntity entity)
-        {
-            _dbSet.Update(entity);
-            await SaveAsync();
-        }
-    }
+		public async Task UpdateAsync(TEntity entity)
+		{
+			_dbSet.Update(entity);
+			await SaveAsync();
+		}
+	}
 }

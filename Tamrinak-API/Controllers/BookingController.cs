@@ -9,83 +9,83 @@ namespace Tamrinak_API.Controllers
 {
 	//[Authorize(Roles = "User")]//TODO
 	[Route("api/[controller]")]
-    [ApiController]
-    public class BookingController : ControllerBase
-    {
-        private readonly IBookingService _bookingService;
-        public BookingController(IBookingService bookingService)
-        {
-            _bookingService = bookingService;
-        }
+	[ApiController]
+	public class BookingController : ControllerBase
+	{
+		private readonly IBookingService _bookingService;
+		public BookingController(IBookingService bookingService)
+		{
+			_bookingService = bookingService;
+		}
 
-        [HttpPost("book-field"), Authorize]
-        public async Task<IActionResult> CreateFieldBooking(AddBookingDto dto)
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var booking = await _bookingService.CreateFieldBookingAsync(dto, email);
-            return Ok(booking);
-        }
+		[HttpPost("book-field"), Authorize]
+		public async Task<IActionResult> CreateFieldBooking(AddBookingDto dto)
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			var booking = await _bookingService.CreateFieldBookingAsync(dto, email);
+			return Ok(booking);
+		}
 
-        [HttpGet("get-booking/{bookingId}")]
-        public async Task<IActionResult> GetBooking(int bookingId)
-        {
-            var booking = await _bookingService.GetBookingByIdAsync(bookingId);
-            if (booking == null)
-                return NotFound();
+		[HttpGet("get-booking/{bookingId}")]
+		public async Task<IActionResult> GetBooking(int bookingId)
+		{
+			var booking = await _bookingService.GetBookingByIdAsync(bookingId);
+			if (booking == null)
+				return NotFound();
 
-            return Ok(booking);
-        }
+			return Ok(booking);
+		}
 
-        [HttpGet("user-bookings/{userId}")]
-        public async Task<IActionResult> GetUserBookings(int userId)
-        {
-            var bookings = await _bookingService.GetUserBookingsAsync(userId);
-            return Ok(bookings);
-        }
+		[HttpGet("user-bookings/{userId}")]
+		public async Task<IActionResult> GetUserBookings(int userId)
+		{
+			var bookings = await _bookingService.GetUserBookingsAsync(userId);
+			return Ok(bookings);
+		}
 
-        [HttpDelete("delete-booking/{bookingId}")]
-        public async Task<IActionResult> DeleteBooking(int bookingId)
-        {
-            var success = await _bookingService.DeleteBookingAsync(bookingId);
-            if (!success)
-                return NotFound();
+		[HttpDelete("delete-booking/{bookingId}")]
+		public async Task<IActionResult> DeleteBooking(int bookingId)
+		{
+			var success = await _bookingService.DeleteBookingAsync(bookingId);
+			if (!success)
+				return NotFound();
 
-            return Ok("Booking deleted successfully.");
-        }
+			return Ok("Booking deleted successfully.");
+		}
 
-        [HttpPatch("cancel-booking/{bookingId}")]
-        public async Task<IActionResult> CancelBooking(int bookingId)
-        {
-            var success = await _bookingService.CancelBookingAsync(bookingId);
-            if (!success)
-                return NotFound();
+		[HttpPatch("cancel-booking/{bookingId}")]
+		public async Task<IActionResult> CancelBooking(int bookingId)
+		{
+			var success = await _bookingService.CancelBookingAsync(bookingId);
+			if (!success)
+				return NotFound();
 
-            return Ok("Booking Cancelled successfully.");
-        }
+			return Ok("Booking Cancelled successfully.");
+		}
 
-        [HttpPatch("{bookingId}/pay")]
-        public async Task<IActionResult> MarkBookingAsPaid(int bookingId)
-        {
-            var success = await _bookingService.MarkBookingAsPaidAsync(bookingId);
-            if (!success)
-                return NotFound();
+		[HttpPatch("{bookingId}/pay")]
+		public async Task<IActionResult> MarkBookingAsPaid(int bookingId)
+		{
+			var success = await _bookingService.MarkBookingAsPaidAsync(bookingId);
+			if (!success)
+				return NotFound();
 
-            return Ok("Booking marked as paid.");
-        }
+			return Ok("Booking marked as paid.");
+		}
 
-        [HttpPut("change-booking/{id}")]
-        public async Task<IActionResult> UpdateBooking(int id, [FromBody] UpdateBookingDto dto)
-        {
-            var result = await _bookingService.ChangeBookingAsync(id, dto);
-            return result == null ? Ok("Booking updated successfully.") : BadRequest(result);
-        }
+		[HttpPut("change-booking/{id}")]
+		public async Task<IActionResult> UpdateBooking(int id, [FromBody] UpdateBookingDto dto)
+		{
+			var result = await _bookingService.ChangeBookingAsync(id, dto);
+			return result == null ? Ok("Booking updated successfully.") : BadRequest(result);
+		}
 
-        [HttpGet("availability")]
-        public async Task<IActionResult> GetFieldAvailability(int fieldId, AvailabilityDto dto)//!!??
-        {
-            var slots = await _bookingService.GetAvailableTimeSlotsAsync(fieldId, dto);
-            return Ok(slots);
-        }
-    }
+		[HttpGet("availability")]
+		public async Task<IActionResult> GetFieldAvailability(int fieldId, AvailabilityDto dto)//!!??
+		{
+			var slots = await _bookingService.GetAvailableTimeSlotsAsync(fieldId, dto);
+			return Ok(slots);
+		}
+	}
 }
 
