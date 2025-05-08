@@ -181,13 +181,13 @@ namespace Tamrinak_API.Services.FieldService
 					Id = f.Sport.SportId,
 					Name = f.Sport.Name
 				},
-				Images = f.Images.Select(img => img.Url).ToList()
+				// Modify this part to use Base64 instead of Url
+				Images = f.Images.Select(img => img.Base64Data).ToList() // Changed from img.Url to img.Base64Data
 			}).ToList();
 
-
 			return result;
-
 		}
+
 	}
 }
 

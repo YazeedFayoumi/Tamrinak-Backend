@@ -19,7 +19,7 @@ namespace Tamrinak_API.Controllers
 			_imageService = imageService;
 		}
 
-		//[Authorize(Roles = "Admin")]//TODO
+		//[Authorize(Roles = "Admin")] // TODO
 		[HttpPost("add-sport")]
 		public async Task<IActionResult> AddSport([FromForm] AddSportDto dto, IFormFile formFile)
 		{
@@ -27,15 +27,17 @@ namespace Tamrinak_API.Controllers
 			{
 				var sportDto = await _sportService.AddSportAsync(dto);
 				var sport = await _sportService.GetSportByIdAsync(sportDto.Id);
-				var url = await _imageService.UploadImageAsync(formFile, "sports");
+
+				var base64Image = await _imageService.UploadImageAsync(formFile, "sports");
+
 				var image = new Image
 				{
 					SportId = sportDto.Id,
-					Url = url
+					Base64Data = base64Image // Use Base64 string instead of URL
 				};
+
 				await _imageService.AddImageAsync(image);
-				await _imageService.UpdateImageAsync(image);
-				await _sportService.UpdateSportAsync(sport);
+				await _sportService.UpdateSportAsync(sport); // Update sport with the new image reference
 
 				return Ok(sportDto);
 			}
@@ -44,25 +46,28 @@ namespace Tamrinak_API.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
+
 		[HttpGet("get-all-sports")]
 		public async Task<IActionResult> GetAllSports()
 		{
 			var sports = await _sportService.GetAllSportsAsync();
-
 			return Ok(sports);
 		}
+
 		[HttpGet("get-sport")]
 		public async Task<IActionResult> GetSport(int id)
 		{
 			var sport = await _sportService.GetSportDetailAsync(id);
 			return Ok(sport);
 		}
+
 		[HttpPut("update-sport")]
 		public async Task<IActionResult> UpdateSport(int id, UpdateSportDto dto)
 		{
 			await _sportService.UpdateSportDtoAsync(id, dto);
 			return Ok(dto);
 		}
+
 		[HttpDelete("remove-sport")]
 		public async Task<IActionResult> DeleteSport(int id)
 		{
@@ -81,28 +86,28 @@ namespace Tamrinak_API.Controllers
 			if (sport == null)
 				return NotFound("Sport not found");
 
-			// Get existing images
+			// Get existing images for the sport
 			var existingImages = await _imageService.GetImagesAsync(id, "sport");
 
-			// Delete each one
+			// Delete existing images from the database
 			foreach (var img in existingImages.ToList())
 			{
-				await _imageService.DeleteImageAsync(img.Url);
+				await _imageService.DeleteImageAsync(img.Base64Data); // Use Base64Data for deletion
 			}
 
-			// Upload new one
-			var url = await _imageService.UploadImageAsync(formFile, "sports");
+			// Upload new image as Base64
+			var base64Image = await _imageService.UploadImageAsync(formFile, "sports");
 
+			// Create a new image entity
 			var image = new Image
 			{
 				SportId = id,
-				Url = url
+				Base64Data = base64Image // Save the Base64 image data
 			};
 
 			await _imageService.AddImageAsync(image);
 
 			return Ok("Image updated successfully");
 		}
-
 	}
 }
