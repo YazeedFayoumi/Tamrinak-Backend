@@ -12,218 +12,219 @@ using Tamrinak_API.Services.UserService;
 
 namespace Tamrinak_API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UserController : ControllerBase
-    {
-        private readonly IUserService _userService;
-        private readonly IAuthenticationService _authService;
-        private readonly IImageService _imageService;
-        public UserController(IUserService userService, IImageService imageService, IAuthenticationService authenticationService)
-        {
-            _userService = userService;
-            _authService = authenticationService;
-            _imageService = imageService;
-        }
+	[Route("api/[controller]")]
+	[ApiController]
+	public class UserController : ControllerBase
+	{
+		private readonly IUserService _userService;
+		private readonly IAuthenticationService _authService;
+		private readonly IImageService _imageService;
+		public UserController(IUserService userService, IImageService imageService, IAuthenticationService authenticationService)
+		{
+			_userService = userService;
+			_authService = authenticationService;
+			_imageService = imageService;
+		}
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register(UserRegisterDto registerDto)
-        {
-            try
-            {
-                UserDto createdUser = await _userService.CreateUserAsync(registerDto);
-                return Ok(createdUser);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
-            }
+		[HttpPost("Register")]
+		public async Task<IActionResult> Register(UserRegisterDto registerDto)
+		{
+			try
+			{
+				UserDto createdUser = await _userService.CreateUserAsync(registerDto);
+				return Ok(createdUser);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(StatusCodes.Status403Forbidden, ex.Message);
+			}
 
-        }
+		}
 
-        [HttpPatch("AddRole"), AuthorizeRole(Roles = "SuperAdmin,Admin")]
-        public async Task<ActionResult> AddRoleToUser([FromBody] AssignRoleDto model)
-        {
-            try
-            {
-                await _userService.AssignRoleAsync(model);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
+		[HttpPatch("AddRole"), AuthorizeRole(Roles = "SuperAdmin,Admin")]
+		public async Task<ActionResult> AddRoleToUser([FromBody] AssignRoleDto model)
+		{
+			try
+			{
+				await _userService.AssignRoleAsync(model);
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+				return NotFound(ex.Message);
+			}
+		}
 
-        [HttpGet("GetUserRoles/{id}"), Authorize]
-        public async Task<ActionResult> GetUserRoles(int id)
-        {
-            var roles = await _userService.GetUserRolesAsync(id);
-            return Ok(roles);
-        }
+		[HttpGet("GetUserRoles/{id}"), Authorize]
+		public async Task<ActionResult> GetUserRoles(int id)
+		{
+			var roles = await _userService.GetUserRolesAsync(id);
+			return Ok(roles);
+		}
 
-        [HttpGet("GetUserRolesEmail{email}"), AuthorizeRole(Roles = "Admin")]
-        public async Task<ActionResult> GetUserRoles([FromBody] string email)
-        {
-            var roles = await _userService.GetUserRolesAsync(email);
-            return Ok(roles);
-        }
-        [HttpGet("BasicInfoUserList")]
-        public async Task<IActionResult> GetUsersBasicInfo()
-        {
-            var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
-        }
+		[HttpGet("GetUserRolesEmail{email}"), AuthorizeRole(Roles = "Admin")]
+		public async Task<ActionResult> GetUserRoles([FromBody] string email)
+		{
+			var roles = await _userService.GetUserRolesAsync(email);
+			return Ok(roles);
+		}
+		[HttpGet("BasicInfoUserList")]
+		public async Task<IActionResult> GetUsersBasicInfo()
+		{
+			var users = await _userService.GetAllUsersAsync();
+			return Ok(users);
+		}
 
 
-        [HttpGet("{id}")]
-        //[Authorize]
-        public async Task<ActionResult<UserDto>> GetUserById(int id)
-        {
-            var userDto = await _userService.GetUserDtoAsync(id);
+		[HttpGet("{id}")]
+		//[Authorize]
+		public async Task<ActionResult<UserDto>> GetUserById(int id)
+		{
+			var userDto = await _userService.GetUserDtoAsync(id);
 
-            if (userDto == null)
-            {
-                return NotFound($"User with ID {id} not found");
-            }
-            return Ok(userDto);
-        }
+			if (userDto == null)
+			{
+				return NotFound($"User with ID {id} not found");
+			}
+			return Ok(userDto);
+		}
 
-        [HttpPatch("upload-profile-picture")]
-        public async Task<IActionResult> UploadProfilePicture(IFormFile file, int userId)
-        {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded.");
+		[HttpPatch("upload-profile-picture")]
+		public async Task<IActionResult> UploadProfilePicture(IFormFile file, int userId)
+		{
+			if (file == null || file.Length == 0)
+				return BadRequest("No file uploaded.");
 
-            var folderName = "users";
+			var folderName = "users";
 
-            try
-            {
-                var user = await _userService.GetUserAsync(userId);
+			try
+			{
+				var user = await _userService.GetUserAsync(userId);
 
-                if (user == null)
-                    return NotFound("User not found.");
+				if (user == null)
+					return NotFound("User not found.");
 
-                if (!await _userService.CanAddUserImageAsync(userId))
-                    return BadRequest("User already has a profile image.");
+				if (!await _userService.CanAddUserImageAsync(userId))
+					return BadRequest("User already has a profile image.");
 
-                var imageUrl = await _imageService.UploadImageAsync(file, folderName);
+				var imageUrl = await _imageService.UploadImageAsync(file, folderName);
 
-                user.ProfileImageUrl = imageUrl;
-                await _userService.UpdateUserAsync(user);
+				user.ProfileImageUrl = imageUrl;
+				await _userService.UpdateUserAsync(user);
 
-                return Ok(new { ImageUrl = imageUrl });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-        [HttpDelete("{id}")]
-        //[Authorize(Roles = "Admin")] 
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            await _userService.DeleteUserAsync(id);
-            return Ok();
-        }
-        [HttpDelete("delete-profile-picture")]
-        public async Task<IActionResult> DeleteProfilePicture(int userId)
-        {
-            try
-            {
-                var user = await _userService.GetUserAsync(userId);
-                if (user == null)
-                    return NotFound("User not found.");
+				return Ok(new { ImageUrl = imageUrl });
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
+		}
+		[HttpDelete("{id}")]
+		//[Authorize] 
+		public async Task<IActionResult> DeleteUser(int id)
+		{
+			await _userService.DeleteUserAsync(id);
+			return Ok(new { message = $"User with ID {id} deleted successfully." });
+		}
+		[HttpDelete("delete-profile-picture")]
+		public async Task<IActionResult> DeleteProfilePicture(int userId)
+		{
+			try
+			{
+				var user = await _userService.GetUserAsync(userId);
+				if (user == null)
+					return NotFound("User not found.");
 
-                if (string.IsNullOrEmpty(user.ProfileImageUrl))
-                    return BadRequest("No profile image to delete.");
+				if (string.IsNullOrEmpty(user.ProfileImageUrl))
+					return BadRequest("No profile image to delete.");
 
-                var result = await _imageService.DeleteImageAsync(user.ProfileImageUrl);
-                if (!result)
-                    return StatusCode(500, "Error deleting the image.");
+				var result = await _imageService.DeleteImageAsync(user.ProfileImageUrl);
+				if (!result)
+					return StatusCode(500, "Error deleting the image.");
 
-                user.ProfileImageUrl = null;
-                await _userService.UpdateUserAsync(user);
+				user.ProfileImageUrl = null;
+				await _userService.UpdateUserAsync(user);
 
-                return Ok("Profile image deleted successfully.");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+				return Ok("Profile image deleted successfully.");
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
 
-        }
-        [HttpPatch("change-profile-picture")]
-        public async Task<IActionResult> ChangeProfilePicture(IFormFile file, int userId)
-        {
-            if (file == null || file.Length == 0)
-                return BadRequest("No file uploaded.");
-            try
-            {
-                var user = await _userService.GetUserAsync(userId);
-                if (user == null)
-                    return NotFound("User not found");
+		}
+		[HttpPatch("change-profile-picture")]
+		public async Task<IActionResult> ChangeProfilePicture(IFormFile file, int userId)
+		{
+			if (file == null || file.Length == 0)
+				return BadRequest("No file uploaded.");
+			try
+			{
+				var user = await _userService.GetUserAsync(userId);
+				if (user == null)
+					return NotFound("User not found");
 
-                if (await _userService.CanAddUserImageAsync(userId))
-                {
-                    await _imageService.DeleteImageAsync(user.ProfileImageUrl);
-                }
+				if (await _userService.CanAddUserImageAsync(userId))
+				{
+					await _imageService.DeleteImageAsync(user.ProfileImageUrl);
+				}
 
-                var folderName = "users";
-                var imageUrl = await _imageService.UploadImageAsync(file, folderName);
+				var folderName = "users";
+				var imageUrl = await _imageService.UploadImageAsync(file, folderName);
 
-                user.ProfileImageUrl = imageUrl;
-                await _userService.UpdateUserAsync(user);
+				user.ProfileImageUrl = imageUrl;
+				await _userService.UpdateUserAsync(user);
 
-                return Ok(new { message = "New profile picture saved", imageUrl = imageUrl });
-            } catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-            
-        }
-        
-        [HttpGet("profile-picture")]
-        public async Task<IActionResult> GetProfilePictureFile(int userId)
-        {
-            var user = await _userService.GetUserAsync(userId);
-            if (user == null || string.IsNullOrEmpty(user.ProfileImageUrl))
-                return NotFound("Profile image not found.");
+				return Ok(new { message = "New profile picture saved", imageUrl = imageUrl });
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
 
-            var imageFileName = Path.GetFileName(user.ProfileImageUrl);
-            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users", imageFileName);
+		}
 
-            /* if (!System.IO.File.Exists(imagePath))
+		[HttpGet("profile-picture")]
+		public async Task<IActionResult> GetProfilePictureFile(int userId)
+		{
+			var user = await _userService.GetUserAsync(userId);
+			if (user == null || string.IsNullOrEmpty(user.ProfileImageUrl))
+				return NotFound("Profile image not found.");
+
+			var imageFileName = Path.GetFileName(user.ProfileImageUrl);
+			var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users", imageFileName);
+
+			/* if (!System.IO.File.Exists(imagePath))
                  return NotFound("Image file not found on server.");*/
-            try
-            {
-                var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                var contentType = _imageService.GetContentType(imagePath);
-                return File(stream, contentType);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, "Access denied to image file.");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error: {ex.Message}");
-            }
-        }
+			try
+			{
+				var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+				var contentType = _imageService.GetContentType(imagePath);
+				return File(stream, contentType);
+			}
+			catch (UnauthorizedAccessException)
+			{
+				return StatusCode(StatusCodes.Status403Forbidden, "Access denied to image file.");
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(StatusCodes.Status500InternalServerError, $"Error: {ex.Message}");
+			}
+		}
 
-        [HttpGet("profile")]
-        [Authorize]
-        public async Task<IActionResult> GetUserProfile()
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(email))
-                return Unauthorized();
+		[HttpGet("profile")]
+		[Authorize]
+		public async Task<IActionResult> GetUserProfile()
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			if (string.IsNullOrEmpty(email))
+				return Unauthorized();
 
-            var profile = await _userService.GetUserProfileAsync(email);
-            return Ok(profile);
-        }
+			var profile = await _userService.GetUserProfileAsync(email);
+			return Ok(profile);
+		}
 
-    }
+	}
 
 
 }
