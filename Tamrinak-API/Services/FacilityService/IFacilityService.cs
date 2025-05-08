@@ -15,5 +15,9 @@ namespace Tamrinak_API.Services.FacilityService
 		Task<bool> DeleteFacilityAsync(int id);
 		Task<Facility> GetFacilityWithImagesAsync(int facilityId);
 		Task<List<FacilityBySportDto>> GetFacilitiesBySportAsync(int sportId);
-	}
+
+        Task<bool> SetUnavailableFacilityAsync(int facilityId);
+		Task<bool> ReactivateFacilityAsync(int facilityId);
+
+    }
 }

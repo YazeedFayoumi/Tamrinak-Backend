@@ -14,6 +14,7 @@ namespace Tamrinak_API.DTO.FieldDtos
 		public bool? HasLighting { get; set; }
 		public bool? IsIndoor { get; set; }
 		public string OpenTime { get; set; }
+		public bool IsAvailable { get; set; }
 		public string CloseTime { get; set; }
 		public SportBasicDto Sport { get; set; }
 	}

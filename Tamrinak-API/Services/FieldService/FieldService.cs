@@ -11,11 +11,13 @@ namespace Tamrinak_API.Services.FieldService
 	public class FieldService : IFieldService
 	{
 		private readonly IGenericRepo<Field> _fieldRepo;
+		private readonly IGenericRepo<Booking> _bookingRepo;
 		private readonly IGenericRepo<Image> _imageRepo;
-		public FieldService(IGenericRepo<Field> fieldRepo, IGenericRepo<Image> imageRepo)
+		public FieldService(IGenericRepo<Field> fieldRepo, IGenericRepo<Image> imageRepo, IGenericRepo<Booking> bookingRepo)
 		{
 			_fieldRepo = fieldRepo;
 			_imageRepo = imageRepo;
+			_bookingRepo = bookingRepo;
 		}
 
 		public async Task<FieldDto> AddFieldAsync(AddFieldDto dto)
@@ -32,7 +34,8 @@ namespace Tamrinak_API.Services.FieldService
 				OpenTime = TimeOnly.Parse(dto.OpenTime),
 				CloseTime = TimeOnly.Parse(dto.CloseTime),
 				Capacity = dto.Capacity,
-				PricePerHour = dto.PricePerHour
+				PricePerHour = dto.PricePerHour,
+				IsAvailable = true
 			};
 
 			var createdField = await _fieldRepo.CreateAsync(field);
@@ -51,13 +54,32 @@ namespace Tamrinak_API.Services.FieldService
 				PhoneNumber = createdField.PhoneNumber,
 				PricePerHour = createdField.PricePerHour,
 				SportId = createdField.SportId,
+				IsAvailable = createdField.IsAvailable
 			};
 		}
 
 		public async Task<bool> DeleteFieldAsync(int id)
 		{
-			var field = await _fieldRepo.GetByConditionAsync(f => f.FieldId == id, include: f => f.Images);
+            var bookings = await _bookingRepo.GetListByConditionAsync(
+			   b => b.FieldId == id &&
+				   (b.BookingDate >= DateTime.UtcNow.Date) // only this part stays in SQL
+		   );
 
+            var now = DateTime.UtcNow;
+            var hasActiveBooking = bookings.Any(b =>
+            {
+                var bookingStart = b.BookingDate.Add(b.StartTime.ToTimeSpan());
+                var bookingEnd = b.StartTime < b.EndTime
+                    ? b.BookingDate.Add(b.EndTime.ToTimeSpan())
+                    : b.BookingDate.AddDays(1).Add(b.EndTime.ToTimeSpan());
+
+                return now < bookingEnd; // current time is inside booking range
+            });
+
+            if (hasActiveBooking)
+                throw new InvalidOperationException("Cannot delete field with active or future bookings.");
+
+            var field = await _fieldRepo.GetByConditionAsync(f => f.FieldId == id, include: f => f.Images);
 			if (field == null)
 				return false;
 
@@ -67,8 +89,8 @@ namespace Tamrinak_API.Services.FieldService
 			{
 				await _imageRepo.DeleteAsync(image);
 			}
-
-			await _fieldRepo.DeleteAsync(field);
+            
+            await _fieldRepo.DeleteAsync(field);
 			await _fieldRepo.SaveAsync();
 			return true;
 		}
@@ -100,6 +122,7 @@ namespace Tamrinak_API.Services.FieldService
 				IsIndoor = field.IsIndoor,
 				OpenTime = field.OpenTime.ToString("HH:mm"),
 				CloseTime = field.CloseTime.ToString("HH:mm"),
+				IsAvailable = field.IsAvailable,
 				Sport = new SportBasicDto
 				{
 					Id = field.Sport.SportId,
@@ -121,8 +144,8 @@ namespace Tamrinak_API.Services.FieldService
 				PhoneNumber = f.PhoneNumber,
 				OpenTime = f.OpenTime.ToString("HH:mm"),
 				CloseTime = f.CloseTime.ToString("HH:mm"),
-				PricePerHour = f.PricePerHour
-
+				PricePerHour = f.PricePerHour,
+				IsAvailable = f.IsAvailable,
 			}).ToList();
 		}
 
@@ -142,6 +165,7 @@ namespace Tamrinak_API.Services.FieldService
 			field.Capacity = dto.Capacity;
 			field.HasLighting = dto.HasLighting;
 			field.IsIndoor = dto.IsIndoor;
+			field.IsAvailable = dto.IsAvailable;
 
 			await _fieldRepo.UpdateAsync(field);
 			await _fieldRepo.SaveAsync();
@@ -188,6 +212,48 @@ namespace Tamrinak_API.Services.FieldService
 			return result;
 		}
 
-	}
+		}
+        public async Task<bool> SetUnavailableFieldAsync(int fieldId)
+        {
+            var field = await _fieldRepo.GetAsync(fieldId);
+            if (field == null)
+                return false;
+            var bookings = await _bookingRepo.GetListByConditionAsync(
+			   b => b.FieldId == fieldId &&
+				   (b.BookingDate >= DateTime.UtcNow.Date) 
+			);
+
+            var now = DateTime.UtcNow;
+            var hasActiveBooking = bookings.Any(b =>
+            {
+                var bookingStart = b.BookingDate.Add(b.StartTime.ToTimeSpan());
+                var bookingEnd = b.StartTime < b.EndTime
+                    ? b.BookingDate.Add(b.EndTime.ToTimeSpan())
+                    : b.BookingDate.AddDays(1).Add(b.EndTime.ToTimeSpan());
+
+                return now < bookingEnd; 
+            });
+
+            if (hasActiveBooking)
+                throw new InvalidOperationException("Cannot delete field with active or future bookings.");
+            field.IsAvailable = false;
+            await _fieldRepo.UpdateAsync(field);
+            await _fieldRepo.SaveAsync();
+
+            return true;
+        }
+
+        public async Task<bool> ReactivateFieldAsync(int fieldId)
+        {
+            var field = await _fieldRepo.GetAsync(fieldId);
+            if (field == null) return false;
+
+            field.IsAvailable = true;
+            await _fieldRepo.UpdateAsync(field);
+            await _fieldRepo.SaveAsync();
+            return true;
+        }
+
+    }
 }
 

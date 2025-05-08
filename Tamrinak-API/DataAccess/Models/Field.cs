@@ -25,6 +25,8 @@ namespace Tamrinak_API.DataAccess.Models
 		[Required]
 		public TimeOnly CloseTime { get; set; }
 
+		public bool IsAvailable { get; set; }
+
 		public int? Capacity { get; set; }
 
 		public decimal? PricePerHour { get; set; }

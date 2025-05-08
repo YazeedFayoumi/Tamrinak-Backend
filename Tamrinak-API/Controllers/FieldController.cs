@@ -101,7 +101,11 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-		[HttpDelete("remove-field")]
+        
+
+
+
+        [HttpDelete("remove-field")]
 		public async Task<IActionResult> DeleteField(int fieldId)
 		{
 			var field = await _fieldService.GetFieldWithImagesAsync(fieldId);
@@ -200,5 +204,38 @@ namespace Tamrinak_API.Controllers
 
 			return Ok(imageData);
 		}
-	}
+        [HttpDelete("delete-field-images/{fieldId}")]
+        //[Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> DeleteFieldImages(int fieldId)
+        {
+            var images = await _imageService.GetImagesAsync(fieldId, "field");
+            foreach (var img in images)
+            {
+                await _imageService.DeleteImageAsync(img.Url);
+            }
+            return Ok("All images deleted.");
+        }
+
+        [HttpPut("{fieldId}/archive")]
+        //[Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> SoftDeleteField(int fieldId)
+        {
+            var result = await _fieldService.SetUnavailableFieldAsync(fieldId);
+            if (!result)
+                return NotFound("Field not found");
+
+            return Ok("Field has been archived (soft deleted).");
+        }
+
+        [HttpPut("{fieldId}/reactivate")]
+        //[Authorize(Roles = "Admin,SuperAdmin")]
+        public async Task<IActionResult> ReactivateField(int fieldId)
+        {
+            var result = await _fieldService.ReactivateFieldAsync(fieldId);
+            if (!result)
+                return NotFound("Field not found.");
+            return Ok("Field reactivated.");
+        }
+
+    }
 }

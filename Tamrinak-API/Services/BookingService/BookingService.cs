@@ -265,7 +265,11 @@ namespace Tamrinak_API.Services.BookingService
 			var field = await _fieldRepo.GetAsync(bookingDto.FieldId);
 			if (field == null)
 				return "Field does not exist.";
+			if (!field.IsAvailable)
+			{
+				return "Field not available.";
 
+            }
 			if (field.Capacity < bookingDto.NumberOfPeople)
 				return "Number of players exceeds field capacity. عدد اللاعبين يتعدى استيعاب المرفق";
 

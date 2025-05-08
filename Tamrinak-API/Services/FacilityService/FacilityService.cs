@@ -15,12 +15,16 @@ namespace Tamrinak_API.Services.FacilityService
 		private readonly IGenericRepo<SportFacility> _sportFacilityRepo;
 		private readonly IGenericRepo<Sport> _sportRepo;
 		private readonly IGenericRepo<Image> _imageRepo;
-		public FacilityService(IGenericRepo<Facility> facilityRepo, IGenericRepo<SportFacility> sportFacilityRepo, IGenericRepo<Image> imageRepo, IGenericRepo<Sport> sportRepo)
+		private readonly IGenericRepo<Membership> _membershipRepo;
+		public FacilityService(IGenericRepo<Facility> facilityRepo, IGenericRepo<SportFacility> sportFacilityRepo, IGenericRepo<Membership> memRepo,
+			IGenericRepo<Image> imageRepo,
+			IGenericRepo<Sport> sportRepo)
 		{
 			_facilityRepo = facilityRepo;
 			_sportFacilityRepo = sportFacilityRepo;
 			_imageRepo = imageRepo;
 			_sportRepo = sportRepo;
+			_membershipRepo = memRepo;
 		}
 
 		public async Task<FacilityDto> AddFacilityAsync(AddFacilityDto dto)
@@ -33,8 +37,6 @@ namespace Tamrinak_API.Services.FacilityService
 				PhoneNumber = dto.PhoneNumber,
 				LocationMap = dto.LocationMap,
 				PricePerMonth = dto.PricePerMonth,
-				OfferDurationInMonths = dto.OfferDurationInMonths,
-				OfferPrice = dto.OfferPrice,
 				Description = dto.Description,
 				OpenTime = TimeOnly.Parse(dto.OpenTime),
 				CloseTime = TimeOnly.Parse(dto.CloseTime)
@@ -68,8 +70,6 @@ namespace Tamrinak_API.Services.FacilityService
 				LocationMap = facility.LocationMap,
 				PhoneNumber = facility.PhoneNumber,
 				PricePerMonth = facility.PricePerMonth,
-				OfferDurationInMonths = facility.OfferDurationInMonths,
-				OfferPrice = facility.OfferPrice,
 				IsAvailable = facility.IsAvailable,
 				OpenTime = facility.OpenTime.ToString("HH:mm"),
 				CloseTime = facility.CloseTime.ToString("HH:mm"),
@@ -84,8 +84,14 @@ namespace Tamrinak_API.Services.FacilityService
 
 			if (facility == null)
 				return false;
+            var now = DateTime.UtcNow.Date;
+            var anyMemberships = await _membershipRepo.ExistsAsync(m => m.FacilityId == id);
+            if (anyMemberships)
+                throw new InvalidOperationException("Cannot delete facility with existing memberships.");
 
-			var imagesToDelete = facility.Images.ToList();
+
+
+            var imagesToDelete = facility.Images.ToList();
 
 			foreach (var image in imagesToDelete)
 			{
@@ -111,8 +117,6 @@ namespace Tamrinak_API.Services.FacilityService
 				IsAvailable = f.IsAvailable,
 				LocationMap = f.LocationMap,
 				PricePerMonth = f.PricePerMonth,
-				OfferDurationInMonths = f.OfferDurationInMonths,
-				OfferPrice = f.OfferPrice,
 				Description = f.Description,
 				OpenTime = f.OpenTime.ToString("HH:mm"),
 				CloseTime = f.CloseTime.ToString("HH:mm"),
@@ -143,8 +147,6 @@ namespace Tamrinak_API.Services.FacilityService
 				LocationMap = facility.LocationMap,
 				PhoneNumber = facility.PhoneNumber,
 				PricePerMonth = facility.PricePerMonth,
-				OfferDurationInMonths = facility.OfferDurationInMonths,
-				OfferPrice = facility.OfferPrice,
 				IsAvailable = facility.IsAvailable,
 				OpenTime = facility.OpenTime.ToString("HH:mm"),
 				CloseTime = facility.CloseTime.ToString("HH:mm"),
@@ -187,8 +189,6 @@ namespace Tamrinak_API.Services.FacilityService
 			facility.LocationDesc = dto.LocationDesc;
 			facility.LocationMap = dto.LocationMap;
 			facility.PricePerMonth = dto.PricePerMonth;
-			facility.OfferDurationInMonths = dto.OfferDurationInMonths;
-			facility.OfferPrice = dto.OfferPrice;
 			facility.Type = dto.Type;
 			facility.PhoneNumber = dto.PhoneNumber;
 			facility.IsAvailable = dto.IsAvailable;
@@ -224,8 +224,6 @@ namespace Tamrinak_API.Services.FacilityService
 				LocationMap = facility.LocationMap,
 				PhoneNumber = facility.PhoneNumber,
 				PricePerMonth = facility.PricePerMonth,
-				OfferDurationInMonths = facility.OfferDurationInMonths,
-				OfferPrice = facility.OfferPrice,
 				IsAvailable = facility.IsAvailable,
 				OpenTime = facility.OpenTime.ToString("HH:mm"),
 				CloseTime = facility.CloseTime.ToString("HH:mm"),
@@ -258,5 +256,38 @@ namespace Tamrinak_API.Services.FacilityService
 				Images = f.Images.Select(img => img.Base64Data).ToList()
 			}).ToList();
 		}
-	}
+
+        public async Task<bool> SetUnavailableFacilityAsync(int facilityId)
+        {
+            var facility = await _facilityRepo.GetAsync(facilityId);
+            if (facility == null)
+                return false;
+
+            // Check for active memberships
+            var now = DateTime.UtcNow.Date;
+            var activeMemberships = await _membershipRepo.GetListByConditionAsync(
+                m => m.FacilityId == facilityId && m.ExpirationDate >= now && m.IsActive
+            );
+
+            if (activeMemberships.Any())
+                throw new InvalidOperationException("Cannot archive facility with active memberships.");
+
+            facility.IsAvailable = false;
+            await _facilityRepo.UpdateAsync(facility);
+            await _facilityRepo.SaveAsync();
+
+            return true;
+        }
+
+        public async Task<bool> ReactivateFacilityAsync(int facilityId)
+        {
+            var facility = await _facilityRepo.GetAsync(facilityId);
+            if (facility == null) return false;
+
+            facility.IsAvailable = true;
+            await _facilityRepo.UpdateAsync(facility);
+            await _facilityRepo.SaveAsync();
+            return true;
+        }
+    }
 }
