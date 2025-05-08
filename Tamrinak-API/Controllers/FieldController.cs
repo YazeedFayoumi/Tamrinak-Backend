@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FieldDtos;
 using Tamrinak_API.Services.FieldService;
@@ -60,33 +61,45 @@ namespace Tamrinak_API.Controllers
 		[HttpPost("add-field-images")]
 		public async Task<IActionResult> AddFieldImages(int fieldId, List<IFormFile> formFiles)
 		{
-			var field = await _fieldService.GetFieldAsync(fieldId);
-			var canAdd = await _imageService.CanAddEntityImagesAsync<Field>(fieldId, 10);
-
-			if (!canAdd)
-				return BadRequest("Max number of images for this field");
-
-			if (formFiles == null || !formFiles.Any())
-				return BadRequest("No files uploaded.");
-
-			int existingCount = (await _imageService.GetImagesAsync(fieldId, "field")).Count();
-			int allowed = 10 - existingCount;
-
-			foreach (var file in formFiles.Take(allowed))
+			try
 			{
-				var url = await _imageService.UploadImageAsync(file, "fields");
-				var image = new Image
-				{
-					FieldId = fieldId,
-					Url = url
-				};
-				await _imageService.AddImageAsync(image);
-				await _imageService.UpdateImageAsync(image);
-			}
+				var field = await _fieldService.GetFieldAsync(fieldId);
+				if (field == null)
+					return NotFound("Field not found.");
 
-			await _fieldService.UpdateFieldAsync(field);
-			return Ok("Images uploaded successfully.");
+				if (formFiles == null || !formFiles.Any())
+					return BadRequest("No files uploaded.");
+
+				int existingCount = (await _imageService.GetImagesAsync(fieldId, "field")).Count();
+				int maxImages = 10;
+
+				if (existingCount >= maxImages)
+					return BadRequest("Max number of images for this field.");
+
+				int allowed = maxImages - existingCount;
+				var filesToUpload = formFiles.Take(allowed);
+
+				foreach (var file in filesToUpload)
+				{
+					var url = await _imageService.UploadImageAsync(file, "fields");
+					var image = new Image
+					{
+						FieldId = fieldId,
+						Url = url
+					};
+					await _imageService.AddImageAsync(image);
+				}
+
+				await _fieldService.UpdateFieldAsync(field);
+				return Ok("Images uploaded successfully.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error uploading images: " + ex.Message);
+				return StatusCode(500, "Internal Server Error: " + ex.Message);
+			}
 		}
+
 
 
 
