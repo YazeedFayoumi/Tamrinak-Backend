@@ -87,21 +87,28 @@ namespace Tamrinak_API.Services.ImageService
 		public async Task<bool> DeleteImageAsync(string base64Data)
 		{
 			var image = await _imageRepo.GetByConditionAsync(u => u.Base64Data == base64Data);
-			try
+
+			if (image == null)
 			{
-				if (image != null)
-				{
-					await _imageRepo.DeleteAsync(image);
-					await _imageRepo.SaveAsync();
-					return true;
-				}
-				return false;
-			}
-			catch (Exception ex)
+                throw new Exception("Image not found");
+            }
+			else
 			{
-				Console.WriteLine("Delete failed: " + ex.Message);
-				return false;
-			}
+                try
+
+                {
+                    await _imageRepo.DeleteAsync(image);
+                    await _imageRepo.SaveAsync();
+                    return true;
+                }
+
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Delete failed: " + ex.Message);
+                    return false;
+                }
+            }
+            
 		}
 
 		public async Task UpdateImageAsync(Image image)

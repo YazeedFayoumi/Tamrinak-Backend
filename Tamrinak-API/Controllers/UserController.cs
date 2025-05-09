@@ -138,11 +138,11 @@ namespace Tamrinak_API.Controllers
 				if (string.IsNullOrEmpty(user.ProfileImageBase64))
 					return BadRequest("No profile image to delete.");
 
-				var result = await _imageService.DeleteImageAsync(user.ProfileImageBase64);
+				//var result = await _imageService.DeleteImageAsync(user.ProfileImageBase64);
 				/*if (!result)
 					return StatusCode(500, "Error deleting the image.");
 */
-				//user.ProfileImageBase64 = null;
+				user.ProfileImageBase64 = null;
 				await _userService.UpdateUserAsync(user);
 
 				return Ok("Profile image deleted successfully.");
