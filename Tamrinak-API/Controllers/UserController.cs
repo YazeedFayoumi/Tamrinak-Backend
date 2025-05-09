@@ -107,12 +107,12 @@ namespace Tamrinak_API.Controllers
 				if (!await _userService.CanAddUserImageAsync(userId))
 					return BadRequest("User already has a profile image.");
 
-				var imageUrl = await _imageService.UploadImageAsync(file, folderName);
+				var imageBase64 = await _imageService.UploadImageAsync(file, folderName);
 
-				user.ProfileImageUrl = imageUrl;
+				user.ProfileImageBase64 = imageBase64;
 				await _userService.UpdateUserAsync(user);
 
-				return Ok(new { ImageUrl = imageUrl });
+				return Ok(new { ImageBase64 = imageBase64 });
 			}
 			catch (Exception ex)
 			{
@@ -135,14 +135,14 @@ namespace Tamrinak_API.Controllers
 				if (user == null)
 					return NotFound("User not found.");
 
-				if (string.IsNullOrEmpty(user.ProfileImageUrl))
+				if (string.IsNullOrEmpty(user.ProfileImageBase64))
 					return BadRequest("No profile image to delete.");
 
-				var result = await _imageService.DeleteImageAsync(user.ProfileImageUrl);
-				if (!result)
+				var result = await _imageService.DeleteImageAsync(user.ProfileImageBase64);
+				/*if (!result)
 					return StatusCode(500, "Error deleting the image.");
-
-				user.ProfileImageUrl = null;
+*/
+				//user.ProfileImageBase64 = null;
 				await _userService.UpdateUserAsync(user);
 
 				return Ok("Profile image deleted successfully.");
@@ -166,16 +166,16 @@ namespace Tamrinak_API.Controllers
 
 				if (await _userService.CanAddUserImageAsync(userId))
 				{
-					await _imageService.DeleteImageAsync(user.ProfileImageUrl);
+					await _imageService.DeleteImageAsync(user.ProfileImageBase64);
 				}
 
 				var folderName = "users";
-				var imageUrl = await _imageService.UploadImageAsync(file, folderName);
+				var imageBase64 = await _imageService.UploadImageAsync(file, folderName);
 
-				user.ProfileImageUrl = imageUrl;
+				user.ProfileImageBase64 = imageBase64;
 				await _userService.UpdateUserAsync(user);
 
-				return Ok(new { message = "New profile picture saved", imageUrl = imageUrl });
+				return Ok(new { message = "New profile picture saved", imageUrl = imageBase64 });
 			}
 			catch (Exception ex)
 			{
@@ -188,20 +188,28 @@ namespace Tamrinak_API.Controllers
 		public async Task<IActionResult> GetProfilePictureFile(int userId)
 		{
 			var user = await _userService.GetUserAsync(userId);
-			if (user == null || string.IsNullOrEmpty(user.ProfileImageUrl))
+			if (user == null || string.IsNullOrEmpty(user.ProfileImageBase64))
 				return NotFound("Profile image not found.");
 
-			var imageFileName = Path.GetFileName(user.ProfileImageUrl);
-			var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users", imageFileName);
+
+            // Return Base64 image as data URI
+          
+/*            var imageFileName = Path.GetFileName(user.ProfileImageBase64);
+			var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users", imageFileName);*/
 
 			/* if (!System.IO.File.Exists(imagePath))
                  return NotFound("Image file not found on server.");*/
 			try
 			{
-				var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-				var contentType = _imageService.GetContentType(imagePath);
-				return File(stream, contentType);
-			}
+                var base64Image = user.ProfileImageBase64;
+                var dataUri = $"data:image/jpeg;base64,{base64Image}";
+                var contentType = _imageService.GetContentType(base64Image);
+
+                return Ok(new
+                {
+                    Base64Image = $"data:image/jpeg;base64,{user.ProfileImageBase64}"
+                });
+            }
 			catch (UnauthorizedAccessException)
 			{
 				return StatusCode(StatusCodes.Status403Forbidden, "Access denied to image file.");

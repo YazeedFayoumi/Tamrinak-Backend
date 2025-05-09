@@ -51,7 +51,7 @@ namespace Tamrinak_API.Services.UserService
 				Id = newUser.UserId,
 				Email = newUser.Email,
 				Name = newUser.Name,
-				ProfileImageUrl = newUser.ProfileImageUrl,
+                ProfileImageBase64 = newUser.ProfileImageBase64,
 				Roles = newUser.UserRoles.Select(ur => ur.Role.RoleName).ToList()
 			};
 		}
@@ -126,7 +126,7 @@ namespace Tamrinak_API.Services.UserService
 				Id = user.UserId,
 				Name = user.Name,
 				Email = user.Email,
-				ProfileImageUrl = user.ProfileImageUrl,
+				ProfileImageBase64 = user.ProfileImageBase64,
 				Roles = userRoles.Select(ur => ur.Role.RoleName).ToList(),
 			};
 			return userDto;
@@ -152,7 +152,7 @@ namespace Tamrinak_API.Services.UserService
 		public async Task<bool> CanAddUserImageAsync(int userId)
 		{
 			var user = await _genericRepo.GetByConditionAsync(u => u.UserId == userId);
-			return string.IsNullOrEmpty(user.ProfileImageUrl); // true if user has no image yet
+			return string.IsNullOrEmpty(user.ProfileImageBase64); // true if user has no image yet
 		}
 
 		public async Task<ProfileDto> GetUserProfileAsync(string email)
