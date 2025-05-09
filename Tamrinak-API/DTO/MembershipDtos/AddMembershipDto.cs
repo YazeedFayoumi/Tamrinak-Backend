@@ -6,5 +6,6 @@ namespace Tamrinak_API.DTO.MembershipDtos
 	{
 		[Required]
 		public int FacilityId { get; set; }
-	}
+        public int? OfferId { get; set; } = null;
+    }
 }

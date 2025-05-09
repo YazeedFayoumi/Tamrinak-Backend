@@ -55,6 +55,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 		};
 	});
 
+builder.Services.AddHostedService<MembershipExpiryJob>();
+
 builder.Services.AddSwaggerGen(c =>
 {
 	c.SwaggerDoc("v1", new OpenApiInfo { Title = "TamrinakAPI", Version = "v1" });

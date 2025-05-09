@@ -6,6 +6,7 @@ using Tamrinak_API.DTO.FacilityDtos;
 using Tamrinak_API.DTO.FieldDtos;
 using Tamrinak_API.Services.FacilityService;
 using Tamrinak_API.Services.ImageService;
+using Tamrinak_API.Services.MembershipOfferService;
 
 namespace Tamrinak_API.Controllers
 {
@@ -15,6 +16,7 @@ namespace Tamrinak_API.Controllers
 	{
 		private readonly IFacilityService _facilityService;
 		private readonly IImageService _imageService;
+		// readonly IMembershipOfferService _membershipOfferService;
 
 		public FacilityController(IFacilityService facilityService, IImageService imageService)
 		{
@@ -197,5 +199,6 @@ namespace Tamrinak_API.Controllers
                 return NotFound("Facility not found.");
             return Ok("Facility reactivated.");
         }
+
     }
 }
