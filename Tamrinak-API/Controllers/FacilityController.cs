@@ -165,7 +165,7 @@ namespace Tamrinak_API.Controllers
 			return Ok(result);
 		}
 
-        [HttpDelete("delete-facility-images/{facilityId}")]
+     /*   [HttpDelete("delete-facility-images/{facilityId}")]
         //[Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> DeleteFieldImages(int fieldId)
         {
@@ -176,7 +176,7 @@ namespace Tamrinak_API.Controllers
             }
             return Ok("All images deleted.");
         }
-
+*/
         [HttpPut("{facilityId}/archive")]
         //[Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> SetUnavailableFacility(int facilityId)

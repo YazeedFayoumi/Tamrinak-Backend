@@ -212,7 +212,7 @@ namespace Tamrinak_API.Services.FieldService
 			return result;
 		}
 
-		}
+		
         public async Task<bool> SetUnavailableFieldAsync(int fieldId)
         {
             var field = await _fieldRepo.GetAsync(fieldId);

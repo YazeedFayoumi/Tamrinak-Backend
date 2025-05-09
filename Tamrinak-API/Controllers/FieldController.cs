@@ -204,17 +204,17 @@ namespace Tamrinak_API.Controllers
 
 			return Ok(imageData);
 		}
-        [HttpDelete("delete-field-images/{fieldId}")]
+        /*[HttpDelete("delete-field-images/{fieldId}")]
         //[Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> DeleteFieldImages(int fieldId)
         {
             var images = await _imageService.GetImagesAsync(fieldId, "field");
             foreach (var img in images)
             {
-                await _imageService.DeleteImageAsync(img.Url);
+                await _imageService.DeleteImageAsync();
             }
             return Ok("All images deleted.");
-        }
+        }*/
 
         [HttpPut("{fieldId}/archive")]
         //[Authorize(Roles = "Admin,SuperAdmin")]
