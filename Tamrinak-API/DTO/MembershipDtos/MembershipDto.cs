@@ -8,6 +8,7 @@
 		public DateTime StartDate { get; set; }
 		public DateTime ExpirationDate { get; set; }
 		public decimal MonthlyFee { get; set; }
-		public bool IsActive { get; set; }
+        public decimal? TotalOfferPaid { get; set; }
+        public bool IsActive { get; set; }
 	}
 }

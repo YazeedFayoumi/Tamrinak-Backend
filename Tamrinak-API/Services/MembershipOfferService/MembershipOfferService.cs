@@ -42,6 +42,8 @@ namespace Tamrinak_API.Services.MembershipOfferService
 				DurationInMonths = offer.DurationInMonths,
 				Price = offer.Price
 			};
+
+
 		}
 
 		public async Task<List<MembershipOfferDto>> GetOffersForFacilityAsync(int facilityId)

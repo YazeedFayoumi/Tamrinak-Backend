@@ -104,5 +104,20 @@ namespace Tamrinak_API.Services.EmailService
 
 			await SendEmailAsync(toEmail, subject, htmlBody, plainTextBody);
 		}
-	}
+
+        public async Task SendMembershipExpiryReminderAsync(string toEmail, string userName, string facilityName, DateTime expirationDate)
+        {
+            string subject = "Membership Expiry Reminder";
+            string htmlBody = $@"
+			<p>Hello {userName},</p>
+			<p>Your membership at <strong>{facilityName}</strong> will expire on <strong>{expirationDate:yyyy-MM-dd}</strong>.</p>
+			<p>Please renew to continue enjoying our services.</p>
+			<p>– The Tamrinak Team</p>";
+
+            string plainTextBody = $"Hello {userName},\n\nYour membership at {facilityName} will expire on {expirationDate:yyyy-MM-dd}.\n\n– The Tamrinak Team";
+
+            await SendEmailAsync(toEmail, subject, htmlBody, plainTextBody);
+        }
+
+    }
 }

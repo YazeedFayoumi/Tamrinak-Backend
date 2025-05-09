@@ -9,5 +9,9 @@ namespace Tamrinak_API.Services.MembershipService
 		Task<MembershipDto> GetMembershipByIdAsync(int id);
 		Task CancelMembershipAsync(int id, string userEmail);
 		Task DeleteMembershipAsync(int id, string userEmail);
-	}
+
+		Task<int> DeactivateExpiredMembershipsAsync();
+		Task<int> SendMembershipExpiryRemindersAsync();
+
+    }
 }

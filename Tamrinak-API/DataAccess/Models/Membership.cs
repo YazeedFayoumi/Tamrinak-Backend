@@ -25,7 +25,9 @@ namespace Tamrinak_API.DataAccess.Models
 		[Required, Column(TypeName = "decimal(10,2)")]
 		public decimal MonthlyFee { get; set; }
 
-		public User User { get; set; }
+        public decimal? TotalOfferPaid { get; set; } // total offer price paid upfront
+
+        public User User { get; set; }
 		public Payment Payment { get; set; }
 		public Facility Facility { get; set; }
 	}
