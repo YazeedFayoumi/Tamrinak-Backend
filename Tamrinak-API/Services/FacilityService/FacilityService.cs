@@ -4,6 +4,7 @@ using Tamrinak_API.DataAccess.Configurartions;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FacilityDtos;
 using Tamrinak_API.DTO.FieldDtos;
+using Tamrinak_API.DTO.PaginationDto;
 using Tamrinak_API.DTO.SportDtos;
 using Tamrinak_API.Repository.GenericRepo;
 
@@ -288,6 +289,36 @@ namespace Tamrinak_API.Services.FacilityService
             await _facilityRepo.UpdateAsync(facility);
             await _facilityRepo.SaveAsync();
             return true;
+        }
+
+        public async Task<List<FacilityBySportDto>> GetPagFacilitiesBySportAsync(int sportId, PaginationDto pagination)
+        {
+            var facilities = await _facilityRepo.GetListByConditionIncludeAsync(
+                f => f.SportFacilities.Any(sf => sf.SportId == sportId),
+                include: q => q
+                    .Include(f => f.SportFacilities)
+                        .ThenInclude(sf => sf.Sport)
+                    .Include(f => f.Images)
+            );
+
+            var paged = facilities
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToList();
+
+            return paged.Select(f => new FacilityBySportDto
+            {
+                Id = f.FacilityId,
+                Name = f.Name,
+                Description = f.Description,
+                Type = (int)f.Type,
+                Sports = f.SportFacilities.Select(sf => new SportBasicDto
+                {
+                    Id = sf.Sport.SportId,
+                    Name = sf.Sport.Name
+                }).ToList(),
+                Images = f.Images.Select(img => img.Base64Data).ToList()
+            }).ToList();
         }
     }
 }

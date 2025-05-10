@@ -1,5 +1,6 @@
 ﻿using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FieldDtos;
+using Tamrinak_API.DTO.PaginationDto;
 
 namespace Tamrinak_API.Services.FieldService
 {
@@ -14,6 +15,7 @@ namespace Tamrinak_API.Services.FieldService
 		Task<bool> DeleteFieldAsync(int id);
 		Task<Field> GetFieldWithImagesAsync(int fieldId);
 		Task<List<FieldBySportDto>> GetFieldsBySportAsync(int sportId);
+        Task<List<FieldBySportDto>> GetPagFieldsBySportAsync(int sportId, PaginationDto dto);
 
         Task<bool> SetUnavailableFieldAsync(int fieldId);
 		Task<bool> ReactivateFieldAsync(int fieldId);

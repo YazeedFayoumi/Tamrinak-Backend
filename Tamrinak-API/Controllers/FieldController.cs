@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FieldDtos;
+using Tamrinak_API.DTO.PaginationDto;
 using Tamrinak_API.Services.FieldService;
 using Tamrinak_API.Services.ImageService;
 
@@ -235,6 +236,13 @@ namespace Tamrinak_API.Controllers
             if (!result)
                 return NotFound("Field not found.");
             return Ok("Field reactivated.");
+        }
+
+        [HttpGet("pag-fields/by-sport/{sportId}")]
+        public async Task<IActionResult> GetPagFieldsBySport(int sportId, [FromQuery] PaginationDto pagination)
+        {
+            var result = await _fieldService.GetPagFieldsBySportAsync(sportId, pagination);
+            return Ok(result);
         }
 
     }

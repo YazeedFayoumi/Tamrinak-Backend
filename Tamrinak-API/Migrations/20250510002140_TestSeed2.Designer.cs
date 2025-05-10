@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tamrinak_API.DataAccess;
 
@@ -11,9 +12,11 @@ using Tamrinak_API.DataAccess;
 namespace Tamrinak_API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250510002140_TestSeed2")]
+    partial class TestSeed2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -350,6 +353,7 @@ namespace Tamrinak_API.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewId"));
 
                     b.Property<string>("Comment")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -363,9 +367,6 @@ namespace Tamrinak_API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<int>("Likes")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ParentReviewId")
                         .HasColumnType("int");
 
                     b.Property<int>("Rating")
@@ -382,8 +383,6 @@ namespace Tamrinak_API.Migrations
                     b.HasIndex("FacilityId");
 
                     b.HasIndex("FieldId");
-
-                    b.HasIndex("ParentReviewId");
 
                     b.HasIndex("UserId", "FacilityId", "FieldId")
                         .IsUnique()
@@ -789,10 +788,6 @@ namespace Tamrinak_API.Migrations
                         .HasForeignKey("FieldId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Tamrinak_API.DataAccess.Models.Review", "ParentReview")
-                        .WithMany("Replies")
-                        .HasForeignKey("ParentReviewId");
-
                     b.HasOne("Tamrinak_API.DataAccess.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -802,8 +797,6 @@ namespace Tamrinak_API.Migrations
                     b.Navigation("Facility");
 
                     b.Navigation("Field");
-
-                    b.Navigation("ParentReview");
 
                     b.Navigation("User");
                 });
@@ -876,11 +869,6 @@ namespace Tamrinak_API.Migrations
                 {
                     b.Navigation("Payment")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Review", b =>
-                {
-                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Tamrinak_API.DataAccess.Models.Role", b =>

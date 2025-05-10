@@ -1,6 +1,7 @@
 ﻿using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FacilityDtos;
 using Tamrinak_API.DTO.FieldDtos;
+using Tamrinak_API.DTO.PaginationDto;
 
 namespace Tamrinak_API.Services.FacilityService
 {
@@ -15,6 +16,7 @@ namespace Tamrinak_API.Services.FacilityService
 		Task<bool> DeleteFacilityAsync(int id);
 		Task<Facility> GetFacilityWithImagesAsync(int facilityId);
 		Task<List<FacilityBySportDto>> GetFacilitiesBySportAsync(int sportId);
+        Task<List<FacilityBySportDto>> GetPagFacilitiesBySportAsync(int sportId, PaginationDto dto);
 
         Task<bool> SetUnavailableFacilityAsync(int facilityId);
 		Task<bool> ReactivateFacilityAsync(int facilityId);
