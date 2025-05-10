@@ -33,6 +33,12 @@ namespace Tamrinak_API.Services.MembershipService
 
             var facility = await _facilityRepo.GetAsync(dto.FacilityId)
                            ?? throw new Exception("Facility not found");
+            var existingMembership = await _membershipRepo.GetByConditionAsync(
+                m => m.UserId == user.UserId && m.FacilityId == facility.FacilityId && m.IsActive
+            );
+
+            if (existingMembership != null)
+                throw new InvalidOperationException("You already have an active membership for this facility.");
 
             decimal finalMonthlyFee;
             int durationInMonths;
@@ -184,7 +190,7 @@ namespace Tamrinak_API.Services.MembershipService
 
         public async Task<int> SendMembershipExpiryRemindersAsync()
         {
-            var targetDate = DateTime.UtcNow.Date.AddDays(29);
+            var targetDate = DateTime.UtcNow.Date.AddHours(-14);
 
             var memberships = await _membershipRepo.GetListByConditionIncludeAsync(
                 m => m.ExpirationDate.Date == targetDate && m.IsActive,

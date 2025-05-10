@@ -2,6 +2,7 @@
 using Org.BouncyCastle.Asn1.X9;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FieldDtos;
+using Tamrinak_API.DTO.PaginationDto;
 using Tamrinak_API.DTO.SportDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Repository.GenericRepo;
@@ -252,6 +253,36 @@ namespace Tamrinak_API.Services.FieldService
             await _fieldRepo.UpdateAsync(field);
             await _fieldRepo.SaveAsync();
             return true;
+        }
+
+        public async Task<List<FieldBySportDto>> GetPagFieldsBySportAsync(int sportId, PaginationDto pagination)
+        {
+            var fields = await _fieldRepo.GetListByConditionIncludeAsync(
+                f => f.SportId == sportId,
+                include: q => q.Include(f => f.Sport).Include(f => f.Images)
+            );
+
+            var paged = fields
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToList();
+
+            var result = paged.Select(f => new FieldBySportDto
+            {
+                Id = f.FieldId,
+                Name = f.Name,
+                LocationDesc = f.LocationDesc,
+                PricePerHour = f.PricePerHour,
+                Sport = new SportBasicDto
+                {
+                    Id = f.Sport.SportId,
+                    Name = f.Sport.Name
+                },
+                // Modify this part to use Base64 instead of Url
+                Images = f.Images.Select(img => img.Base64Data).ToList() // Changed from img.Url to img.Base64Data
+            }).ToList();
+
+            return result;
         }
 
     }

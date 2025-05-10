@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FacilityDtos;
 using Tamrinak_API.DTO.FieldDtos;
+using Tamrinak_API.DTO.PaginationDto;
 using Tamrinak_API.Services.FacilityService;
 using Tamrinak_API.Services.ImageService;
 using Tamrinak_API.Services.MembershipOfferService;
@@ -198,6 +199,13 @@ namespace Tamrinak_API.Controllers
             if (!result)
                 return NotFound("Facility not found.");
             return Ok("Facility reactivated.");
+        }
+
+        [HttpGet("pag-facilities/by-sport/{sportId}")]
+        public async Task<IActionResult> GetPagFacilitiesBySport(int sportId, [FromQuery] PaginationDto pagination)
+        {
+            var result = await _facilityService.GetPagFacilitiesBySportAsync(sportId, pagination);
+            return Ok(result);
         }
 
     }

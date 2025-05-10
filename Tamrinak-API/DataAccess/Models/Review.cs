@@ -24,11 +24,15 @@ namespace Tamrinak_API.DataAccess.Models
 		public int Rating { get; set; }
 
 		[MaxLength(1000)]
-		public string Comment { get; set; }
+		public string? Comment { get; set; } //should it?
 
 		public DateTime ReviewDate { get; set; } = DateTime.UtcNow;
 
 		public bool IsVerified { get; set; } = false;
 		public int Likes { get; set; } = 0;
-	}
+
+        public int? ParentReviewId { get; set; }
+        public Review ParentReview { get; set; }
+        public ICollection<Review> Replies { get; set; } = new List<Review>();
+    }
 }
