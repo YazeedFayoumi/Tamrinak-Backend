@@ -20,24 +20,27 @@ namespace Tamrinak_API.Controllers
 		}
 
 		//[Authorize(Roles = "Admin")] // TODO
-		[HttpPost("sport")]
+	    [HttpPost("sport")]
 		public async Task<IActionResult> AddSport([FromForm] AddSportDto dto, IFormFile formFile)
 		{
 			try
 			{
-				var sportDto = await _sportService.AddSportAsync(dto);
-				var sport = await _sportService.GetSportByIdAsync(sportDto.Id);
-
+				// Upload image first
 				var base64Image = await _imageService.UploadImageAsync(formFile, "sports");
+
+				// Then add sport
+				var sportDto = await _sportService.AddSportAsync(dto);
 
 				var image = new Image
 				{
 					SportId = sportDto.Id,
-					Base64Data = base64Image // Use Base64 string instead of URL
+					Base64Data = base64Image
 				};
 
 				await _imageService.AddImageAsync(image);
-				await _sportService.UpdateSportAsync(sport); // Update sport with the new image reference
+
+				var sport = await _sportService.GetSportByIdAsync(sportDto.Id);
+				await _sportService.UpdateSportAsync(sport);
 
 				return Ok(sportDto);
 			}
