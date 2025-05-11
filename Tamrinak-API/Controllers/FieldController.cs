@@ -23,7 +23,7 @@ namespace Tamrinak_API.Controllers
 		}
 
 		//[Authorize(Roles = "Admin")] // TODO
-		[HttpPost("add-field")]
+		[HttpPost("field")]
 		public async Task<IActionResult> AddField(AddFieldDto dto)
 		{
 			try
@@ -37,21 +37,21 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-		[HttpGet("get-field")]
+		[HttpGet("field/{id}")]
 		public async Task<IActionResult> GetField(int id)
 		{
 			var field = await _fieldService.GetFieldDetailsAsync(id);
 			return Ok(field);
 		}
 
-		[HttpGet("get-all-fields")]
+		[HttpGet("all-fields")]
 		public async Task<IActionResult> GetFields()
 		{
 			var fields = await _fieldService.GetFieldsAsync();
 			return Ok(fields);
 		}
 
-		[HttpPut("update-field")]
+		[HttpPut("field")]
 		public async Task<IActionResult> UpdateField(int id, UpdateFieldDto dto)
 		{
 			await _fieldService.UpdateFieldDtoAsync(id, dto);
@@ -59,7 +59,7 @@ namespace Tamrinak_API.Controllers
 			return Ok(newField);
 		}
 
-		[HttpPost("add-field-images")]
+		[HttpPost("field-images")]
 		public async Task<IActionResult> AddFieldImages(int fieldId, List<IFormFile> formFiles)
 		{
 			try
@@ -106,7 +106,7 @@ namespace Tamrinak_API.Controllers
 
 
 
-        [HttpDelete("remove-field")]
+        [HttpDelete("field")]
 		public async Task<IActionResult> DeleteField(int fieldId)
 		{
 			var field = await _fieldService.GetFieldWithImagesAsync(fieldId);
@@ -127,7 +127,7 @@ namespace Tamrinak_API.Controllers
 			return Ok("Field deleted");
 		}
 
-		[HttpDelete("delete-field-image")]
+		[HttpDelete("field-image")]
 		public async Task<IActionResult> DeleteFieldImage(int fieldId, int imageId)
 		{
 			var image = await _imageService.GetImageAsync(imageId);
@@ -138,7 +138,7 @@ namespace Tamrinak_API.Controllers
 			return Ok("Image deleted successfully.");
 		}
 
-		[HttpGet("get-field-photo")]
+		[HttpGet("field-photo")]
 		public async Task<IActionResult> GetFieldPhoto(int id)
 		{
 			var image = await _imageService.GetImageAsync(id);
@@ -152,7 +152,7 @@ namespace Tamrinak_API.Controllers
 			return Ok(new { Image = dataUri });
 		}
 
-		[HttpGet("get-ren-field-photo")]
+		[HttpGet("ren-field-photo")]
 		public async Task<IActionResult> GetRenFieldPhoto(int id)
 		{
 			var image = await _imageService.GetImageAsync(id);
@@ -167,7 +167,7 @@ namespace Tamrinak_API.Controllers
 			return File(byteArray, contentType);
 		}
 
-		[HttpGet("get-field-photo-list")]
+		[HttpGet("field-photo-list")]
 		public async Task<IActionResult> GetFieldPhotoList(int fieldId)
 		{
 			var images = await _imageService.GetImagesAsync(fieldId, "field");
@@ -193,7 +193,7 @@ namespace Tamrinak_API.Controllers
 			return Ok(result);
 		}
 
-		[HttpGet("get-sport-images/{sportId}")]
+		[HttpGet("sport-images/{sportId}")]
 		public async Task<IActionResult> GetSportImages(int sportId)
 		{
 			var images = await _imageService.GetImagesAsync(sportId, "sport");

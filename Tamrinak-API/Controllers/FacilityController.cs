@@ -26,7 +26,7 @@ namespace Tamrinak_API.Controllers
 		}
 
 		//[Authorize(Roles = "Admin")] // TODO
-		[HttpPost("add-facility")]
+		[HttpPost("facility")]
 		public async Task<IActionResult> AddFacility(AddFacilityDto dto)
 		{
 			try
@@ -40,28 +40,28 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-		[HttpGet("get-facility")]
+		[HttpGet("facility/{id}")]
 		public async Task<IActionResult> GetFacility(int id)
 		{
 			var facility = await _facilityService.GetFacilityDetailsAsync(id);
 			return Ok(facility);
 		}
 
-		[HttpGet("get-facilities")]
+		[HttpGet("facilities")]
 		public async Task<IActionResult> Getfacilities()
 		{
 			var facilities = await _facilityService.GetFacilitiesAsync();
 			return Ok(facilities);
 		}
 
-		[HttpPut("update-facility")]
+		[HttpPut("facility")]
 		public async Task<IActionResult> UpdateFacility(int id, UpdateFacilityDto dto)
 		{
 			var newFacility = await _facilityService.UpdateFacilityDtoAsync(id, dto);// _facilityService.GetFacilityAsync(id);
 			return Ok(newFacility);
 		}
 
-		[HttpPost("add-facility-image")]
+		[HttpPost("facility-image")]
 		public async Task<IActionResult> AddFacilityImage(int facilityId, IFormFile formFile)
 		{
 			var facility = await _facilityService.GetFacilityAsync(facilityId);
@@ -87,7 +87,7 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-        [HttpDelete("remove-facility")]
+        [HttpDelete("facility")]
 		public async Task<IActionResult> DeleteFacility(int facilityId)
 		{
 			var facility = await _facilityService.GetFacilityWithImagesAsync(facilityId);
@@ -107,7 +107,7 @@ namespace Tamrinak_API.Controllers
 			return Ok("Facility deleted");
 		}
 
-		[HttpDelete("delete-facility-image")]
+		[HttpDelete("facility-image")]
 		public async Task<IActionResult> DeleteFacilityImage(int facilityId, int imageId)
 		{
 			var image = await _imageService.GetImageAsync(imageId);
@@ -119,7 +119,7 @@ namespace Tamrinak_API.Controllers
 			return Ok("Image deleted successfully.");
 		}
 
-		[HttpGet("get-facility-photo")]
+		[HttpGet("facility-photo")]
 		public async Task<IActionResult> GetFacilityPhoto(int id)
 		{
 			var image = await _imageService.GetImageAsync(id);
@@ -130,7 +130,7 @@ namespace Tamrinak_API.Controllers
 			return Ok(image.Base64Data);
 		}
 
-		[HttpGet("get-ren-facility-photo")]
+		[HttpGet("ren-facility-photo")]
 		public async Task<IActionResult> GetRenFacilityPhoto(int id)
 		{
 			var image = await _imageService.GetImageAsync(id);
@@ -143,7 +143,7 @@ namespace Tamrinak_API.Controllers
 			return Ok(base64Image);
 		}
 
-		[HttpGet("get-facility-photo-list")]
+		[HttpGet("facility-photo-list")]
 		public async Task<IActionResult> GetFacilityPhotoList(int facilityId)
 		{
 			var images = await _imageService.GetImagesAsync(facilityId, "facility");
