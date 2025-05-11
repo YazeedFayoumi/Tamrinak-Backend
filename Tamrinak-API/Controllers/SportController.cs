@@ -20,7 +20,7 @@ namespace Tamrinak_API.Controllers
 		}
 
 		//[Authorize(Roles = "Admin")] // TODO
-		[HttpPost("add-sport")]
+		[HttpPost("sport")]
 		public async Task<IActionResult> AddSport([FromForm] AddSportDto dto, IFormFile formFile)
 		{
 			try
@@ -47,35 +47,35 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-		[HttpGet("get-all-sports")]
+		[HttpGet("all-sports")]
 		public async Task<IActionResult> GetAllSports()
 		{
 			var sports = await _sportService.GetAllSportsAsync();
 			return Ok(sports);
 		}
 
-		[HttpGet("get-sport")]
+		[HttpGet("sport/{id}")]
 		public async Task<IActionResult> GetSport(int id)
 		{
 			var sport = await _sportService.GetSportDetailAsync(id);
 			return Ok(sport);
 		}
 
-		[HttpPut("update-sport")]
+		[HttpPut("sport")]
 		public async Task<IActionResult> UpdateSport(int id, UpdateSportDto dto)
 		{
 			await _sportService.UpdateSportDtoAsync(id, dto);
 			return Ok(dto);
 		}
 
-		[HttpDelete("remove-sport")]
+		[HttpDelete("sport")]
 		public async Task<IActionResult> DeleteSport(int id)
 		{
 			await _sportService.DeleteSportAsync(id);
 			return Ok();
 		}
 
-		[HttpPost("update-sport-image/{id}")]
+		[HttpPost("sport-image/{id}")]
 		[Consumes("multipart/form-data")]
 		public async Task<IActionResult> UpdateSportImage(int id, IFormFile formFile)
 		{
