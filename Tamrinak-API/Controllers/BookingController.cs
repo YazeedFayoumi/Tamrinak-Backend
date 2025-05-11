@@ -26,7 +26,7 @@ namespace Tamrinak_API.Controllers
 			return Ok(booking);
 		}
 
-		[HttpGet("get-booking/{bookingId}")]
+		[HttpGet("booking/{bookingId}")]
 		public async Task<IActionResult> GetBooking(int bookingId)
 		{
 			var booking = await _bookingService.GetBookingByIdAsync(bookingId);
@@ -43,7 +43,7 @@ namespace Tamrinak_API.Controllers
 			return Ok(bookings);
 		}
 
-		[HttpDelete("delete-booking/{bookingId}")]
+		[HttpDelete("booking/{bookingId}")]
 		public async Task<IActionResult> DeleteBooking(int bookingId)
 		{
 			var success = await _bookingService.DeleteBookingAsync(bookingId);
@@ -73,7 +73,7 @@ namespace Tamrinak_API.Controllers
 			return Ok("Booking marked as paid.");
 		}
 
-		[HttpPut("change-booking/{id}")]
+		[HttpPut("booking/{id}")]
 		public async Task<IActionResult> UpdateBooking(int id, [FromBody] UpdateBookingDto dto)
 		{
 			var result = await _bookingService.ChangeBookingAsync(id, dto);

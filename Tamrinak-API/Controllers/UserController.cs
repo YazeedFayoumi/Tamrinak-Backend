@@ -55,14 +55,14 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-		[HttpGet("GetUserRoles/{id}"), Authorize]
+		[HttpGet("UserRoles/{id}"), Authorize]
 		public async Task<ActionResult> GetUserRoles(int id)
 		{
 			var roles = await _userService.GetUserRolesAsync(id);
 			return Ok(roles);
 		}
 
-		[HttpGet("GetUserRolesEmail{email}"), AuthorizeRole(Roles = "Admin")]
+		[HttpGet("UserRolesByEmail/{email}"), AuthorizeRole(Roles = "Admin")]
 		public async Task<ActionResult> GetUserRoles([FromBody] string email)
 		{
 			var roles = await _userService.GetUserRolesAsync(email);
