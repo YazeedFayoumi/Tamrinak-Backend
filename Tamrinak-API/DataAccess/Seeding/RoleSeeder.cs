@@ -22,7 +22,6 @@ namespace Tamrinak_API.DataAccess.Seeding
 					Description = "Administrative access with most system privileges"
 				},
 
-				// User Roles
 				new Role
 				{
 					RoleId = 3,
@@ -34,8 +33,8 @@ namespace Tamrinak_API.DataAccess.Seeding
 				new Role
 				{
 					RoleId = 4,
-					RoleName = "FacilityManager",
-					Description = "Manages specific facility operations"
+					RoleName = "VenueManager",
+					Description = "Manages specific venue (facility and field) operations"
 				},
 
 
