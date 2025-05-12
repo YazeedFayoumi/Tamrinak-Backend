@@ -19,7 +19,7 @@ namespace Tamrinak_API.Services.ImageService
 		}
 		public async Task<string> UploadImageAsync(IFormFile file, string folderName)
 		{
-			long maxSize = folderName == "user" ? 1 * 1024 * 1024 : 5 * 1024 * 1024;
+			long maxSize = folderName == "user" ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
 			if (file.Length > maxSize)
 				throw new InvalidOperationException("File size exceeds allowed limit.");
 

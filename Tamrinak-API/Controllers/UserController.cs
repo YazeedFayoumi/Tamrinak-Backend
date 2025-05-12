@@ -89,36 +89,6 @@ namespace Tamrinak_API.Controllers
 			return Ok(userDto);
 		}
 
-		[HttpPatch("upload-profile-picture")]
-		public async Task<IActionResult> UploadProfilePicture(IFormFile file, int userId)
-		{
-			if (file == null || file.Length == 0)
-				return BadRequest("No file uploaded.");
-
-			var folderName = "users";
-
-			try
-			{
-				var user = await _userService.GetUserAsync(userId);
-
-				if (user == null)
-					return NotFound("User not found.");
-
-				if (!await _userService.CanAddUserImageAsync(userId))
-					return BadRequest("User already has a profile image.");
-
-				var imageBase64 = await _imageService.UploadImageAsync(file, folderName);
-
-				user.ProfileImageBase64 = imageBase64;
-				await _userService.UpdateUserAsync(user);
-
-				return Ok(new { ImageBase64 = imageBase64 });
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, $"Internal server error: {ex.Message}");
-			}
-		}
 		[HttpDelete("{id}")]
 		//[Authorize] 
 		public async Task<IActionResult> DeleteUser(int id)
@@ -139,9 +109,9 @@ namespace Tamrinak_API.Controllers
 					return BadRequest("No profile image to delete.");
 
 				//var result = await _imageService.DeleteImageAsync(user.ProfileImageBase64);
-				/*if (!result)
+				//if (!result)
 					return StatusCode(500, "Error deleting the image.");
-*/
+
 				user.ProfileImageBase64 = null;
 				await _userService.UpdateUserAsync(user);
 
@@ -153,35 +123,42 @@ namespace Tamrinak_API.Controllers
 			}
 
 		}
-		[HttpPatch("change-profile-picture")]
-		public async Task<IActionResult> ChangeProfilePicture(IFormFile file, int userId)
+
+		[HttpPatch("profile-picture")]
+		public async Task<IActionResult> UpdateProfilePicture(IFormFile file, int userId)
 		{
 			if (file == null || file.Length == 0)
 				return BadRequest("No file uploaded.");
+
 			try
 			{
 				var user = await _userService.GetUserAsync(userId);
 				if (user == null)
 					return NotFound("User not found");
 
-				if (await _userService.CanAddUserImageAsync(userId))
+				// Delete existing image if one exists and replacement is allowed
+				if (!string.IsNullOrEmpty(user.ProfileImageBase64))
 				{
-					await _imageService.DeleteImageAsync(user.ProfileImageBase64);
+					user.ProfileImageBase64 = null;
+					await _userService.UpdateUserAsync(user);
 				}
 
-				var folderName = "users";
+				var folderName = "users";//?
 				var imageBase64 = await _imageService.UploadImageAsync(file, folderName);
 
 				user.ProfileImageBase64 = imageBase64;
 				await _userService.UpdateUserAsync(user);
 
-				return Ok(new { message = "New profile picture saved", imageUrl = imageBase64 });
+				return Ok(new
+				{
+					message = "Profile picture updated successfully",
+					imageUrl = imageBase64
+				});
 			}
 			catch (Exception ex)
 			{
 				return StatusCode(500, $"Internal server error: {ex.Message}");
 			}
-
 		}
 
 		[HttpGet("profile-picture")]
