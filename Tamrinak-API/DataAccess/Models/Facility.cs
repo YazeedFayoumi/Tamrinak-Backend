@@ -37,7 +37,10 @@ namespace Tamrinak_API.DataAccess.Models
 		public int TotalReviews { get; set; }
 
 		public FacilityType Type { get; set; }
-		public ICollection<Field> Fields { get; set; }
+
+        public int? OwnerId { get; set; }
+        public User? Owner { get; set; }
+        public ICollection<Field> Fields { get; set; }
 		public ICollection<Membership> Memberships { get; set; } = new List<Membership>();
 		public ICollection<SportFacility> SportFacilities { get; set; } = new List<SportFacility>();
 		public ICollection<Image> Images { get; set; } = new List<Image>();

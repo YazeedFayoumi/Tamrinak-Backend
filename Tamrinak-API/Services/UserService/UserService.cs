@@ -174,6 +174,20 @@ namespace Tamrinak_API.Services.UserService
 			};
 		}
 
+        public async Task RequestVenueOwnershipAsync(string email)
+        {
+            var user = await _genericRepo.GetByConditionAsync(u => u.Email == email) ?? throw new Exception("User not found");
 
-	}
+            if (user.HasVenueOwnershipRequest)
+                throw new Exception("You already have a pending venue ownership request.");
+
+            user.HasVenueOwnershipRequest = true;
+            user.VenueRequestDate = DateTime.UtcNow;
+
+            await _genericRepo.UpdateAsync(user);
+            await _genericRepo.SaveAsync();
+        }
+
+
+    }
 }

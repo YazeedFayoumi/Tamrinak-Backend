@@ -42,8 +42,10 @@ namespace Tamrinak_API.DataAccess.Models
 		[NotMapped]
 		public int TotalReviews { get; set; }
 
+        public int? OwnerId { get; set; }
+        public User? Owner { get; set; }
 
-		public int? FacilityId { get; set; }
+        public int? FacilityId { get; set; }
 		public Facility Facility { get; set; }
 
 		public Sport Sport { get; set; }

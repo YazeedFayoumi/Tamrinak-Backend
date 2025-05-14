@@ -8,6 +8,7 @@ using Tamrinak_API.DataAccess;
 using Tamrinak_API.DataAccess.Seeding;
 using Tamrinak_API.Helpers;
 using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Services.AdminService;
 using Tamrinak_API.Services.AuthenticationService;
 using Tamrinak_API.Services.BookingService;
 using Tamrinak_API.Services.EmailService;
@@ -105,6 +106,7 @@ builder.Services.AddScoped<IMembershipOfferService, MembershipOfferService>();
 builder.Services.AddScoped<IMembershipOfferService, MembershipOfferService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 builder.Services.AddScoped<DatabaseInitializer>();
 

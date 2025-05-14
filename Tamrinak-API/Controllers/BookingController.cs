@@ -21,9 +21,16 @@ namespace Tamrinak_API.Controllers
 		[HttpPost("book-field"), Authorize]
 		public async Task<IActionResult> CreateFieldBooking(AddBookingDto dto)
 		{
-			var email = User.FindFirst(ClaimTypes.Email)?.Value;
-			var booking = await _bookingService.CreateFieldBookingAsync(dto, email);
-			return Ok(booking);
+			try
+			{
+				var email = User.FindFirst(ClaimTypes.Email)?.Value;
+				var booking = await _bookingService.CreateFieldBookingAsync(dto, email);
+				return Ok(booking);
+            }
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+            }
 		}
 
 		[HttpGet("booking/{bookingId}")]

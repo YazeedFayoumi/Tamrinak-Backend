@@ -208,8 +208,16 @@ namespace Tamrinak_API.Controllers
 			var profile = await _userService.GetUserProfileAsync(email);
 			return Ok(profile);
 		}
+        [Authorize]
+        [HttpPost("request-venue-ownership")]
+        public async Task<IActionResult> RequestVenueOwnership()
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value; // Replace with your actual claim extraction
+            await _userService.RequestVenueOwnershipAsync(email);
+            return Ok("Venue ownership request submitted.");
+        }
 
-	}
+    }
 
 
 }
