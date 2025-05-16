@@ -1,6 +1,10 @@
-﻿using Tamrinak_API.DataAccess.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Stripe;
+using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.PaymentDtos;
+using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Repository.GenericRepo;
+using PaymentMethod = Tamrinak_API.DataAccess.Models.PaymentMethod;
 
 namespace Tamrinak_API.Services.PaymentService
 {
@@ -10,119 +14,162 @@ namespace Tamrinak_API.Services.PaymentService
 		private readonly IGenericRepo<User> _userRepo;
 		private readonly IGenericRepo<Booking> _bookingRepo;
 		private readonly IGenericRepo<Membership> _membershipRepo;
+        private readonly IConfiguration _config;
 
-
-		public PaymentService(IGenericRepo<Payment> paymentRepo, IGenericRepo<User> userRepo)
+		public PaymentService(IGenericRepo<Payment> paymentRepo, IGenericRepo<User> userRepo, IConfiguration configuration,
+           IGenericRepo<Booking> bookingRepo, IGenericRepo<Membership> membershipRepo )
 		{
 			_paymentRepo = paymentRepo;
 			_userRepo = userRepo;
+            _bookingRepo = bookingRepo;
+            _membershipRepo = membershipRepo;
+            _config = configuration;
 		}
 
-		public async Task<PaymentDto> AddPaymentAsync(AddPaymentDto dto, string userEmail)
-		{
-			var user = await _userRepo.GetByConditionAsync(u => u.Email == userEmail)
-					   ?? throw new Exception("User not found or unauthorized.");
+        public async Task<int> CreatePaymentAsync(int userId, AddPaymentDto dto)
+        {
+            var user = await _userRepo.GetAsync(userId)
+                       ?? throw new Exception("User not found or unauthorized.");
 
-			if (dto.BookingId.HasValue == dto.MembershipId.HasValue)
-				throw new Exception("Payment must be linked to either a booking or a membership, not both or neither.");
+            if ((dto.BookingId.HasValue && dto.MembershipId.HasValue) || (!dto.BookingId.HasValue && !dto.MembershipId.HasValue))
+                throw new Exception("You must provide either a BookingId or MembershipId.");
 
-			var payment = new Payment
-			{
-				Amount = dto.Amount,
-				Method = dto.Method,
-				TransactionId = dto.TransactionId,
-				PaymentDate = DateTime.UtcNow,
-			};
+            decimal expectedAmount = 0;
 
-			if (dto.BookingId.HasValue)
-			{
-				var booking = await _bookingRepo.GetAsync(dto.BookingId.Value)
-							  ?? throw new Exception("Booking not found.");
+            if (dto.BookingId.HasValue)
+            {
+                var booking = await _bookingRepo.GetAsync(dto.BookingId.Value)
+                    ?? throw new Exception("Booking not found.");
 
-				if (booking.UserId != user.UserId)
-					throw new UnauthorizedAccessException("You cannot pay for someone else's booking.");
+                if (booking.UserId != userId)
+                    throw new Exception("You cannot pay for another user's booking.");
 
-				payment.BookingId = dto.BookingId.Value;
-			}
-			else if (dto.MembershipId.HasValue)
-			{
-				var membership = await _membershipRepo.GetAsync(dto.MembershipId.Value)
-								 ?? throw new Exception("Membership not found.");
+                expectedAmount = booking.TotalCost;
+            }
+            else if (dto.MembershipId.HasValue)
+            {
+                var membership = await _membershipRepo.GetAsync(dto.MembershipId.Value)
+                    ?? throw new Exception("Membership not found.");
 
-				if (membership.UserId != user.UserId)
-					throw new UnauthorizedAccessException("You cannot pay for someone else's membership.");
+                if (membership.UserId != userId)
+                    throw new Exception("You cannot pay for another user's membership.");
 
-				payment.MembershipId = dto.MembershipId.Value;
-			}
+                expectedAmount = membership.TotalOfferPaid ?? membership.MonthlyFee;
+            }
 
-			await _paymentRepo.AddAsync(payment);
-			await _paymentRepo.SaveAsync();
-
-			return new PaymentDto
-			{
-				PaymentId = payment.PaymentId,
-				Amount = payment.Amount,
-				Method = payment.Method,
-				PaymentDate = payment.PaymentDate,
-				TransactionId = payment.TransactionId
-			};
-		}
-
-		public async Task<PaymentDto> GetPaymentByIdAsync(int paymentId)
-		{
-			var payment = await _paymentRepo.GetAsync(paymentId)
-				?? throw new Exception("Payment not found");
-
-			return new PaymentDto
-			{
-				PaymentId = payment.PaymentId,
-				Amount = payment.Amount,
-				PaymentDate = payment.PaymentDate,
-				Method = payment.Method,
-				IsConfirmed = payment.IsConfirmed,
-				BookingId = payment.BookingId,
-				MembershipId = payment.MembershipId,
-				TransactionId = payment.TransactionId
-			};
-		}
-
-		public async Task<List<PaymentDto>> GetUserPaymentsAsync(string userEmail)
-		{
-			var user = await _userRepo.GetByConditionAsync(u => u.Email == userEmail)
-				?? throw new Exception("User not found");
-
-			var payments = await _paymentRepo.GetListByConditionAsync(p =>
-				(p.Booking != null && p.Booking.UserId == user.UserId) ||
-				(p.Membership != null && p.Membership.UserId == user.UserId));
-
-			return payments.Select(p => new PaymentDto
-			{
-				PaymentId = p.PaymentId,
-				Amount = p.Amount,
-				PaymentDate = p.PaymentDate,
-				Method = p.Method,
-				IsConfirmed = p.IsConfirmed,
-				BookingId = p.BookingId,
-				MembershipId = p.MembershipId,
-				TransactionId = p.TransactionId
-			}).ToList();
-		}
-
-		public async Task<bool> ConfirmPaymentAsync(int paymentId)
-		{
-			var payment = await _paymentRepo.GetAsync(paymentId)
-				?? throw new Exception("Payment not found");
-
-			if (payment.Method != PaymentMethod.Cash)
-				throw new Exception("Only cash payments can be confirmed manually");
-
-			payment.IsConfirmed = true;
-			await _paymentRepo.UpdateAsync(payment);
-			await _paymentRepo.SaveAsync();
-			return true;
-		}
+            if (dto.Amount != expectedAmount)
+                throw new Exception("Incorrect payment amount.");
 
 
+            if (dto.Method == PaymentMethod.Stripe && string.IsNullOrEmpty(dto.TransactionId))
+                throw new Exception("Stripe payment requires a transaction ID.");
 
-	}
+            var payment = new Payment
+            {
+                BookingId = dto.BookingId,
+                MembershipId = dto.MembershipId,
+                Amount = dto.Amount,
+                Method = dto.Method,
+                Status = PaymentStatus.Pending,
+                PaymentDate = DateTime.UtcNow,
+                TransactionId = dto.TransactionId,
+                IsConfirmed = false
+            };
+
+            await _paymentRepo.AddAsync(payment);
+            await _paymentRepo.SaveAsync();
+
+            return payment.PaymentId;
+        }
+
+        public async Task<PaymentDto?> GetPaymentByIdAsync(int paymentId)
+        {
+            var payment = await _paymentRepo.GetAsync(paymentId);
+            if (payment == null) return null;
+
+            return ToDto(payment);
+        }
+
+        public async Task<List<PaymentDto>> GetPaymentsByUserAsync(int userId)
+        {
+            var payments = await _paymentRepo.GetListByConditionIncludeAsync(
+                p => (p.Booking != null && p.Booking.UserId == userId) || (p.Membership != null && p.Membership.UserId == userId),
+                q => q.Include(p => p.Booking)
+                      .Include(p => p.Membership)
+            );
+
+            return payments.Select(ToDto).ToList();
+        }
+
+        public async Task CancelPaymentAsync(int userId, int paymentId)
+        {
+            var payment = await _paymentRepo.GetByConditionIncludeAsync(
+                p => p.PaymentId == paymentId &&
+                    ((p.Booking != null && p.Booking.UserId == userId) ||
+                     (p.Membership != null && p.Membership.UserId == userId)),
+                q => q.Include(p => p.Booking)
+                      .Include(p => p.Membership)
+            );
+
+            if (payment == null)
+                throw new Exception("Payment not found");
+
+            if (payment.IsConfirmed || payment.IsRefunded)
+                throw new Exception("Cannot cancel a confirmed or refunded payment.");
+
+            payment.Status = PaymentStatus.Cancelled;
+            payment.CancelledAt = DateTime.UtcNow;
+
+            await _paymentRepo.UpdateAsync(payment);
+            await _paymentRepo.SaveAsync();
+        }
+
+        public async Task<PaymentIntent> CreateStripeIntentAsync(decimal amount, string currency)
+        {
+            StripeConfiguration.ApiKey = _config["Stripe:SecretKey"];
+
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = (long)(amount * 100), // Stripe uses smallest currency unit (e.g., 100 JOD = 10000)
+                Currency = currency,
+                PaymentMethodTypes = new List<string> { "card" }
+            };
+
+            var service = new PaymentIntentService();
+            return await service.CreateAsync(options);
+        }
+
+        public async Task MarkStripePaymentAsPaidAsync(string transactionId)
+        {
+            var payment = await _paymentRepo.GetByConditionAsync(p =>
+                p.TransactionId == transactionId && p.Method == PaymentMethod.Stripe);
+
+            if (payment == null)
+                throw new Exception("Stripe payment not found.");
+
+            payment.Status = PaymentStatus.Paid; // still pending manual confirmation
+            payment.IsConfirmed = false;
+
+            await _paymentRepo.UpdateAsync(payment);
+            await _paymentRepo.SaveAsync();
+        }
+
+
+        private PaymentDto ToDto(Payment p)
+        {
+            return new PaymentDto
+            {
+                PaymentId = p.PaymentId,
+                ForType = p.BookingId.HasValue ? "Booking" : "Membership",
+                ReferenceId = p.BookingId ?? p.MembershipId ?? 0,
+                Amount = p.Amount,
+                PaymentDate = p.PaymentDate,
+                Method = p.Method.ToString(),
+                Status = p.Status.ToString(),
+                IsConfirmed = p.IsConfirmed,
+                IsRefunded = p.IsRefunded
+            };
+        }
+
+    }
 }

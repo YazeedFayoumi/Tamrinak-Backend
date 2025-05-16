@@ -68,5 +68,129 @@ namespace Tamrinak_API.Controllers
             return Ok("Venue request rejected");
         }
 
+        [HttpGet("users/{id}/bookings")]
+        public async Task<IActionResult> GetUserBookings(int id)
+        {
+            var bookings = await _adminService.GetUserBookingsAsync(id);
+            return Ok(bookings);
+        }
+
+        [HttpGet("users/{id}/memberships")]
+        public async Task<IActionResult> GetUserMemberships(int id)
+        {
+            var memberships = await _adminService.GetUserMembershipsAsync(id);
+            return Ok(memberships);
+        }
+
+        [HttpGet("reviews")]
+        public async Task<IActionResult> GetAllReviews(
+        [FromQuery] bool? isVerified,
+        [FromQuery] int? facilityId,
+        [FromQuery] int? fieldId,
+        [FromQuery] int page,
+        [FromQuery] int pageSize)
+            {
+            var result = await _adminService.GetAllReviewsAsync(isVerified, facilityId, fieldId, page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet("reviews/{id}")]
+        public async Task<IActionResult> GetReviewById(int id)
+        {
+            var review = await _adminService.GetReviewByIdAsync(id);
+            return review != null ? Ok(review) : NotFound("Review not found");
+        }
+
+        [HttpPatch("reviews/{id}/verify")]
+        public async Task<IActionResult> VerifyReview(int id)
+        {
+            await _adminService.VerifyReviewAsync(id);
+            return Ok("Review verified.");
+        }
+
+        [HttpDelete("reviews/{id}")]
+        public async Task<IActionResult> DeleteReview(int id)
+        {
+            await _adminService.DeleteReviewAsync(id);
+            return Ok("Review deleted.");
+        }
+
+        [HttpGet("reviews/{id}/replies")]
+        public async Task<IActionResult> GetRepliesForReview(int id)
+        {
+            var replies = await _adminService.GetReviewRepliesAsync(id);
+            return Ok(replies);
+        }
+
+        [HttpPatch("reviews/{id}/reset-likes")]
+        public async Task<IActionResult> ResetReviewLikes(int id)
+        {
+            await _adminService.ResetReviewLikesAsync(id);
+            return Ok("Likes reset.");
+        }
+
+        [HttpPatch("reviews/{id}/lock")]
+        public async Task<IActionResult> LockReviewThread(int id)
+        {
+            await _adminService.SetReviewLockStatusAsync(id, true);
+            return Ok("Review thread locked.");
+        }
+
+        [HttpPatch("reviews/{id}/unlock")]
+        public async Task<IActionResult> UnlockReviewThread(int id)
+        {
+            await _adminService.SetReviewLockStatusAsync(id, false);
+            return Ok("Review thread unlocked.");
+        }
+
+        [HttpPatch("reviews/bulk-verify")]
+        public async Task<IActionResult> BulkVerifyReviews([FromBody] List<int> reviewIds)
+        {
+            await _adminService.BulkVerifyReviewsAsync(reviewIds);
+            return Ok("Reviews verified successfully.");
+        }
+
+        [HttpGet("users/{userId}/reviews")]
+        public async Task<IActionResult> GetUserReviews(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _adminService.GetReviewsByUserAsync(userId, page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet("payments")]
+        public async Task<IActionResult> GetPayments([FromQuery] string? method, [FromQuery] bool? confirmed)
+        {
+            var payments = await _adminService.GetAllPaymentsAsync(method, confirmed);
+            return Ok(payments);
+        }
+
+        [HttpGet("payments/{id}")]
+        public async Task<IActionResult> GetPaymentById(int id)
+        {
+            var payment = await _adminService.GetPaymentByIdAsync(id);
+            return payment != null ? Ok(payment) : NotFound("Payment not found");
+        }
+
+        [HttpPatch("payments/{id}/confirm")]
+        public async Task<IActionResult> ConfirmPayment(int id)
+        {
+            await _adminService.ConfirmPaymentAsync(id);
+            return Ok("Payment confirmed.");
+        }
+
+        [HttpPatch("payments/{id}/refund")]
+        public async Task<IActionResult> RefundPayment(int id)
+        {
+            await _adminService.RefundPaymentAsync(id);
+            return Ok("Payment refunded.");
+        }
+
+        [HttpGet("users/{id}/payments")]
+        public async Task<IActionResult> GetUserPayments(int id)
+        {
+            var payments = await _adminService.GetPaymentsByUserAsync(id);
+            return Ok(payments);
+        }
+
     }
 }

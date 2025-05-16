@@ -47,6 +47,7 @@ namespace Tamrinak_API.DataAccess.Models
 	public enum PaymentStatus
 	{
 		Pending,
+		Paid,
 		Confirmed,
 		Refunded,
 		Cancelled,

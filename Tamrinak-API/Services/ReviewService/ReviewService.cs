@@ -31,6 +31,11 @@ namespace Tamrinak_API.Services.ReviewService
         {
             var user = await _userRepo.GetByConditionAsync(u => u.Email == userEmail)
                        ?? throw new Exception("User not found");
+            if (!user.IsEmailConfirmed)
+            {
+                throw new Exception("Email must be confirmed to review");
+            }
+
             bool isVerified = false;
 
             if (dto.FieldId.HasValue)
@@ -181,6 +186,9 @@ namespace Tamrinak_API.Services.ReviewService
             var parent = await _reviewRepo.GetAsync(dto.ParentReviewId)
                          ?? throw new Exception("Parent review not found");
 
+            if (parent.IsLocked)
+                throw new Exception("Replies are not allowed for this review.");
+
             var reply = new Review
             {
                 UserId = user.UserId,
@@ -292,7 +300,5 @@ namespace Tamrinak_API.Services.ReviewService
             IsVerified = r.IsVerified
         };
 
-
-      
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Tamrinak_API.DataAccess.Models;
 
 namespace Tamrinak_API.DTO.PaymentDtos
@@ -9,7 +10,8 @@ namespace Tamrinak_API.DTO.PaymentDtos
 		public int? MembershipId { get; set; }
 
 		[Required]
-		public decimal Amount { get; set; }
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal Amount { get; set; }
 
 		[Required]
 		public PaymentMethod Method { get; set; }

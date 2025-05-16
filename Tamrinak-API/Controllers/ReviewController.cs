@@ -21,7 +21,7 @@ namespace Tamrinak_API.Controllers
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> AddReview([FromBody] AddReviewDto dto)
-        {
+        { 
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
             var review = await _reviewService.AddReviewAsync(dto, email);
             return Ok(review);

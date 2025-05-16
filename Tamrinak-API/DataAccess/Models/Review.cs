@@ -29,7 +29,8 @@ namespace Tamrinak_API.DataAccess.Models
 		public DateTime ReviewDate { get; set; } = DateTime.UtcNow;
 
 		public bool IsVerified { get; set; } = false;
-		public int Likes { get; set; } = 0;
+		public bool IsLocked { get; set; } = false;
+        public int Likes { get; set; } = 0;
 
         public int? ParentReviewId { get; set; }
         public Review ParentReview { get; set; }
