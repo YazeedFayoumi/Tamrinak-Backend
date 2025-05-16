@@ -22,9 +22,21 @@ namespace Tamrinak_API.Controllers
 		[HttpPost("new")]
 		public async Task<IActionResult> AddMembership([FromBody] AddMembershipDto dto)
 		{
-			var email = User.FindFirst(ClaimTypes.Email)?.Value;
-			var result = await _membershipService.AddMembershipAsync(dto, email);
-			return Ok(result);
+			try
+			{
+				var email = User.FindFirst(ClaimTypes.Email)?.Value;
+				if (string.IsNullOrEmpty(email))
+				{
+					return Unauthorized("User email not found in token");
+				}
+
+				var result = await _membershipService.AddMembershipAsync(dto, email);
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
 		}
 
 		[HttpGet("user")]
@@ -57,6 +69,8 @@ namespace Tamrinak_API.Controllers
 			await _membershipService.DeleteMembershipAsync(id, email);
 			return Ok("Membership deleted");
 		}
+
+		//TODO get all Memberships
 	}
 
 }
