@@ -1,4 +1,5 @@
 ﻿using Tamrinak_API.DTO.AdminDtos;
+using Tamrinak_API.DTO.PaginationDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
 
 namespace Tamrinak_API.Services.AdminService
@@ -15,6 +16,25 @@ namespace Tamrinak_API.Services.AdminService
         Task<bool> DeleteUserAsync(int userId);
         Task AddRoleToUserAsync(int userId, string roleName);
         Task RemoveRoleToUserAsync(int userId, string roleName);
+
+        Task<List<AdminBookingDto>> GetUserBookingsAsync(int userId);
+        Task<List<AdminMembershipDto>> GetUserMembershipsAsync(int userId);
+
+        Task<PagedResult<AdminReviewDto>> GetAllReviewsAsync(bool? isVerified, int? facilityId, int? fieldId, int page, int pageSize);
+        Task<AdminReviewDto?> GetReviewByIdAsync(int reviewId);
+        Task VerifyReviewAsync(int reviewId);
+        Task DeleteReviewAsync(int reviewId);
+        Task<List<AdminReviewDto>> GetReviewRepliesAsync(int parentReviewId);
+        Task ResetReviewLikesAsync(int reviewId);
+        Task SetReviewLockStatusAsync(int reviewId, bool isLocked);
+        Task BulkVerifyReviewsAsync(List<int> reviewIds);
+        Task<PagedResult<AdminReviewDto>> GetReviewsByUserAsync(int userId, int page, int pageSize);
+
+        Task<List<AdminPaymentDto>> GetAllPaymentsAsync(string? method, bool? confirmed);
+        Task<AdminPaymentDto?> GetPaymentByIdAsync(int paymentId);
+        Task ConfirmPaymentAsync(int paymentId);
+        Task RefundPaymentAsync(int paymentId);
+        Task<List<AdminPaymentDto>> GetPaymentsByUserAsync(int userId);
 
     }
 }
