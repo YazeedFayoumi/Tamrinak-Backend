@@ -4,7 +4,8 @@
     {
         public int MembershipId { get; set; }
         public int UserId { get; set; }
-        public string UserName { get; set; }         // From User
+        public string? UserName { get; set; }  
+        public string? UserEmail { get; set; }
         public string FacilityName { get; set; }     // From Facility
         public DateTime StartDate { get; set; }
         public DateTime ExpirationDate { get; set; }

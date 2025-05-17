@@ -19,6 +19,8 @@ namespace Tamrinak_API.Services.AdminService
 
         Task<List<AdminBookingDto>> GetUserBookingsAsync(int userId);
         Task<List<AdminMembershipDto>> GetUserMembershipsAsync(int userId);
+        Task<FieldBookingStatsDto> GetFieldBookingStatsAsync(int fieldId);
+        Task<FacilityMembershipStatsDto> GetFacilityMembershipStatsAsync(int facilityId);
 
         Task<PagedResult<AdminReviewDto>> GetAllReviewsAsync(bool? isVerified, int? facilityId, int? fieldId, int page, int pageSize);
         Task<AdminReviewDto?> GetReviewByIdAsync(int reviewId);

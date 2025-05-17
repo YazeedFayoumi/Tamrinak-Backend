@@ -45,6 +45,13 @@ namespace Tamrinak_API.Services.PaymentService
                     throw new Exception("You cannot pay for another user's booking.");
 
                 expectedAmount = booking.TotalCost;
+
+                var existingPayment = await _paymentRepo.GetByConditionAsync(p =>
+                p.BookingId == dto.BookingId.Value); // && p.IsConfirmed);
+
+                if (existingPayment != null)
+                    throw new Exception("This booking already has a confirmed payment.");
+
             }
             else if (dto.MembershipId.HasValue)
             {
@@ -55,6 +62,12 @@ namespace Tamrinak_API.Services.PaymentService
                     throw new Exception("You cannot pay for another user's membership.");
 
                 expectedAmount = membership.TotalOfferPaid ?? membership.MonthlyFee;
+
+                var existingPayment = await _paymentRepo.GetByConditionAsync(p =>
+                 p.MembershipId == dto.MembershipId.Value); //&& p.IsConfirmed);
+
+                if (existingPayment != null)
+                    throw new Exception("This membership already has a confirmed payment.");
             }
 
             if (dto.Amount != expectedAmount)

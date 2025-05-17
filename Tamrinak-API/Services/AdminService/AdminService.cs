@@ -15,12 +15,15 @@ namespace Tamrinak_API.Services.AdminService
 
         private readonly IGenericRepo<Booking> _bookingRepo;
         private readonly IGenericRepo<Membership> _membershipRepo;
+        private readonly IGenericRepo<Field> _fieldRepo;
+        private readonly IGenericRepo<Facility> _facilityRepo;
 
         private readonly IGenericRepo<Review> _reviewRepo;
         private readonly IGenericRepo<Payment> _paymentRepo;
         public AdminService(IGenericRepo<User> userRepo, IGenericRepo<UserRole> userRoleRepo, IGenericRepo<Role> roleRepo,
             IGenericRepo<Booking> bookingRepo, IGenericRepo<Membership> membershipRepo, 
-            IGenericRepo<Review> reviewRepo, IGenericRepo<Payment> paymentRepo)
+            IGenericRepo<Review> reviewRepo, IGenericRepo<Payment> paymentRepo,
+            IGenericRepo<Field> fieldRepo, IGenericRepo<Facility> facilityRepo)
         {
             _userRepo = userRepo;
             _userRoleRepo = userRoleRepo;
@@ -29,6 +32,8 @@ namespace Tamrinak_API.Services.AdminService
             _membershipRepo = membershipRepo;
             _reviewRepo = reviewRepo;
             _paymentRepo = paymentRepo;
+            _fieldRepo = fieldRepo;
+            _facilityRepo = facilityRepo;
         }
 
         public async Task<List<AdminUserDto>> GetAllUsersAsync()
@@ -221,6 +226,125 @@ namespace Tamrinak_API.Services.AdminService
                 MonthlyFee = m.MonthlyFee,
                 TotalOfferPaid = m.TotalOfferPaid
             }).ToList();
+        }
+
+        public async Task<FieldBookingStatsDto> GetFieldBookingStatsAsync(int fieldId)
+        {
+            var field = await _fieldRepo.GetAsync(fieldId)
+                ?? throw new Exception("Field not found.");
+
+            var bookings = await _bookingRepo.GetListByConditionIncludeAsync(
+                b => b.FieldId == fieldId,
+                include: q => q.Include(b => b.User)
+            );
+
+            //var now = DateTime.UtcNow;
+            var today = DateTime.UtcNow.Date;
+            var nowTime = TimeOnly.FromDateTime(DateTime.UtcNow);
+
+            // We'll assume a booking belongs to today or a future day and hasn't been canceled
+            var upcomingBookings = bookings
+                .Where(b => b.BookingDate >= today && b.CancelledAt == null)
+                .ToList();
+
+            var pastBookings = bookings
+                .Where(b => b.BookingDate < today && b.CancelledAt == null)
+                .ToList();
+
+            var canceledBookings = bookings
+                .Where(b => b.CancelledAt != null)
+                .ToList();
+
+            var dto = new FieldBookingStatsDto
+            {
+                FieldId = fieldId,
+                FieldName = field.Name,
+                TotalBookings = bookings.Count,
+                UpcomingBookings = upcomingBookings.Count,
+                PastBookings = pastBookings.Count,
+                CanceledBookings = canceledBookings.Count,
+                UniqueUsers = bookings.Select(b => b.UserId).Distinct().Count(),
+                TotalRevenue = bookings.Where(b => b.IsPaid).Sum(b => b.TotalCost),
+                UpcomingSchedule = upcomingBookings
+                    .GroupBy(b => b.BookingDate)
+                    .Select(g => new BookingByDateDto
+                    {
+                        Date = g.Key,
+                        Count = g.Count()
+                    }).OrderBy(d => d.Date).ToList(),
+
+                Bookings = bookings.Select(b => new AdminBookingDto
+                {
+                    BookingId = b.BookingId,
+                    UserEmail = b.User.Email, // Include User
+                    StartTime = b.StartTime.ToString("HH:mm"),
+                    EndTime = b.EndTime.ToString("HH:mm"),
+                    CancelledAt = b.CancelledAt,
+                    IsPaid = b.IsPaid,
+                    TotalCost = b.TotalCost
+                }).ToList()
+
+            };
+
+            return dto;
+        }
+
+        public async Task<FacilityMembershipStatsDto> GetFacilityMembershipStatsAsync(int facilityId)
+        {
+           var facilityEntity = await _facilityRepo.GetAsync(facilityId)
+                ?? throw new Exception("Facility not found.");
+
+            var facility = await _facilityRepo.GetListByConditionIncludeAsync(
+                    f => f.FacilityId == facilityId,
+                    include: q => q.Include(f => f.MembershipOffers)
+                );
+
+            var offers = facility.FirstOrDefault()?.MembershipOffers ?? new List<MembershipOffer>();
+
+            var memberships = await _membershipRepo.GetListByConditionIncludeAsync(
+                m => m.FacilityId == facilityId,
+                include: q => q.Include(b => b.User)
+            );
+
+            var dto = new FacilityMembershipStatsDto
+            {
+                FacilityId = facilityId,
+                FacilityName = facilityEntity.Name,
+                TotalMemberships = memberships.Count,
+                ActiveMemberships = memberships.Count(m => m.IsActive),
+                ExpiredMemberships = memberships.Count(m => !m.IsActive),
+                UniqueUsers = memberships.Select(m => m.UserId).Distinct().Count(),
+                TotalRevenue = memberships.Sum(m => m.TotalOfferPaid ?? m.MonthlyFee),
+                OfferBreakdowns  = memberships
+                    .Where(m => m.TotalOfferPaid != null)
+                    .GroupBy(m => m.TotalOfferPaid)
+                    .Select(g =>
+                    {
+                        var amount = g.Key!.Value;
+                        var matchedOffer = offers.FirstOrDefault(o => o.Price == amount);
+
+                        return new MembershipOfferBreakdownDto
+                        {
+                            OfferId = matchedOffer?.OfferId,
+                            OfferDuration = matchedOffer?.DurationInMonths.ToString() ?? $"Offer at {amount} JD",
+                            Count = g.Count(),
+                            TotalRevenue = g.Sum(m => m.TotalOfferPaid ?? m.MonthlyFee)
+                        };
+                    }).ToList(),
+
+                Memberships = memberships.Select(m => new AdminMembershipDto
+                {
+                    MembershipId = m.MembershipId,
+                    UserEmail = m.User.Email, // Include User in Include()
+                    IsActive = m.IsActive,
+                    StartDate = m.StartDate,
+                    ExpirationDate = m.ExpirationDate,
+                    MonthlyFee = m.MonthlyFee,
+                    TotalOfferPaid = m.TotalOfferPaid,
+                }).ToList()
+            };
+
+            return dto;
         }
 
         //reviews

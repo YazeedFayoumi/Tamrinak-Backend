@@ -23,7 +23,11 @@ namespace Tamrinak_API.Services.FieldService
 
 		public async Task<FieldDto> AddFieldAsync(AddFieldDto dto)
 		{
-			var field = new Field
+            var duration = TimeOnly.Parse(dto.CloseTime) - TimeOnly.Parse(dto.OpenTime);
+            if (duration.TotalMinutes < 30)
+                throw new Exception("Open/Close time must span at least 30 minutes.");
+
+            var field = new Field
 			{
 				Name = dto.Name,
 				LocationDesc = dto.LocationDesc,

@@ -6,7 +6,9 @@ namespace Tamrinak_API.DTO.AdminDtos
     {
         public int BookingId { get; set; }
         public int UserId { get; set; }
-        public string UserName { get; set; }          // From User
+        public string? UserName { get; set; }          // From User
+        public string? UserEmail { get; set; }
+
         public string? FieldName { get; set; }        // From Field (nullable)
         public string? FacilityName { get; set; }     // From Facility (nullable)
         public DateTime BookingDate { get; set; }

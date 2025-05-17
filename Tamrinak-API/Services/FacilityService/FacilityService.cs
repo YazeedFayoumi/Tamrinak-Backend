@@ -30,7 +30,11 @@ namespace Tamrinak_API.Services.FacilityService
 
 		public async Task<FacilityDto> AddFacilityAsync(AddFacilityDto dto)
 		{
-			var facility = new Facility
+            var duration = TimeOnly.Parse(dto.CloseTime) - TimeOnly.Parse(dto.OpenTime);
+            if (duration.TotalMinutes < 30)
+                throw new Exception("Open/Close time must span at least 30 minutes.");
+
+            var facility = new Facility
 			{
 				Name = dto.Name,
 				LocationDesc = dto.LocationDesc,
@@ -186,7 +190,11 @@ namespace Tamrinak_API.Services.FacilityService
 			if (facility == null)
 				throw new KeyNotFoundException("facility not found");
 
-			facility.Name = dto.Name;
+            var duration = TimeOnly.Parse(dto.CloseTime) - TimeOnly.Parse(dto.OpenTime);
+            if (duration.TotalMinutes < 30)
+                throw new Exception("Open/Close time must span at least 30 minutes.");
+
+            facility.Name = dto.Name;
 			facility.LocationDesc = dto.LocationDesc;
 			facility.LocationMap = dto.LocationMap;
 			facility.PricePerMonth = dto.PricePerMonth;

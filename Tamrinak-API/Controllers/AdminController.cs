@@ -82,6 +82,23 @@ namespace Tamrinak_API.Controllers
             return Ok(memberships);
         }
 
+        [HttpGet("fields/{fieldId}/bookings/stats")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetFieldBookingStats(int fieldId)
+        {
+            var stats = await _adminService.GetFieldBookingStatsAsync(fieldId);
+            return Ok(stats);
+        }
+
+        [HttpGet("facilities/{facilityId}/memberships/stats")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetFacilityMembershipStats(int facilityId)
+        {
+            var stats = await _adminService.GetFacilityMembershipStatsAsync(facilityId);
+            return Ok(stats);
+        }
+
+
         [HttpGet("reviews")]
         public async Task<IActionResult> GetAllReviews(
         [FromQuery] bool? isVerified,
