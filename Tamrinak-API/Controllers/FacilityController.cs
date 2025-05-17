@@ -26,13 +26,13 @@ namespace Tamrinak_API.Controllers
 			_imageService = imageService;
 		}
 
-		//[Authorize(Roles = "Admin")] // TODO
+		[Authorize(Roles = "Admin, VenueManager")] // TODO
 		[HttpPost("facility")]
 		public async Task<IActionResult> AddFacility(AddFacilityDto dto)
 		{
 			try
 			{
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 var facility = await _facilityService.AddFacilityAsync(dto, userId);
 				return Ok(facility);
 			}

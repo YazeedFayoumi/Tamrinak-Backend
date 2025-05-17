@@ -23,15 +23,15 @@ namespace Tamrinak_API.Controllers
 			_imageService = imageService;
 		}
 
-		//[Authorize(Roles = "Admin")] // TODO
+		[Authorize(Roles = "Admin,VenueManager")] // TODO
 		[HttpPost("field")]
 		public async Task<IActionResult> AddField(AddFieldDto dto)
 		{
 			try
 			{
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-                var field = await _fieldService.AddFieldAsync(dto, userId);
+				var field = await _fieldService.AddFieldAsync(dto, userId);
 				return Ok(field);
 			}
 			catch (Exception ex)
