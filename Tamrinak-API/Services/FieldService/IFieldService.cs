@@ -6,7 +6,7 @@ namespace Tamrinak_API.Services.FieldService
 {
 	public interface IFieldService
 	{
-		Task<FieldDto> AddFieldAsync(AddFieldDto dto);
+		Task<FieldDto> AddFieldAsync(AddFieldDto dto, int userId);
 		Task<Field> GetFieldAsync(int id);
 		Task<FieldDetailsDto> GetFieldDetailsAsync(int id);
 		Task<IEnumerable<FieldDto>> GetFieldsAsync();

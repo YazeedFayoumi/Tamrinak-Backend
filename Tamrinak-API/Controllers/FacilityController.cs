@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FacilityDtos;
 using Tamrinak_API.DTO.FieldDtos;
@@ -31,7 +32,8 @@ namespace Tamrinak_API.Controllers
 		{
 			try
 			{
-				var facility = await _facilityService.AddFacilityAsync(dto);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var facility = await _facilityService.AddFacilityAsync(dto, userId);
 				return Ok(facility);
 			}
 			catch (Exception ex)

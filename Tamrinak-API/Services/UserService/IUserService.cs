@@ -1,4 +1,5 @@
 ﻿using Tamrinak_API.DataAccess.Models;
+using Tamrinak_API.DTO.AdminDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
 
 namespace Tamrinak_API.Services.UserService
@@ -16,7 +17,7 @@ namespace Tamrinak_API.Services.UserService
 		Task UpdateUserAsync(User user);
 		Task<bool> CanAddUserImageAsync(int userId);
 		Task<ProfileDto> GetUserProfileAsync(string email);
-		Task RequestVenueOwnershipAsync(string email);
+		Task RequestVenueOwnershipAsync(string email, VenueOwnershipRequestDto reqDto);
 
     }
 }

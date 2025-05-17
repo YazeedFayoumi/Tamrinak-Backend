@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Tamrinak_API.DataAccess.Models;
+using Tamrinak_API.DTO.AdminDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Repository.GenericRepo;
 
@@ -11,15 +12,21 @@ namespace Tamrinak_API.Services.UserService
 		private readonly IGenericRepo<User> _genericRepo;
 		private readonly IGenericRepo<Role> _roleRepo;
 		private readonly IGenericRepo<UserRole> _userRoleRepo;
-		public UserService(IGenericRepo<User> genericRepo, IGenericRepo<Role> roleRepo, IGenericRepo<UserRole> userRoleRepo)
-		{
-			_genericRepo = genericRepo;
-			_roleRepo = roleRepo;
-			_userRoleRepo = userRoleRepo;
-		}
+		private readonly IGenericRepo<Field> _fieldRepo;	
+		private readonly IGenericRepo<Facility> _facilityRepo;
+
+		public UserService(IGenericRepo<User> genericRepo, IGenericRepo<Role> roleRepo, IGenericRepo<UserRole> userRoleRepo,
+  IGenericRepo<Field> fieldRepo, IGenericRepo<Facility> facilityRepo)
+        {
+            _genericRepo = genericRepo;
+            _roleRepo = roleRepo;
+            _userRoleRepo = userRoleRepo;
+            _fieldRepo = fieldRepo;
+            _facilityRepo = facilityRepo;
+        }
 
 
-		public async Task<UserDto> CreateUserAsync(UserRegisterDto user)
+        public async Task<UserDto> CreateUserAsync(UserRegisterDto user)
 		{
 			if (await _genericRepo.ExistsAsync(e => e.Email == user.Email))
 			{
@@ -174,15 +181,34 @@ namespace Tamrinak_API.Services.UserService
 			};
 		}
 
-        public async Task RequestVenueOwnershipAsync(string email)
+        public async Task RequestVenueOwnershipAsync(string email, VenueOwnershipRequestDto reqDto)
         {
             var user = await _genericRepo.GetByConditionAsync(u => u.Email == email) ?? throw new Exception("User not found");
+            if (reqDto.VenueType != "Facility" && reqDto.VenueType != "Field")
+                throw new Exception("Invalid venue type.");
 
             if (user.HasVenueOwnershipRequest)
                 throw new Exception("You already have a pending venue ownership request.");
 
+            if (reqDto.VenueType == "Facility")
+            {
+                var facility = await _facilityRepo.GetAsync(reqDto.VenueId)
+                    ?? throw new Exception("Facility not found.");
+                if (facility.OwnerId != null)
+                    throw new Exception("This facility is already managed.");
+            }
+            else 
+            {
+                var field = await _fieldRepo.GetAsync(reqDto.VenueId)
+                    ?? throw new Exception("Field not found.");
+                if (field.OwnerId != null)
+                    throw new Exception("This field is already managed.");
+            }
+
             user.HasVenueOwnershipRequest = true;
             user.VenueRequestDate = DateTime.UtcNow;
+            user.RequestedVenueId = reqDto.VenueId;
+            user.RequestedVenueType = reqDto.VenueType;
 
             await _genericRepo.UpdateAsync(user);
             await _genericRepo.SaveAsync();

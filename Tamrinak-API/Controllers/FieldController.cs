@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Security.Claims;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FieldDtos;
 using Tamrinak_API.DTO.PaginationDto;
@@ -28,7 +29,9 @@ namespace Tamrinak_API.Controllers
 		{
 			try
 			{
-				var field = await _fieldService.AddFieldAsync(dto);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                var field = await _fieldService.AddFieldAsync(dto, userId);
 				return Ok(field);
 			}
 			catch (Exception ex)

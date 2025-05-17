@@ -39,8 +39,8 @@ namespace Tamrinak_API.Services.AdminService
         public async Task<List<AdminUserDto>> GetAllUsersAsync()
         {
             var users = await _userRepo.GetListByConditionIncludeAsync(
-     predicate: u => true, // or any real filter if needed
-     include: query => query
+                 predicate: u => true, // or any real filter if needed
+                 include: query => query
          .Include(u => u.UserRoles)
          .ThenInclude(ur => ur.Role)
  );
@@ -129,8 +129,32 @@ namespace Tamrinak_API.Services.AdminService
         {
             var user = await _userRepo.GetAsync(userId) ?? throw new Exception("User not found");
 
+            if (!user.HasVenueOwnershipRequest || user.RequestedVenueId == null || string.IsNullOrEmpty(user.RequestedVenueType))
+                throw new Exception("No pending ownership request for this user.");
+
             user.HasVenueOwnershipRequest = false;
-            user.VenueRequestDate = null;
+            //user.VenueRequestDate = null;
+
+            if (user.RequestedVenueType == "Facility")
+            {
+                var facility = await _facilityRepo.GetAsync(user.RequestedVenueId.Value)
+                    ?? throw new Exception("Facility not found.");
+
+                facility.OwnerId = userId;
+                await _facilityRepo.UpdateAsync(facility);
+            }
+            else if (user.RequestedVenueType == "Field")
+            {
+                var field = await _fieldRepo.GetAsync(user.RequestedVenueId.Value)
+                    ?? throw new Exception("Field not found.");
+
+                field.OwnerId = userId;
+                await _fieldRepo.UpdateAsync(field);
+            }
+            else
+            {
+                throw new Exception("Invalid venue type.");
+            }
 
             var venueManagerRole = await _roleRepo.GetByConditionAsync(r => r.RoleName == "VenueManager");
             if (venueManagerRole == null)
@@ -142,6 +166,9 @@ namespace Tamrinak_API.Services.AdminService
                 RoleId = venueManagerRole.RoleId
             });
 
+            user.RequestedVenueId = null;
+            user.RequestedVenueType = null;
+
             await _userRepo.UpdateAsync(user);
             await _userRepo.SaveAsync();
 
@@ -151,9 +178,13 @@ namespace Tamrinak_API.Services.AdminService
         public async Task<bool> RejectVenueOwnershipRequestAsync(int userId)
         {
             var user = await _userRepo.GetAsync(userId) ?? throw new Exception("User not found");
+            if (!user.HasVenueOwnershipRequest || user.RequestedVenueId == null || string.IsNullOrEmpty(user.RequestedVenueType))
+                throw new Exception("No pending ownership request for this user.");
 
             user.HasVenueOwnershipRequest = false;
             user.VenueRequestDate = null;
+            user.RequestedVenueId = null;
+            user.RequestedVenueType = null;
 
             await _userRepo.UpdateAsync(user);
             await _userRepo.SaveAsync();

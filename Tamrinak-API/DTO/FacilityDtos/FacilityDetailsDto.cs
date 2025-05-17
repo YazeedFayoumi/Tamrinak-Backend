@@ -18,6 +18,7 @@ namespace Tamrinak_API.DTO.FacilityDtos
 		public FacilityType Type { get; set; }
 		public double AverageRating { get; set; }
 		public int TotalReviews { get; set; }
+		public int? OwnerId { get; set; }
 		public List<SportBasicDto> Sports { get; set; }
 	}
 

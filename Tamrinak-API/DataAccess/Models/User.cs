@@ -27,6 +27,9 @@ namespace Tamrinak_API.DataAccess.Models
         public bool HasVenueOwnershipRequest { get; set; } = false;
         public DateTime? VenueRequestDate { get; set; }
 
+        public int? RequestedVenueId { get; set; } // ID of the field or facility
+        public string? RequestedVenueType { get; set; }
+
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 		public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 		public ICollection<Membership> Memberships { get; set; } = new List<Membership>();

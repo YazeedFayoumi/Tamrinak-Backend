@@ -17,23 +17,33 @@ namespace Tamrinak_API.Services.FacilityService
 		private readonly IGenericRepo<Sport> _sportRepo;
 		private readonly IGenericRepo<Image> _imageRepo;
 		private readonly IGenericRepo<Membership> _membershipRepo;
+		private readonly IGenericRepo<User> _userRepo;
+		private readonly IGenericRepo<UserRole> _userRoleRepo;
 		public FacilityService(IGenericRepo<Facility> facilityRepo, IGenericRepo<SportFacility> sportFacilityRepo, IGenericRepo<Membership> memRepo,
 			IGenericRepo<Image> imageRepo,
-			IGenericRepo<Sport> sportRepo)
+			IGenericRepo<Sport> sportRepo, IGenericRepo<User> userRepo, IGenericRepo<UserRole> userRoleRepo)
 		{
 			_facilityRepo = facilityRepo;
 			_sportFacilityRepo = sportFacilityRepo;
 			_imageRepo = imageRepo;
 			_sportRepo = sportRepo;
 			_membershipRepo = memRepo;
+			_userRepo = userRepo;
+			_userRoleRepo = userRoleRepo;
 		}
 
-		public async Task<FacilityDto> AddFacilityAsync(AddFacilityDto dto)
+		public async Task<FacilityDto> AddFacilityAsync(AddFacilityDto dto, int userId)
 		{
             var duration = TimeOnly.Parse(dto.CloseTime) - TimeOnly.Parse(dto.OpenTime);
             if (duration.TotalMinutes < 30)
                 throw new Exception("Open/Close time must span at least 30 minutes.");
+            var user = await _userRepo.GetByConditionIncludeAsync(
+                 predicate: u => u.UserId == userId,
+                 include: q => q.Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+                )
+             ?? throw new Exception("User not found");
 
+            bool isVenueManager = user.UserRoles.Any(ur => ur.Role.RoleName == "VenueManager");
             var facility = new Facility
 			{
 				Name = dto.Name,
@@ -44,8 +54,9 @@ namespace Tamrinak_API.Services.FacilityService
 				PricePerMonth = dto.PricePerMonth,
 				Description = dto.Description,
 				OpenTime = TimeOnly.Parse(dto.OpenTime),
-				CloseTime = TimeOnly.Parse(dto.CloseTime)
-			};
+				CloseTime = TimeOnly.Parse(dto.CloseTime),
+                OwnerId = isVenueManager ? userId : null
+            };
 
 			var createdFac = await _facilityRepo.CreateAsync(facility);
 			await _facilityRepo.SaveAsync();
@@ -163,7 +174,8 @@ namespace Tamrinak_API.Services.FacilityService
 				{
 					Id = sf.Sport.SportId,
 					Name = sf.Sport.Name
-				}).ToList()
+				}).ToList(),
+				OwnerId = facility?.OwnerId,
 			};
 		}
 

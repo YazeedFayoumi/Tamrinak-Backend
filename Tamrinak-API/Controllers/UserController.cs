@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using System.Security.Claims;
 using Tamrinak_API.DataAccess.Models;
+using Tamrinak_API.DTO.AdminDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Helpers;
 using Tamrinak_API.Services.AuthenticationService;
@@ -210,10 +211,10 @@ namespace Tamrinak_API.Controllers
 		}
         [Authorize]
         [HttpPost("request-venue-ownership")]
-        public async Task<IActionResult> RequestVenueOwnership()
+        public async Task<IActionResult> RequestVenueOwnership([FromBody]  VenueOwnershipRequestDto reqDto)
         {
             var email = User.FindFirst(ClaimTypes.Email)?.Value; // Replace with your actual claim extraction
-            await _userService.RequestVenueOwnershipAsync(email);
+            await _userService.RequestVenueOwnershipAsync(email, reqDto);
             return Ok("Venue ownership request submitted.");
         }
 

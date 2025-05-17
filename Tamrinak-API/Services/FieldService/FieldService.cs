@@ -14,19 +14,31 @@ namespace Tamrinak_API.Services.FieldService
 		private readonly IGenericRepo<Field> _fieldRepo;
 		private readonly IGenericRepo<Booking> _bookingRepo;
 		private readonly IGenericRepo<Image> _imageRepo;
-		public FieldService(IGenericRepo<Field> fieldRepo, IGenericRepo<Image> imageRepo, IGenericRepo<Booking> bookingRepo)
-		{
-			_fieldRepo = fieldRepo;
-			_imageRepo = imageRepo;
-			_bookingRepo = bookingRepo;
-		}
+		private readonly IGenericRepo<User> _userRepo;
+		private readonly IGenericRepo<UserRole> _userRoleRepo;
+		public FieldService(IGenericRepo<Field> fieldRepo, IGenericRepo<Image> imageRepo, IGenericRepo<Booking> bookingRepo
+, IGenericRepo<User> userRepo, IGenericRepo<UserRole> userRoleRepo)
+        {
+            _fieldRepo = fieldRepo;
+            _imageRepo = imageRepo;
+            _bookingRepo = bookingRepo;
+            _userRepo = userRepo;
+			_userRoleRepo = userRoleRepo;
+        }
 
-		public async Task<FieldDto> AddFieldAsync(AddFieldDto dto)
+        public async Task<FieldDto> AddFieldAsync(AddFieldDto dto, int userId)
 		{
             var duration = TimeOnly.Parse(dto.CloseTime) - TimeOnly.Parse(dto.OpenTime);
             if (duration.TotalMinutes < 30)
                 throw new Exception("Open/Close time must span at least 30 minutes.");
 
+            var user = await _userRepo.GetByConditionIncludeAsync(
+                 predicate: u => u.UserId == userId,
+				 include: q => q.Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+                )
+			 ?? throw new Exception("User not found");
+
+            bool isVenueManager = user.UserRoles.Any(ur => ur.Role.RoleName == "VenueManager");
             var field = new Field
 			{
 				Name = dto.Name,
@@ -40,8 +52,9 @@ namespace Tamrinak_API.Services.FieldService
 				CloseTime = TimeOnly.Parse(dto.CloseTime),
 				Capacity = dto.Capacity,
 				PricePerHour = dto.PricePerHour,
-				IsAvailable = true
-			};
+				IsAvailable = true,
+                OwnerId = isVenueManager ? userId : null
+            };
 
 			var createdField = await _fieldRepo.CreateAsync(field);
 			await _fieldRepo.SaveAsync();
@@ -132,7 +145,9 @@ namespace Tamrinak_API.Services.FieldService
 				{
 					Id = field.Sport.SportId,
 					Name = field.Sport.Name
-				}
+				},
+				OwnerId = field?.OwnerId,
+
 			};
 		}
 

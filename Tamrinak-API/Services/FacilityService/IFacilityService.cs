@@ -7,7 +7,7 @@ namespace Tamrinak_API.Services.FacilityService
 {
 	public interface IFacilityService
 	{
-		Task<FacilityDto> AddFacilityAsync(AddFacilityDto dto);
+		Task<FacilityDto> AddFacilityAsync(AddFacilityDto dto, int userId);
 		Task<Facility> GetFacilityAsync(int id);
 		Task<FacilityDetailsDto> GetFacilityDetailsAsync(int id);
 		Task<IEnumerable<FacilityDto>> GetFacilitiesAsync();
