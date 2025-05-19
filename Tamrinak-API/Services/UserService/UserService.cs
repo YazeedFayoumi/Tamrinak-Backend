@@ -214,6 +214,23 @@ namespace Tamrinak_API.Services.UserService
             await _genericRepo.SaveAsync();
         }
 
+        public async Task RequestVenueManagerRoleAsync(int userId)
+        {
+            var user = await _genericRepo.GetAsync(userId) ?? throw new Exception("User not found");
+
+            if (user.HasVenueOwnershipRequest)
+                throw new Exception("You already have a pending request.");
+
+            user.HasVenueOwnershipRequest = true;
+            user.VenueRequestDate = DateTime.UtcNow;
+            user.RequestedVenueId = null;
+            user.RequestedVenueType = null;
+
+            await _genericRepo.UpdateAsync(user);
+            await _genericRepo.SaveAsync();
+        }
+
+
 
     }
 }

@@ -18,6 +18,7 @@ namespace Tamrinak_API.Services.UserService
 		Task<bool> CanAddUserImageAsync(int userId);
 		Task<ProfileDto> GetUserProfileAsync(string email);
 		Task RequestVenueOwnershipAsync(string email, VenueOwnershipRequestDto reqDto);
+		Task RequestVenueManagerRoleAsync(int userId);
 
     }
 }

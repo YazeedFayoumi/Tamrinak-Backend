@@ -42,20 +42,6 @@ namespace Tamrinak_API.Controllers
 
 		}
 
-		[HttpPatch("AddRole"), AuthorizeRole(Roles = "SuperAdmin,Admin")]
-		public async Task<ActionResult> AddRoleToUser([FromBody] AssignRoleDto model)
-		{
-			try
-			{
-				await _userService.AssignRoleAsync(model);
-				return Ok();
-			}
-			catch (Exception ex)
-			{
-				return NotFound(ex.Message);
-			}
-		}
-
 		[HttpGet("UserRoles/{id}"), Authorize]
 		public async Task<ActionResult> GetUserRoles(int id)
 		{
@@ -69,13 +55,13 @@ namespace Tamrinak_API.Controllers
 			var roles = await _userService.GetUserRolesAsync(email);
 			return Ok(roles);
 		}
-		[HttpGet("BasicInfoUserList")]
+		/*[HttpGet("BasicInfoUserList")]
 		public async Task<IActionResult> GetUsersBasicInfo()
 		{
 			var users = await _userService.GetAllUsersAsync();
 			return Ok(users);
 		}
-
+*/
 
 		[HttpGet("{id}")]
 		//[Authorize]
@@ -210,13 +196,23 @@ namespace Tamrinak_API.Controllers
 			return Ok(profile);
 		}
         [Authorize]
-        [HttpPost("request-venue-ownership")]
+        [HttpPost("request-venue-ownership-existing-venue")]
         public async Task<IActionResult> RequestVenueOwnership([FromBody]  VenueOwnershipRequestDto reqDto)
         {
             var email = User.FindFirst(ClaimTypes.Email)?.Value; // Replace with your actual claim extraction
             await _userService.RequestVenueOwnershipAsync(email, reqDto);
             return Ok("Venue ownership request submitted.");
         }
+
+        [HttpPost("request-venue-manager")]
+        [Authorize]
+        public async Task<IActionResult> RequestVenueManagerRole()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            await _userService.RequestVenueManagerRoleAsync(userId);
+            return Ok("Venue manager role request submitted.");
+        }
+
 
     }
 
