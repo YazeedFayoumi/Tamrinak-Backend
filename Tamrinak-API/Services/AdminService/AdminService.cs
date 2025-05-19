@@ -182,7 +182,7 @@ namespace Tamrinak_API.Services.AdminService
         public async Task<bool> RejectVenueOwnershipRequestAsync(int userId)
         {
             var user = await _userRepo.GetAsync(userId) ?? throw new Exception("User not found");
-            if (!user.HasVenueOwnershipRequest || user.RequestedVenueId == null || string.IsNullOrEmpty(user.RequestedVenueType))
+            if (!user.HasVenueOwnershipRequest)
                 throw new Exception("No pending ownership request for this user.");
 
             user.HasVenueOwnershipRequest = false;
