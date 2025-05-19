@@ -37,6 +37,13 @@ namespace Tamrinak_API.Services.FacilityService
             var duration = TimeOnly.Parse(dto.CloseTime) - TimeOnly.Parse(dto.OpenTime);
             if (duration.TotalMinutes < 30)
                 throw new Exception("Open/Close time must span at least 30 minutes.");
+
+            bool duplicateExists = await _facilityRepo.ExistsAsync(f =>
+             f.Name == dto.Name && f.LocationDesc == dto.LocationDesc);
+
+            if (duplicateExists)
+                throw new Exception("A facility with the same name and location description already exists.");
+
             var user = await _userRepo.GetByConditionIncludeAsync(
                  predicate: u => u.UserId == userId,
                  include: q => q.Include(u => u.UserRoles).ThenInclude(ur => ur.Role)

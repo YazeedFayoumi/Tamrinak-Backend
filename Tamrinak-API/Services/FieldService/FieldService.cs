@@ -32,7 +32,13 @@ namespace Tamrinak_API.Services.FieldService
             if (duration.TotalMinutes < 30)
                 throw new Exception("Open/Close time must span at least 30 minutes.");
 
-			var user = await _userRepo.GetByConditionIncludeAsync(
+            bool duplicateExists = await _fieldRepo.ExistsAsync(f =>
+			   f.Name == dto.Name && f.LocationDesc == dto.LocationDesc);
+
+			if (duplicateExists)
+				throw new Exception("A field with the same name and location description already exists.");
+
+            var user = await _userRepo.GetByConditionIncludeAsync(
 				 predicate: u => u.UserId == userId,
 				 include: q => q.Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
 				)

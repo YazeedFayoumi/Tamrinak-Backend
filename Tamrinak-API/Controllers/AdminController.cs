@@ -6,8 +6,9 @@ using Tamrinak_API.Services.UserService;
 namespace Tamrinak_API.Controllers
 {
    /// <summary>
-   /// /////////[Authorize(Roles = "SuperAdmin")]
+   /// /////////
    /// </summary>
+    //[Authorize(Roles = "SuperAdmin")]
     [ApiController]
     [Route("api/admin")]
     public class AdminController : ControllerBase
@@ -98,6 +99,13 @@ namespace Tamrinak_API.Controllers
             return Ok(stats);
         }
 
+        [HttpGet("venue-managers")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetVenueManagers()
+        {
+            var data = await _adminService.GetVenueManagerOverviewsAsync();
+            return Ok(data); 
+        }
 
         [HttpGet("reviews")]
         public async Task<IActionResult> GetAllReviews(

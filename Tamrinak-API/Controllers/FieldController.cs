@@ -23,7 +23,7 @@ namespace Tamrinak_API.Controllers
 			_imageService = imageService;
 		}
 
-		[Authorize(Roles = "Admin,VenueManager")] // TODO
+		[Authorize(Roles = "Admin,VenueManager")] 
 		[HttpPost("field")]
 		public async Task<IActionResult> AddField(AddFieldDto dto)
 		{

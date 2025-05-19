@@ -378,6 +378,37 @@ namespace Tamrinak_API.Services.AdminService
             return dto;
         }
 
+        public async Task<object> GetVenueManagerOverviewsAsync()
+        {
+            var managers = await _userRepo.GetListByConditionIncludeAsync(
+                u => u.UserRoles.Any(ur => ur.Role.RoleName == "VenueManager"),
+                q => q.Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+            );
+
+            var allFields = await _fieldRepo.GetAllAsync();
+            var allFacilities = await _facilityRepo.GetAllAsync();
+
+            var result = managers.Select(m => new
+            {
+                UserId = m.UserId,
+                Name = m.Name,
+                Email = m.Email,
+                FieldsOwned = allFields.Count(f => f.OwnerId == m.UserId),
+                FacilitiesOwned = allFacilities.Count(f => f.OwnerId == m.UserId),
+                Fields = allFields
+                    .Where(f => f.OwnerId == m.UserId)
+                    .Select(f => f.Name)
+                    .ToList(),
+                Facilities = allFacilities
+                    .Where(f => f.OwnerId == m.UserId)
+                    .Select(f => f.Name)
+                    .ToList()
+            }).ToList();
+
+            return result;
+        }
+
+
         //reviews
         public async Task<AdminReviewDto?> GetReviewByIdAsync(int reviewId)
         {
