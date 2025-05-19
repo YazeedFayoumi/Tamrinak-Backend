@@ -11,7 +11,11 @@ namespace Tamrinak_API.Services.BookingService
 		Task<bool> CancelBookingAsync(int bookingId);
 		Task<string?> ChangeBookingAsync(int bookingId, UpdateBookingDto dto);
 		Task<bool> MarkBookingAsPaidAsync(int bookingId);
-		Task<List<(TimeOnly Start, TimeOnly End)>> GetAvailableTimeSlotsAsync(int fieldId, AvailabilityDto dto);
+		//Task<List<(TimeOnly Start, TimeOnly End)>> GetAvailableTimeSlotsAsync(int fieldId, AvailabilityDto dto);
+		Task<List<TimeSlotDto>> GetAvailableTimeSlotsWithNextDayAsync(int fieldId, DateTime bookingDate);
+		Task<List<BookingDto>> GetBookingsByDateAsync(int fieldId, DateTime date);
 
-	}
+
+
+        }
 }

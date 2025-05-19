@@ -87,12 +87,33 @@ namespace Tamrinak_API.Controllers
 			return result == null ? Ok("Booking updated successfully.") : BadRequest(result);
 		}
 
-		[HttpGet("availability")]
-		public async Task<IActionResult> GetFieldAvailability(int fieldId, AvailabilityDto dto)//!!??
-		{
-			var slots = await _bookingService.GetAvailableTimeSlotsAsync(fieldId, dto);
-			return Ok(slots);
-		}
-	}
+        /*     [HttpGet("fields/{fieldId}/available-slots")]
+             public async Task<IActionResult> GetAvailableSlots(int fieldId, [FromQuery] DateTime bookingDate)
+             {
+                 var slots = await _bookingService.GetAvailableTimeSlotsWithNextDayAsync(fieldId, bookingDate);
+                 var result = slots.Select(s => new
+                 {
+                     Start = s.Start.ToString("HH:mm"),
+                     End = s.End.ToString("HH:mm")
+                 });
+
+                 return Ok(result);
+             }*/
+
+        [HttpGet("by-date")]
+        public async Task<IActionResult> GetBookingsByDate(int fieldId, DateTime date)
+        {
+            var result = await _bookingService.GetBookingsByDateAsync(fieldId, date);
+            return Ok(result);
+        }
+
+        [HttpGet("availability")] // shows from 00:00 to 03:00 the next day 
+        public async Task<IActionResult> GetFieldAvailability(int fieldId, DateTime date)
+        {
+            var result = await _bookingService.GetAvailableTimeSlotsWithNextDayAsync(fieldId, date);
+            return Ok(result);
+        }
+
+    }
 }
 

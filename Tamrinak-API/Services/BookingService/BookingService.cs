@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.BookingDtos;
 using Tamrinak_API.Repository.GenericRepo;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Tamrinak_API.Services.BookingService
 {
@@ -217,37 +218,130 @@ namespace Tamrinak_API.Services.BookingService
 			return true;
 		}
 
-		public async Task<List<(TimeOnly Start, TimeOnly End)>> GetAvailableTimeSlotsAsync(int fieldId, AvailabilityDto dto)
-		{
-			var field = await _fieldRepo.GetAsync(fieldId);
-			if (field == null)
-				return new List<(TimeOnly, TimeOnly)>();
+        public async Task<List<BookingDto>> GetBookingsByDateAsync(int fieldId, DateTime date)
+        {
+            var bookings = await _bookingRepo.GetListByConditionIncludeAsync(
+                b =>
+                    b.FieldId == fieldId &&
+                    (
+                        b.BookingDate == date ||                             // same day
+                        (b.StartTime > b.EndTime && b.BookingDate == date.AddDays(-1)) // overnight from previous day
+                    ),
+                q => q.Include(b => b.User) // or include Field if needed
+            );
 
-			var bookings = await _bookingRepo.GetListByConditionAsync(b => b.FieldId == fieldId && b.BookingDate.Date == dto.BookingDate);
+            return bookings.Select(b => new BookingDto
+            {
+                BookingId = b.BookingId,
+                FieldId = b.FieldId,
+                UserId = b.UserId,
+                BookingDate = b.BookingDate,
+                StartTime = b.StartTime.ToString("HH:mm"),
+                EndTime = b.EndTime.ToString("HH:mm"),
+                TotalCost = b.TotalCost,
+                IsPaid = b.IsPaid,
+                NumberOfPeople = b.NumberOfPeople,
+                Duration = b.Duration,
+                Status = b.Status,
+                CreatedAt = b.CreatedAt,
+                CancelledAt = b.CancelledAt
+            }).ToList();
+        }
 
-			var open = field.OpenTime;
-			var close = field.CloseTime;
+        public async Task<List<TimeSlotDto>> GetAvailableTimeSlotsWithNextDayAsync(int fieldId, DateTime date)
+        {
+            var field = await _fieldRepo.GetAsync(fieldId)
+				   ?? throw new Exception("Field not found");
 
-			var slots = new List<(TimeOnly, TimeOnly)>();
-			var current = open;
+            if (date.Date < DateTime.UtcNow.Date)
+                throw new Exception("Cannot check availability for past dates.");
 
-			foreach (var booking in bookings.OrderBy(b => b.StartTime))
-			{
-				if (current < booking.StartTime)
-				{
-					slots.Add((current, booking.StartTime));
-				}
-				current = booking.EndTime > current ? booking.EndTime : current;
-			}
+            if (date.Date > DateTime.UtcNow.Date.AddDays(90))
+                throw new Exception("You can only view availability up to 90 days in advance.");
 
-			if (current < close)
-				slots.Add((current, close));
+            var open = field.OpenTime;
+            var close = field.CloseTime;
+            bool isOpen24Hours = open == TimeOnly.MinValue && close == TimeOnly.MaxValue;
 
-			return slots;
-		}
+            var availabilityStart = date.Date.Add(open.ToTimeSpan());
+            var availabilityEnd = open < close
+                ? date.Date.Add(close.ToTimeSpan())
+                : date.Date.AddDays(1).Add(close.ToTimeSpan());
+
+            var extendedEnd = availabilityEnd.AddHours(3);
+            var slotDuration = TimeSpan.FromMinutes(30);
+
+            // Load relevant bookings
+            var bookings = await _bookingRepo.GetListByConditionAsync(
+                b => b.FieldId == fieldId &&
+                    (b.BookingDate == date || b.BookingDate == date.AddDays(1) || b.BookingDate == date.AddDays(-1))
+            );
+
+            // Build list of blocked time ranges
+            var blockedRanges = bookings.Select(b =>
+            {
+                var bStart = b.BookingDate.Add(b.StartTime.ToTimeSpan());
+                var bEnd = b.StartTime < b.EndTime
+                    ? b.BookingDate.Add(b.EndTime.ToTimeSpan())
+                    : b.BookingDate.AddDays(1).Add(b.EndTime.ToTimeSpan());
+
+                return (Start: bStart, End: bEnd);
+            }).ToList();
+
+            // Scan through all time and merge consecutive free ranges
+            var availableRanges = new List<TimeSlotDto>();
+
+            DateTime? currentStart = null;
+
+            for (var time = availabilityStart; time < extendedEnd; time += slotDuration)
+            {
+                var timeEnd = time.Add(slotDuration);
+
+                // Skip if outside operating hours (if not open 24)
+                if (!isOpen24Hours && !IsWithinOperatingHours(TimeOnly.FromDateTime(time), TimeOnly.FromDateTime(timeEnd), open, close))
+                    continue;
+
+                // Is this slot overlapping any existing booking?
+                bool isBlocked = blockedRanges.Any(r => time < r.End && timeEnd > r.Start);
+
+                if (isBlocked)
+                {
+                    // If we were building an open range, close it
+                    if (currentStart.HasValue)
+                    {
+                        availableRanges.Add(new TimeSlotDto
+                        {
+                            StartTime = currentStart.Value.ToString("HH:mm"),
+                            EndTime = time.ToString("HH:mm")
+                        });
+                        currentStart = null;
+                    }
+                }
+                else
+                {
+                    // Start a new open range if not already in one
+                    if (!currentStart.HasValue)
+                        currentStart = time;
+                }
+            }
+
+            // If still open range at the end, close it
+            if (currentStart.HasValue)
+            {
+                availableRanges.Add(new TimeSlotDto
+                {
+                    StartTime = currentStart.Value.ToString("HH:mm"),
+                    EndTime = extendedEnd.ToString("HH:mm")
+                });
+            }
+
+            return availableRanges;
+        }
+
+    
 
 
-		private async Task<string?> ValidateBookingAsync(AddBookingDto bookingDto)
+    private async Task<string?> ValidateBookingAsync(AddBookingDto bookingDto)
 		{
 			var start = TimeOnly.Parse(bookingDto.StartTime);
 			var end = TimeOnly.Parse(bookingDto.EndTime);
