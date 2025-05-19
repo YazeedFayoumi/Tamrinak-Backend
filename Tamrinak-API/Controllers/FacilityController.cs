@@ -26,7 +26,7 @@ namespace Tamrinak_API.Controllers
 			_imageService = imageService;
 		}
 
-		[Authorize(Roles = "Admin, VenueManager")] // TODO
+		[Authorize(Roles = "Admin, SuperAdmin, VenueManager")] // TODO
 		[HttpPost("facility")]
 		public async Task<IActionResult> AddFacility(AddFacilityDto dto)
 		{

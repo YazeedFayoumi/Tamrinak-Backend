@@ -100,7 +100,7 @@ namespace Tamrinak_API.Controllers
         }
 
         [HttpGet("venue-managers")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, SuperAdmin")]
         public async Task<IActionResult> GetVenueManagers()
         {
             var data = await _adminService.GetVenueManagerOverviewsAsync();
