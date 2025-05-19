@@ -63,33 +63,76 @@ namespace Tamrinak_API.Controllers
 			return Ok(newFacility);
 		}
 
-		[HttpPost("facility-image")]
-		public async Task<IActionResult> AddFacilityImage(int facilityId, IFormFile formFile)
-		{
-			var facility = await _facilityService.GetFacilityAsync(facilityId);
-			var canAdd = await _imageService.CanAddEntityImagesAsync<Facility>(facilityId, 15);
-			if (canAdd)
-			{
-				// Upload the image as Base64
-				var base64Image = await _imageService.UploadImageAsync(formFile, "facilities");
+		//[HttpPost("facility-image")]
+		//public async Task<IActionResult> AddFacilityImage(int facilityId, IFormFile formFile)
+		//{
+		//	var facility = await _facilityService.GetFacilityAsync(facilityId);
+		//	var canAdd = await _imageService.CanAddEntityImagesAsync<Facility>(facilityId, 15);
+		//	if (canAdd)
+		//	{
+		//		// Upload the image as Base64
+		//		var base64Image = await _imageService.UploadImageAsync(formFile, "facilities");
 
-				var image = new Image
-				{
-					FacilityId = facilityId,
-					Base64Data = base64Image // Store as Base64
-				};
-				await _imageService.AddImageAsync(image);
-				await _imageService.UpdateImageAsync(image);
-				await _facilityService.UpdateFacilityAsync(facility);
-				return Ok();
-			}
-			else
+		//		var image = new Image
+		//		{
+		//			FacilityId = facilityId,
+		//			Base64Data = base64Image // Store as Base64
+		//		};
+		//		await _imageService.AddImageAsync(image);
+		//		await _imageService.UpdateImageAsync(image);
+		//		await _facilityService.UpdateFacilityAsync(facility);
+		//		return Ok();
+		//	}
+		//	else
+		//	{
+		//		return BadRequest("Max number of images for this facility");
+		//	}
+		//}
+
+		[HttpPost("facility-images")]
+		public async Task<IActionResult> AddFacilityImages(int facilityId, List<IFormFile> formFiles)
+		{
+			try
 			{
-				return BadRequest("Max number of images for this facility");
+				var facility = await _facilityService.GetFacilityAsync(facilityId);
+				if (facility == null)
+					return NotFound("Facility not found.");
+
+				if (formFiles == null || !formFiles.Any())
+					return BadRequest("No files uploaded.");
+
+				int existingCount = (await _imageService.GetImagesAsync(facilityId, "facility")).Count();
+				int maxImages = 15;
+
+				if (existingCount >= maxImages)
+					return BadRequest("Max number of images for this facility.");
+
+				int allowed = maxImages - existingCount;
+				var filesToUpload = formFiles.Take(allowed);
+
+				foreach (var file in filesToUpload)
+				{
+					var base64Image = await _imageService.UploadImageAsync(file, "facilities");
+					var image = new Image
+					{
+						FacilityId = facilityId,
+						Base64Data = base64Image
+					};
+					await _imageService.AddImageAsync(image);
+				}
+
+				await _facilityService.UpdateFacilityAsync(facility);
+				return Ok("Images uploaded successfully.");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error uploading facility images: " + ex.Message);
+				return StatusCode(500, "Internal Server Error: " + ex.Message);
 			}
 		}
 
-        [HttpDelete("facility")]
+
+		[HttpDelete("facility")]
 		public async Task<IActionResult> DeleteFacility(int facilityId)
 		{
 			var facility = await _facilityService.GetFacilityWithImagesAsync(facilityId);
