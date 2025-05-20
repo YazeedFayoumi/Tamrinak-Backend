@@ -2,7 +2,9 @@
 {
     public class StripeIntentRequestDto
     {
-        public decimal Amount { get; set; }
+        public int Amount { get; set; }
         public string Currency { get; set; } = "jod";
+        public int? BookingId { get; set; }
+        public int? MembershipId { get; set; }
     }
 }

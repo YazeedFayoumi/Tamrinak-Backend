@@ -10,7 +10,7 @@ namespace Tamrinak_API.Services.PaymentService
         Task<List<PaymentDto>> GetPaymentsByUserAsync(int userId);
         Task CancelPaymentAsync(int userId, int paymentId);
 
-        Task<PaymentIntent> CreateStripeIntentAsync(decimal amount, string currency);
+        Task<string> CreateStripeIntentAsync(int userId, StripeIntentRequestDto dto);
         Task MarkStripePaymentAsPaidAsync(string transactionId);
     }
 }

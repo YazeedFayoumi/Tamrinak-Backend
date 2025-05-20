@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Stripe;
-
+using Stripe.BillingPortal;
+using Stripe.Checkout;
 using System.Security.Claims;
+using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.PaymentDtos;
 using Tamrinak_API.Services.PaymentService;
 
@@ -67,43 +69,83 @@ namespace Tamrinak_API.Controllers
         }
 
         [HttpPost("stripe/create-intent")]
+        //[Authorize]
         public async Task<IActionResult> CreateStripePaymentIntent([FromBody] StripeIntentRequestDto dto)
         {
-            var intent = await _paymentService.CreateStripeIntentAsync(dto.Amount, dto.Currency);
-            return Ok(new { clientSecret = intent.ClientSecret });
+            try
+            {
+                // int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                //  ?? throw new Exception("User ID not found"));
+                dto.MembershipId =null;
+                var sessionId = await _paymentService.CreateStripeIntentAsync(12, dto);
+                return Ok(new { sessionId });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
-        // Webhook (Stripe -> you)
-       
-        [HttpPost("stripe/webhook")]
-        [AllowAnonymous]
+        [HttpPost("webhook")]
         public async Task<IActionResult> StripeWebhook()
         {
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             var stripeSignature = Request.Headers["Stripe-Signature"];
-            var secret = _config["Stripe:WebhookSecret"];
+            var webhookSecret = _config["Stripe:WebhookSecret"];
 
             Event stripeEvent;
 
             try
             {
-                stripeEvent = EventUtility.ConstructEvent(json, stripeSignature, secret);
+                stripeEvent = EventUtility.ConstructEvent(json, stripeSignature, webhookSecret);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Webhook error: {ex.Message}");
+                Console.WriteLine($"❌ Invalid Stripe Signature: {ex.Message}");
+                return BadRequest();
             }
 
-            // ✅ Use the correct constant or string literal
-            if (stripeEvent.Type == "payment_intent.succeeded")
+            if (stripeEvent.Type == "checkout.session.completed")
             {
-                var intent = stripeEvent.Data.Object as PaymentIntent;
-                if (intent == null)
-                    return BadRequest("Invalid PaymentIntent data.");
+                try
+                {
+                    Console.WriteLine("✅ Handling 'checkout.session.completed'");
 
-                var transactionId = intent.Id;
+                    var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
+                    Console.WriteLine("➡️ Session ID: " + session?.Id);
 
-                await _paymentService.MarkStripePaymentAsPaidAsync(transactionId);
+                    var metadata = session.Metadata;
+                    foreach (var kv in metadata)
+                        Console.WriteLine($"🔖 {kv.Key}: {kv.Value}");
+
+                    // Parse metadata
+                    int userId = int.Parse(metadata["userId"]);
+                    int amount = int.Parse(metadata["amount"]);
+                    int? bookingId = metadata.TryGetValue("bookingId", out var bStr) && int.TryParse(bStr, out var b) ? b : null;
+                    int? membershipId = metadata.TryGetValue("membershipId", out var mStr) && int.TryParse(mStr, out var m) ? m : null;
+
+                    Console.WriteLine($"👤 userId={userId}, 💵 amount={amount}, 🏷️ bookingId={bookingId}, membershipId={membershipId}");
+
+                    var dto = new AddPaymentDto
+                    {
+                        Amount = amount,
+                        Method = DataAccess.Models.PaymentMethod.Stripe,
+                        BookingId = bookingId,
+                        MembershipId = membershipId,
+                        TransactionId = session.Id
+                    };
+
+                    Console.WriteLine("📥 Calling CreatePaymentAsync...");
+
+                    await _paymentService.CreatePaymentAsync(userId, dto);
+
+                    Console.WriteLine("✅ Payment saved to DB");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Webhook logic failed: {ex.Message}");
+                    Console.WriteLine(ex.StackTrace); // very important!
+                    return StatusCode(500, "Webhook failure: " + ex.Message);
+                }
             }
 
             return Ok();
