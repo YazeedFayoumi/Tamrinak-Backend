@@ -23,7 +23,7 @@ namespace Tamrinak_API.Controllers
 			_imageService = imageService;
 		}
 
-		[Authorize(Roles = "Admin, VenueManager")] 
+		[Authorize(Roles = "Admin, SuperAdmin, VenueManager")] 
 		[HttpPost("field")]
 		public async Task<IActionResult> AddField(AddFieldDto dto)
 		{
@@ -63,7 +63,7 @@ namespace Tamrinak_API.Controllers
 		}
 
 		[HttpPost("field-images")]
-		public async Task<IActionResult> AddFieldImages(int fieldId, List<IFormFile> formFiles)
+		public async Task<IActionResult> AddFieldImages([FromForm] int fieldId, List<IFormFile> formFiles)
 		{
 			try
 			{
