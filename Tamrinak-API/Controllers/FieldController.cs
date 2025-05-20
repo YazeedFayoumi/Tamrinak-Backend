@@ -63,7 +63,7 @@ namespace Tamrinak_API.Controllers
 		}
 
 		[HttpPost("field-images")]
-		public async Task<IActionResult> AddFieldImages(int fieldId, List<IFormFile> formFiles)
+		public async Task<IActionResult> AddFieldImages([FromForm] int fieldId, List<IFormFile> formFiles)
 		{
 			try
 			{
