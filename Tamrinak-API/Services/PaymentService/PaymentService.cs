@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Stripe;
+using Stripe.Checkout;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.PaymentDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
@@ -137,9 +138,9 @@ namespace Tamrinak_API.Services.PaymentService
             await _paymentRepo.SaveAsync();
         }
 
-        public async Task<PaymentIntent> CreateStripeIntentAsync(decimal amount, string currency)
+        public async Task<string> CreateStripeIntentAsync(int userId, StripeIntentRequestDto dto)
         {
-            StripeConfiguration.ApiKey = _config["Stripe:SecretKey"];
+   /*         StripeConfiguration.ApiKey = _config["Stripe:SecretKey"];
 
             var options = new PaymentIntentCreateOptions
             {
@@ -149,7 +150,46 @@ namespace Tamrinak_API.Services.PaymentService
             };
 
             var service = new PaymentIntentService();
-            return await service.CreateAsync(options);
+            return await service.CreateAsync(options);*/
+
+            StripeConfiguration.ApiKey = _config["Stripe:SecretKey"];
+
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<SessionLineItemOptions>
+        {
+            new SessionLineItemOptions
+            {
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                   
+                    Currency = dto.Currency,
+                    UnitAmount = dto.Amount,
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = "Tamrinak Payment"
+                    }
+                },
+                Quantity = 1
+            }
+        },
+                Mode = "payment",
+                SuccessUrl = $"{_config["ClientApp:BaseUrl"]}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
+                CancelUrl = $"{_config["ClientApp:BaseUrl"]}/payment-cancelled",
+                Metadata = new Dictionary<string, string>
+        {
+            { "userId", userId.ToString() },
+            { "bookingId", dto.BookingId?.ToString() ?? string.Empty },
+            { "membershipId", dto.MembershipId?.ToString() ?? string.Empty },
+            { "amount", dto.Amount.ToString() },
+            { "currency", dto.Currency }
+        }
+            };
+
+            var service = new SessionService();
+            var session = await service.CreateAsync(options);
+            return session.Id;
         }
 
         public async Task MarkStripePaymentAsPaidAsync(string transactionId)
