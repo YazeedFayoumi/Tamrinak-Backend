@@ -198,7 +198,7 @@ namespace Tamrinak_API.Controllers
 			var result = images.Select(img => new
 			{
 				img.Id,
-				Base64Data = img.Base64Data // Return Base64 data
+				ImageData = $"data:image/jpeg;base64,{img.Base64Data}"
 			});
 
 			return Ok(result);
