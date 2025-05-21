@@ -5,7 +5,7 @@ namespace Tamrinak_API.Services.PaymentService
 {
 	public interface IPaymentService
 	{
-        Task<int> CreatePaymentAsync(int userId, AddPaymentDto dto);
+        Task<int> CreatePaymentAsync(int userId, AddPaymentDto dto, bool fromWebHook);
         Task<PaymentDto?> GetPaymentByIdAsync(int paymentId);
         Task<List<PaymentDto>> GetPaymentsByUserAsync(int userId);
         Task CancelPaymentAsync(int userId, int paymentId);
