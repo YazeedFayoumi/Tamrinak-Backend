@@ -98,6 +98,7 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 		[HttpDelete("delete-profile-picture")]
+		[Authorize] // Add authorization
 		public async Task<IActionResult> DeleteProfilePicture(int userId)
 		{
 			try
@@ -109,9 +110,9 @@ namespace Tamrinak_API.Controllers
 				if (string.IsNullOrEmpty(user.ProfileImageBase64))
 					return BadRequest("No profile image to delete.");
 
-				//var result = await _imageService.DeleteImageAsync(user.ProfileImageBase64);
-				//if (!result)
-				return StatusCode(500, "Error deleting the image.");
+				// var result = await _imageService.DeleteImageAsync(user.ProfileImageBase64);
+				// if (!result)
+				//    return StatusCode(500, "Error deleting the image.");
 
 				user.ProfileImageBase64 = null;
 				await _userService.UpdateUserAsync(user);
@@ -122,7 +123,6 @@ namespace Tamrinak_API.Controllers
 			{
 				return StatusCode(500, $"Internal server error: {ex.Message}");
 			}
-
 		}
 
 		[HttpPatch("profile-picture")]
@@ -207,39 +207,6 @@ namespace Tamrinak_API.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
-		[Authorize]
-		[HttpPost("request-venue-ownership-existing-venue")]
-		public async Task<IActionResult> RequestVenueOwnership([FromBody] VenueOwnershipRequestDto reqDto)
-		{
-			try
-			{
-				var email = User.FindFirst(ClaimTypes.Email)?.Value; // Replace with your actual claim extraction
-				await _userService.RequestVenueOwnershipAsync(email, reqDto);
-				return Ok("Venue ownership request submitted.");
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
-		}
-
-		[HttpPost("request-venue-manager")]
-		[Authorize]
-		public async Task<IActionResult> RequestVenueManagerRole()
-		{
-			try
-			{
-				var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-				await _userService.RequestVenueManagerRoleAsync(userId);
-				return Ok("Venue manager role request submitted.");
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
-		}
-
-
 	}
 
 
