@@ -177,6 +177,7 @@ namespace Tamrinak_API.Services.UserService
 				Id = user.UserId,
 				Name = user.Name,
 				Email = user.Email,
+				ProfileImageBase64 = user.ProfileImageBase64,
 				Roles = user.UserRoles.Select(ur => ur.Role.RoleName).ToList()
 			};
 		}

@@ -168,15 +168,6 @@ namespace Tamrinak_API.Controllers
 			var user = await _userService.GetUserAsync(userId);
 			if (user == null || string.IsNullOrEmpty(user.ProfileImageBase64))
 				return NotFound("Profile image not found.");
-
-
-			// Return Base64 image as data URI
-
-			/*            var imageFileName = Path.GetFileName(user.ProfileImageBase64);
-						var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users", imageFileName);*/
-
-			/* if (!System.IO.File.Exists(imagePath))
-                 return NotFound("Image file not found on server.");*/
 			try
 			{
 				var base64Image = user.ProfileImageBase64;
