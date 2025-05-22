@@ -67,21 +67,35 @@ namespace Tamrinak_API.Controllers
 		//[Authorize]
 		public async Task<ActionResult<UserDto>> GetUserById(int id)
 		{
-			var userDto = await _userService.GetUserDtoAsync(id);
-
-			if (userDto == null)
+			try
 			{
-				return NotFound($"User with ID {id} not found");
+				var userDto = await _userService.GetUserDtoAsync(id);
+
+				if (userDto == null)
+				{
+					return NotFound($"User with ID {id} not found");
+				}
+				return Ok(userDto);
 			}
-			return Ok(userDto);
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpDelete("{id}")]
 		//[Authorize] 
 		public async Task<IActionResult> DeleteUser(int id)
 		{
-			await _userService.DeleteUserAsync(id);
-			return Ok(new { message = $"User with ID {id} deleted successfully." });
+			try
+			{
+				await _userService.DeleteUserAsync(id);
+				return Ok(new { message = $"User with ID {id} deleted successfully." });
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 		[HttpDelete("delete-profile-picture")]
 		public async Task<IActionResult> DeleteProfilePicture(int userId)
@@ -97,7 +111,7 @@ namespace Tamrinak_API.Controllers
 
 				//var result = await _imageService.DeleteImageAsync(user.ProfileImageBase64);
 				//if (!result)
-					return StatusCode(500, "Error deleting the image.");
+				return StatusCode(500, "Error deleting the image.");
 
 				user.ProfileImageBase64 = null;
 				await _userService.UpdateUserAsync(user);
@@ -156,24 +170,24 @@ namespace Tamrinak_API.Controllers
 				return NotFound("Profile image not found.");
 
 
-            // Return Base64 image as data URI
-          
-/*            var imageFileName = Path.GetFileName(user.ProfileImageBase64);
-			var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users", imageFileName);*/
+			// Return Base64 image as data URI
+
+			/*            var imageFileName = Path.GetFileName(user.ProfileImageBase64);
+						var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users", imageFileName);*/
 
 			/* if (!System.IO.File.Exists(imagePath))
                  return NotFound("Image file not found on server.");*/
 			try
 			{
-                var base64Image = user.ProfileImageBase64;
-                var dataUri = $"data:image/jpeg;base64,{base64Image}";
-                var contentType = _imageService.GetContentType(base64Image);
+				var base64Image = user.ProfileImageBase64;
+				var dataUri = $"data:image/jpeg;base64,{base64Image}";
+				var contentType = _imageService.GetContentType(base64Image);
 
-                return Ok(new
-                {
-                    Base64Image = $"data:image/jpeg;base64,{user.ProfileImageBase64}"
-                });
-            }
+				return Ok(new
+				{
+					Base64Image = $"data:image/jpeg;base64,{user.ProfileImageBase64}"
+				});
+			}
 			catch (UnauthorizedAccessException)
 			{
 				return StatusCode(StatusCodes.Status403Forbidden, "Access denied to image file.");
@@ -188,33 +202,54 @@ namespace Tamrinak_API.Controllers
 		[Authorize]
 		public async Task<IActionResult> GetUserProfile()
 		{
-			var email = User.FindFirst(ClaimTypes.Email)?.Value;
-			if (string.IsNullOrEmpty(email))
-				return Unauthorized();
+			try
+			{
+				var email = User.FindFirst(ClaimTypes.Email)?.Value;
+				if (string.IsNullOrEmpty(email))
+					return Unauthorized();
 
-			var profile = await _userService.GetUserProfileAsync(email);
-			return Ok(profile);
+				var profile = await _userService.GetUserProfileAsync(email);
+				return Ok(profile);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
-        [Authorize]
-        [HttpPost("request-venue-ownership-existing-venue")]
-        public async Task<IActionResult> RequestVenueOwnership([FromBody]  VenueOwnershipRequestDto reqDto)
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value; // Replace with your actual claim extraction
-            await _userService.RequestVenueOwnershipAsync(email, reqDto);
-            return Ok("Venue ownership request submitted.");
-        }
+		[Authorize]
+		[HttpPost("request-venue-ownership-existing-venue")]
+		public async Task<IActionResult> RequestVenueOwnership([FromBody] VenueOwnershipRequestDto reqDto)
+		{
+			try
+			{
+				var email = User.FindFirst(ClaimTypes.Email)?.Value; // Replace with your actual claim extraction
+				await _userService.RequestVenueOwnershipAsync(email, reqDto);
+				return Ok("Venue ownership request submitted.");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
-        [HttpPost("request-venue-manager")]
-        [Authorize]
-        public async Task<IActionResult> RequestVenueManagerRole()
-        {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            await _userService.RequestVenueManagerRoleAsync(userId);
-            return Ok("Venue manager role request submitted.");
-        }
+		[HttpPost("request-venue-manager")]
+		[Authorize]
+		public async Task<IActionResult> RequestVenueManagerRole()
+		{
+			try
+			{
+				var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+				await _userService.RequestVenueManagerRoleAsync(userId);
+				return Ok("Venue manager role request submitted.");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
 
-    }
+	}
 
 
 }

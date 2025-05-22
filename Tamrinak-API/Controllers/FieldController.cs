@@ -23,13 +23,13 @@ namespace Tamrinak_API.Controllers
 			_imageService = imageService;
 		}
 
-		[Authorize(Roles = "Admin, SuperAdmin, VenueManager")] 
+		[Authorize(Roles = "Admin, SuperAdmin, VenueManager")]
 		[HttpPost("field")]
 		public async Task<IActionResult> AddField(AddFieldDto dto)
 		{
 			try
 			{
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+				var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
 				var field = await _fieldService.AddFieldAsync(dto, userId);
 				return Ok(field);
@@ -43,23 +43,44 @@ namespace Tamrinak_API.Controllers
 		[HttpGet("field/{id}")]
 		public async Task<IActionResult> GetField(int id)
 		{
-			var field = await _fieldService.GetFieldDetailsAsync(id);
-			return Ok(field);
+			try
+			{
+				var field = await _fieldService.GetFieldDetailsAsync(id);
+				return Ok(field);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("all-fields")]
 		public async Task<IActionResult> GetFields()
 		{
-			var fields = await _fieldService.GetFieldsAsync();
-			return Ok(fields);
+			try
+			{
+				var fields = await _fieldService.GetFieldsAsync();
+				return Ok(fields);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpPut("field")]
 		public async Task<IActionResult> UpdateField(int id, UpdateFieldDto dto)
 		{
-			await _fieldService.UpdateFieldDtoAsync(id, dto);
-			var newField = await _fieldService.GetFieldAsync(id);
-			return Ok(newField);
+			try
+			{
+				await _fieldService.UpdateFieldDtoAsync(id, dto);
+				var newField = await _fieldService.GetFieldAsync(id);
+				return Ok(newField);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpPost("field-images")]
@@ -105,110 +126,159 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-        
 
 
 
-        [HttpDelete("field")]
+
+		[HttpDelete("field")]
 		public async Task<IActionResult> DeleteField(int fieldId)
 		{
-			var field = await _fieldService.GetFieldWithImagesAsync(fieldId);
-			if (field == null)
-				return NotFound();
-
-			// Delete images based on Base64 data
-			var fieldImages = field.Images.ToList();
-			foreach (var image in fieldImages)
+			try
 			{
-				await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+				var field = await _fieldService.GetFieldWithImagesAsync(fieldId);
+				if (field == null)
+					return NotFound();
+
+				// Delete images based on Base64 data
+				var fieldImages = field.Images.ToList();
+				foreach (var image in fieldImages)
+				{
+					await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+				}
+
+				var result = await _fieldService.DeleteFieldAsync(fieldId);
+				if (!result)
+					return NotFound("Field not found");
+
+				return Ok("Field deleted");
 			}
-
-			var result = await _fieldService.DeleteFieldAsync(fieldId);
-			if (!result)
-				return NotFound("Field not found");
-
-			return Ok("Field deleted");
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpDelete("field-image")]
 		public async Task<IActionResult> DeleteFieldImage(int fieldId, int imageId)
 		{
-			var image = await _imageService.GetImageAsync(imageId);
-			if (image == null || image.FieldId != fieldId)
-				return NotFound("Image not found for this field.");
+			try
+			{
+				var image = await _imageService.GetImageAsync(imageId);
+				if (image == null || image.FieldId != fieldId)
+					return NotFound("Image not found for this field.");
 
-			await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
-			return Ok("Image deleted successfully.");
+				await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+				return Ok("Image deleted successfully.");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("field-photo")]
 		public async Task<IActionResult> GetFieldPhoto(int id)
 		{
-			var image = await _imageService.GetImageAsync(id);
-			if (image == null)
-				return NotFound("Image not found.");
+			try
+			{
+				var image = await _imageService.GetImageAsync(id);
+				if (image == null)
+					return NotFound("Image not found.");
 
-			// Return Base64 image as data URI
-			var base64Image = image.Base64Data;
-			var dataUri = $"data:image/jpeg;base64,{base64Image}";
+				// Return Base64 image as data URI
+				var base64Image = image.Base64Data;
+				var dataUri = $"data:image/jpeg;base64,{base64Image}";
 
-			return Ok(new { Image = dataUri });
+				return Ok(new { Image = dataUri });
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("ren-field-photo")]
 		public async Task<IActionResult> GetRenFieldPhoto(int id)
 		{
-			var image = await _imageService.GetImageAsync(id);
-			if (image == null)
-				return NotFound("Image not found.");
+			try
+			{
+				var image = await _imageService.GetImageAsync(id);
+				if (image == null)
+					return NotFound("Image not found.");
 
-			// Return Base64 image as file content
-			var base64Image = image.Base64Data;
-			var byteArray = Convert.FromBase64String(base64Image);
-			var contentType = _imageService.GetContentTypeFromBase64(base64Image);
+				// Return Base64 image as file content
+				var base64Image = image.Base64Data;
+				var byteArray = Convert.FromBase64String(base64Image);
+				var contentType = _imageService.GetContentTypeFromBase64(base64Image);
 
-			return File(byteArray, contentType);
+				return File(byteArray, contentType);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("field-photo-list")]
 		public async Task<IActionResult> GetFieldPhotoList(int fieldId)
 		{
-			var images = await _imageService.GetImagesAsync(fieldId, "field");
-			if (images == null)
-				return NotFound("Images not found.");
-
-			// Return Base64 data for each image
-			var result = images.Select(img => new
+			try
 			{
-				img.Id,
-				ImageData = $"data:image/jpeg;base64,{img.Base64Data}"
-			});
+				var images = await _imageService.GetImagesAsync(fieldId, "field");
+				if (images == null)
+					return NotFound("Images not found.");
 
-			return Ok(result);
+				// Return Base64 data for each image
+				var result = images.Select(img => new
+				{
+					img.Id,
+					ImageData = $"data:image/jpeg;base64,{img.Base64Data}"
+				});
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("by-sport/{sportId}")]
 		public async Task<IActionResult> GetFieldsBySport(int sportId)
 		{
-			var result = await _fieldService.GetFieldsBySportAsync(sportId);
-			if (!result.Any())
-				return NotFound("No fields found for this sport.");
-			return Ok(result);
+			try
+			{
+				var result = await _fieldService.GetFieldsBySportAsync(sportId);
+				if (!result.Any())
+					return NotFound("No fields found for this sport.");
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("sport-images/{sportId}")]
 		public async Task<IActionResult> GetSportImages(int sportId)
 		{
-			var images = await _imageService.GetImagesAsync(sportId, "sport");
+			try
+			{
+				var images = await _imageService.GetImagesAsync(sportId, "sport");
 
-			if (!images.Any())
-				return NotFound("No images found for this sport.");
+				if (!images.Any())
+					return NotFound("No images found for this sport.");
 
-			var imageData = images.Select(i => $"data:image/jpeg;base64,{i.Base64Data}").ToList();
+				var imageData = images.Select(i => $"data:image/jpeg;base64,{i.Base64Data}").ToList();
 
-			return Ok(imageData);
+				return Ok(imageData);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
-        /*[HttpDelete("delete-field-images/{fieldId}")]
+		/*[HttpDelete("delete-field-images/{fieldId}")]
         //[Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> DeleteFieldImages(int fieldId)
         {
@@ -220,33 +290,54 @@ namespace Tamrinak_API.Controllers
             return Ok("All images deleted.");
         }*/
 
-        [HttpPut("{fieldId}/archive")]
-        //[Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<IActionResult> SoftDeleteField(int fieldId)
-        {
-            var result = await _fieldService.SetUnavailableFieldAsync(fieldId);
-            if (!result)
-                return NotFound("Field not found");
+		[HttpPut("{fieldId}/archive")]
+		//[Authorize(Roles = "Admin,SuperAdmin")]
+		public async Task<IActionResult> SoftDeleteField(int fieldId)
+		{
+			try
+			{
+				var result = await _fieldService.SetUnavailableFieldAsync(fieldId);
+				if (!result)
+					return NotFound("Field not found");
 
-            return Ok("Field has been archived (soft deleted).");
-        }
+				return Ok("Field has been archived (soft deleted).");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
-        [HttpPut("{fieldId}/reactivate")]
-        //[Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<IActionResult> ReactivateField(int fieldId)
-        {
-            var result = await _fieldService.ReactivateFieldAsync(fieldId);
-            if (!result)
-                return NotFound("Field not found.");
-            return Ok("Field reactivated.");
-        }
+		[HttpPut("{fieldId}/reactivate")]
+		//[Authorize(Roles = "Admin,SuperAdmin")]
+		public async Task<IActionResult> ReactivateField(int fieldId)
+		{
+			try
+			{
+				var result = await _fieldService.ReactivateFieldAsync(fieldId);
+				if (!result)
+					return NotFound("Field not found.");
+				return Ok("Field reactivated.");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
-        [HttpGet("pag-fields/by-sport/{sportId}")]
-        public async Task<IActionResult> GetPagFieldsBySport(int sportId, [FromQuery] PaginationDto pagination)
-        {
-            var result = await _fieldService.GetPagFieldsBySportAsync(sportId, pagination);
-            return Ok(result);
-        }
+		[HttpGet("pag-fields/by-sport/{sportId}")]
+		public async Task<IActionResult> GetPagFieldsBySport(int sportId, [FromQuery] PaginationDto pagination)
+		{
+			try
+			{
+				var result = await _fieldService.GetPagFieldsBySportAsync(sportId, pagination);
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
-    }
+	}
 }

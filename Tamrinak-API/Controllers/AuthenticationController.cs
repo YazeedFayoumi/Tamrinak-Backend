@@ -19,14 +19,28 @@ namespace Tamrinak_API.Controllers
 		[HttpPost("Login")]
 		public async Task<ActionResult> LoginUser([FromBody] UserLoginDto loginUser)
 		{
-			LoginResponse response = await _authService.LoginAsync(loginUser);
-			return Ok(response);
+			try
+			{
+				LoginResponse response = await _authService.LoginAsync(loginUser);
+				return Ok(response);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 		[HttpPost("logout")]
 		public IActionResult Logout()
 		{
-			Response.Cookies.Delete("jwt");
-			return Ok("Logged out successfully.");
+			try
+			{
+				Response.Cookies.Delete("jwt");
+				return Ok("Logged out successfully.");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[Authorize]

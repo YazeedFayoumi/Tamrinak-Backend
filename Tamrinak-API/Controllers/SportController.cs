@@ -20,7 +20,7 @@ namespace Tamrinak_API.Controllers
 		}
 
 		//[Authorize(Roles = "Admin")] // TODO
-	    [HttpPost("sport")]
+		[HttpPost("sport")]
 		public async Task<IActionResult> AddSport([FromForm] AddSportDto dto, IFormFile formFile)
 		{
 			try
@@ -53,64 +53,103 @@ namespace Tamrinak_API.Controllers
 		[HttpGet("all-sports")]
 		public async Task<IActionResult> GetAllSports()
 		{
-			var sports = await _sportService.GetAllSportsAsync();
-			return Ok(sports);
+			try
+			{
+				var sports = await _sportService.GetAllSportsAsync();
+				return Ok(sports);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("sport/{id}")]
 		public async Task<IActionResult> GetSport(int id)
 		{
-			var sport = await _sportService.GetSportDetailAsync(id);
-			return Ok(sport);
+			try
+			{
+				var sport = await _sportService.GetSportDetailAsync(id);
+				if (sport == null)
+				{
+					return NotFound($"Sport with ID {id} not found");
+				}
+				return Ok(sport);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, "An error occurred while processing your request");
+			}
 		}
 
 		[HttpPut("sport")]
 		public async Task<IActionResult> UpdateSport(int id, UpdateSportDto dto)
 		{
-			await _sportService.UpdateSportDtoAsync(id, dto);
-			return Ok(dto);
+			try
+			{
+				await _sportService.UpdateSportDtoAsync(id, dto);
+				return Ok(dto);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpDelete("sport")]
 		public async Task<IActionResult> DeleteSport(int id)
 		{
-			await _sportService.DeleteSportAsync(id);
-			return Ok();
+			try
+			{
+				await _sportService.DeleteSportAsync(id);
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpPost("sport-image/{id}")]
 		[Consumes("multipart/form-data")]
 		public async Task<IActionResult> UpdateSportImage(int id, IFormFile formFile)
 		{
-			if (formFile == null || formFile.Length == 0)
-				return BadRequest("No file uploaded");
-
-			var sport = await _sportService.GetSportByIdAsync(id);
-			if (sport == null)
-				return NotFound("Sport not found");
-
-			// Get existing images for the sport
-			var existingImages = await _imageService.GetImagesAsync(id, "sport");
-
-			// Delete existing images from the database
-			foreach (var img in existingImages.ToList())
+			try
 			{
-				await _imageService.DeleteImageAsync(img.Base64Data); // Use Base64Data for deletion
+				if (formFile == null || formFile.Length == 0)
+					return BadRequest("No file uploaded");
+
+				var sport = await _sportService.GetSportByIdAsync(id);
+				if (sport == null)
+					return NotFound("Sport not found");
+
+				// Get existing images for the sport
+				var existingImages = await _imageService.GetImagesAsync(id, "sport");
+
+				// Delete existing images from the database
+				foreach (var img in existingImages.ToList())
+				{
+					await _imageService.DeleteImageAsync(img.Base64Data); // Use Base64Data for deletion
+				}
+
+				// Upload new image as Base64
+				var base64Image = await _imageService.UploadImageAsync(formFile, "sports");
+
+				// Create a new image entity
+				var image = new Image
+				{
+					SportId = id,
+					Base64Data = base64Image // Save the Base64 image data
+				};
+
+				await _imageService.AddImageAsync(image);
+
+				return Ok("Image updated successfully");
 			}
-
-			// Upload new image as Base64
-			var base64Image = await _imageService.UploadImageAsync(formFile, "sports");
-
-			// Create a new image entity
-			var image = new Image
+			catch (Exception ex)
 			{
-				SportId = id,
-				Base64Data = base64Image // Save the Base64 image data
-			};
-
-			await _imageService.AddImageAsync(image);
-
-			return Ok("Image updated successfully");
+				return BadRequest(ex.Message);
+			}
 		}
 	}
 }

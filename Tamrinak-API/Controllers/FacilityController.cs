@@ -32,8 +32,8 @@ namespace Tamrinak_API.Controllers
 		{
 			try
 			{
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                var facility = await _facilityService.AddFacilityAsync(dto, userId);
+				var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+				var facility = await _facilityService.AddFacilityAsync(dto, userId);
 				return Ok(facility);
 			}
 			catch (Exception ex)
@@ -45,22 +45,43 @@ namespace Tamrinak_API.Controllers
 		[HttpGet("facility/{id}")]
 		public async Task<IActionResult> GetFacility(int id)
 		{
-			var facility = await _facilityService.GetFacilityDetailsAsync(id);
-			return Ok(facility);
+			try
+			{
+				var facility = await _facilityService.GetFacilityDetailsAsync(id);
+				return Ok(facility);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("facilities")]
 		public async Task<IActionResult> Getfacilities()
 		{
-			var facilities = await _facilityService.GetFacilitiesAsync();
-			return Ok(facilities);
+			try
+			{
+				var facilities = await _facilityService.GetFacilitiesAsync();
+				return Ok(facilities);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpPut("facility")]
 		public async Task<IActionResult> UpdateFacility(int id, UpdateFacilityDto dto)
 		{
-			var newFacility = await _facilityService.UpdateFacilityDtoAsync(id, dto);// _facilityService.GetFacilityAsync(id);
-			return Ok(newFacility);
+			try
+			{
+				var newFacility = await _facilityService.UpdateFacilityDtoAsync(id, dto);// _facilityService.GetFacilityAsync(id);
+				return Ok(newFacility);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		//[HttpPost("facility-image")]
@@ -135,123 +156,186 @@ namespace Tamrinak_API.Controllers
 		[HttpDelete("facility")]
 		public async Task<IActionResult> DeleteFacility(int facilityId)
 		{
-			var facility = await _facilityService.GetFacilityWithImagesAsync(facilityId);
-			if (facility == null)
-				return NotFound();
-
-			var facilityImages = facility.Images.ToList();
-			foreach (var image in facilityImages)
+			try
 			{
-				await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+				var facility = await _facilityService.GetFacilityWithImagesAsync(facilityId);
+				if (facility == null)
+					return NotFound();
+
+				var facilityImages = facility.Images.ToList();
+				foreach (var image in facilityImages)
+				{
+					await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+				}
+
+				var result = await _facilityService.DeleteFacilityAsync(facilityId);
+				if (!result)
+					return NotFound("Facility not found");
+
+				return Ok("Facility deleted");
 			}
-
-			var result = await _facilityService.DeleteFacilityAsync(facilityId);
-			if (!result)
-				return NotFound("Facility not found");
-
-			return Ok("Facility deleted");
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpDelete("facility-image")]
 		public async Task<IActionResult> DeleteFacilityImage(int facilityId, int imageId)
 		{
-			var image = await _imageService.GetImageAsync(imageId);
-			if (image == null || image.FacilityId != facilityId)
-				return NotFound("Image not found for this Facility.");
+			try
+			{
+				var image = await _imageService.GetImageAsync(imageId);
+				if (image == null || image.FacilityId != facilityId)
+					return NotFound("Image not found for this Facility.");
 
-			await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+				await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
 
-			return Ok("Image deleted successfully.");
+				return Ok("Image deleted successfully.");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("facility-photo")]
 		public async Task<IActionResult> GetFacilityPhoto(int id)
 		{
-			var image = await _imageService.GetImageAsync(id);
-			if (image == null)
-				return NotFound("Image not found.");
+			try
+			{
+				var image = await _imageService.GetImageAsync(id);
+				if (image == null)
+					return NotFound("Image not found.");
 
-			// Return the Base64 data as the response
-			return Ok(image.Base64Data);
+				// Return the Base64 data as the response
+				return Ok(image.Base64Data);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("ren-facility-photo")]
 		public async Task<IActionResult> GetRenFacilityPhoto(int id)
 		{
-			var image = await _imageService.GetImageAsync(id);
-			if (image == null)
-				return NotFound("Image not found.");
+			try
+			{
+				var image = await _imageService.GetImageAsync(id);
+				if (image == null)
+					return NotFound("Image not found.");
 
-			var base64Image = image.Base64Data;
+				var base64Image = image.Base64Data;
 
-			// Return the Base64 data as a response
-			return Ok(base64Image);
+				// Return the Base64 data as a response
+				return Ok(base64Image);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("facility-photo-list")]
 		public async Task<IActionResult> GetFacilityPhotoList(int facilityId)
 		{
-			var images = await _imageService.GetImagesAsync(facilityId, "facility");
-			if (images == null)
-				return NotFound("Images not found.");
-
-			var result = images.Select(img => new
+			try
 			{
-				img.Id,
-				ImageData = $"data:image/jpeg;base64,{img.Base64Data}"
-			});
+				var images = await _imageService.GetImagesAsync(facilityId, "facility");
+				if (images == null)
+					return NotFound("Images not found.");
 
-			return Ok(result);
+				var result = images.Select(img => new
+				{
+					img.Id,
+					ImageData = $"data:image/jpeg;base64,{img.Base64Data}"
+				});
+
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("by-sport/{sportId}")]
 		public async Task<IActionResult> GetFacilitiesBySport(int sportId)
 		{
-			var result = await _facilityService.GetFacilitiesBySportAsync(sportId);
-			if (!result.Any())
-				return NotFound("No facilities found for this sport.");
-			return Ok(result);
+			try
+			{
+				var result = await _facilityService.GetFacilitiesBySportAsync(sportId);
+				if (!result.Any())
+					return NotFound("No facilities found for this sport.");
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
-     /*   [HttpDelete("delete-facility-images/{facilityId}")]
-        //[Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<IActionResult> DeleteFieldImages(int fieldId)
-        {
-            var images = await _imageService.GetImagesAsync(fieldId, "facility");
-            foreach (var img in images)
-            {
-                await _imageService.DeleteImageAsync(img.Url);
-            }
-            return Ok("All images deleted.");
-        }
-*/
-        [HttpPut("{facilityId}/archive")]
-        //[Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<IActionResult> SetUnavailableFacility(int facilityId)
-        {
-            var success = await _facilityService.SetUnavailableFacilityAsync(facilityId);
-            if (!success)
-                return NotFound("Facility not found");
+		/*   [HttpDelete("delete-facility-images/{facilityId}")]
+		   //[Authorize(Roles = "Admin,SuperAdmin")]
+		   public async Task<IActionResult> DeleteFieldImages(int fieldId)
+		   {
+			   var images = await _imageService.GetImagesAsync(fieldId, "facility");
+			   foreach (var img in images)
+			   {
+				   await _imageService.DeleteImageAsync(img.Url);
+			   }
+			   return Ok("All images deleted.");
+		   }
+   */
+		[HttpPut("{facilityId}/archive")]
+		//[Authorize(Roles = "Admin,SuperAdmin")]
+		public async Task<IActionResult> SetUnavailableFacility(int facilityId)
+		{
+			try
+			{
+				var success = await _facilityService.SetUnavailableFacilityAsync(facilityId);
+				if (!success)
+					return NotFound("Facility not found");
 
-            return Ok("Facility has been archived (soft deleted).");
-        }
+				return Ok("Facility has been archived (soft deleted).");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
-        [HttpPut("{facilityId}/reactivate")]
-        //[Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<IActionResult> ReactivateFacility(int facilityId)
-        {
-            var result = await _facilityService.ReactivateFacilityAsync(facilityId);
-            if (!result)
-                return NotFound("Facility not found.");
-            return Ok("Facility reactivated.");
-        }
+		[HttpPut("{facilityId}/reactivate")]
+		//[Authorize(Roles = "Admin,SuperAdmin")]
+		public async Task<IActionResult> ReactivateFacility(int facilityId)
+		{
+			try
+			{
+				var result = await _facilityService.ReactivateFacilityAsync(facilityId);
+				if (!result)
+					return NotFound("Facility not found.");
+				return Ok("Facility reactivated.");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
-        [HttpGet("pag-facilities/by-sport/{sportId}")]
-        public async Task<IActionResult> GetPagFacilitiesBySport(int sportId, [FromQuery] PaginationDto pagination)
-        {
-            var result = await _facilityService.GetPagFacilitiesBySportAsync(sportId, pagination);
-            return Ok(result);
-        }
+		[HttpGet("pag-facilities/by-sport/{sportId}")]
+		public async Task<IActionResult> GetPagFacilitiesBySport(int sportId, [FromQuery] PaginationDto pagination)
+		{
+			try
+			{
+				var result = await _facilityService.GetPagFacilitiesBySportAsync(sportId, pagination);
+				return Ok(result);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
+		}
 
-    }
+	}
 }

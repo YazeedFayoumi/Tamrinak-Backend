@@ -42,32 +42,60 @@ namespace Tamrinak_API.Controllers
 		[HttpGet("user")]
 		public async Task<IActionResult> GetUserMemberships()
 		{
-			var email = User.FindFirst(ClaimTypes.Email)?.Value;
-			var memberships = await _membershipService.GetUserMembershipsAsync(email);
-			return Ok(memberships);
+			try
+			{
+				var email = User.FindFirst(ClaimTypes.Email)?.Value;
+				var memberships = await _membershipService.GetUserMembershipsAsync(email);
+				return Ok(memberships);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpGet("{id}")]
 		public async Task<IActionResult> GetMembershipById(int id)
 		{
-			var membership = await _membershipService.GetMembershipByIdAsync(id);
-			return Ok(membership);
+			try
+			{
+				var membership = await _membershipService.GetMembershipByIdAsync(id);
+				return Ok(membership);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpPut("{id}/cancel")]
 		public async Task<IActionResult> CancelMembership(int id)
 		{
-			var email = User.FindFirst(ClaimTypes.Email)?.Value;
-			await _membershipService.CancelMembershipAsync(id, email);
-			return NoContent();
+			try
+			{
+				var email = User.FindFirst(ClaimTypes.Email)?.Value;
+				await _membershipService.CancelMembershipAsync(id, email);
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteMembership(int id)
 		{
-			var email = User.FindFirst(ClaimTypes.Email)?.Value;
-			await _membershipService.DeleteMembershipAsync(id, email);
-			return Ok("Membership deleted");
+			try
+			{
+				var email = User.FindFirst(ClaimTypes.Email)?.Value;
+				await _membershipService.DeleteMembershipAsync(id, email);
+				return Ok("Membership deleted");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(ex.Message);
+			}
 		}
 
 		//TODO get all Memberships
