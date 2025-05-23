@@ -98,10 +98,11 @@ namespace Tamrinak_API.Controllers
 		{
 			try
 			{
-				// int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-				//  ?? throw new Exception("User ID not found"));
-				//dto.MembershipId =null;
-				var sessionId = await _paymentService.CreateStripeIntentAsync(12, dto);
+				/*int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+				?? throw new Exception("User ID not found"));*/
+
+		
+                var sessionId = await _paymentService.CreateStripeIntentAsync(12, dto);
 				return Ok(new { sessionId });
 			}
 			catch (Exception ex)
@@ -112,81 +113,6 @@ namespace Tamrinak_API.Controllers
 		[HttpPost("webhook")]
 		public async Task<IActionResult> StripeWebhook()
 		{
-			/*Console.WriteLine("🎯 StripeWebhook triggered");
-
-            HttpContext.Request.EnableBuffering();
-            //var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-            string json;
-            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
-            {
-                json = await reader.ReadToEndAsync();
-            }
-
-            Console.WriteLine("🔍 Webhook raw body: " + json);
-
-            HttpContext.Request.Body.Position = 0;
-
-            var stripeSignature = Request.Headers["Stripe-Signature"];
-            var webhookSecret = _config["Stripe:WebhookSecret"];
-
-            Event stripeEvent;
-
-            try
-            {
-                stripeEvent = EventUtility.ConstructEvent(json, stripeSignature, webhookSecret);
-                Console.WriteLine("Event! ");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Invalid Stripe Signature: {ex.Message}");
-                return BadRequest();
-            }
-
-            if (stripeEvent.Type == "checkout.session.completed")
-            {
-                try
-                {
-                    Console.WriteLine("✅ Handling 'checkout.session.completed'");
-
-                    var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
-                    Console.WriteLine("➡️ Session ID: " + session?.Id);
-
-                    var metadata = session.Metadata;
-                    foreach (var kv in metadata)
-                        Console.WriteLine($"🔖 {kv.Key}: {kv.Value}");
-
-                    // Parse metadata
-                    int userId = int.Parse(metadata["userId"]);
-                    int amount = int.Parse(metadata["amount"]);
-                    int? bookingId = metadata.TryGetValue("bookingId", out var bStr) && int.TryParse(bStr, out var b) ? b : null;
-                    int? membershipId = metadata.TryGetValue("membershipId", out var mStr) && int.TryParse(mStr, out var m) ? m : null;
-
-                    Console.WriteLine($"👤 userId={userId}, 💵 amount={amount}, 🏷️ bookingId={bookingId}, membershipId={membershipId}");
-
-                    var dto = new AddPaymentDto
-                    {
-                        Amount = amount,
-                        Method = DataAccess.Models.PaymentMethod.Stripe,
-                        BookingId = bookingId,
-                        MembershipId = membershipId,
-                        TransactionId = session.Id
-                    };
-
-                    Console.WriteLine("📥 Calling CreatePaymentAsync...");
-
-                    await _paymentService.CreatePaymentAsync(userId, dto, true);
-
-                    Console.WriteLine("✅ Payment saved to DB");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"❌ Webhook logic failed: {ex.Message}");
-                    Console.WriteLine(ex.StackTrace); // very important!
-                    return StatusCode(500, "Webhook failure: " + ex.Message);
-                }
-            }
-
-            return Ok();*/
 			var json = await new StreamReader(Request.Body).ReadToEndAsync();
 
 			Console.WriteLine("📥 Webhook Raw Body: " + json);

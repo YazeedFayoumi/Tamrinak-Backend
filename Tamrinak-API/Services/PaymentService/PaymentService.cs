@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Stripe;
 using Stripe.Checkout;
+using Stripe.V2;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.PaymentDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
@@ -300,17 +301,6 @@ namespace Tamrinak_API.Services.PaymentService
 
         public async Task<string> CreateStripeIntentAsync(int userId, StripeIntentRequestDto dto)
         {
-   /*         StripeConfiguration.ApiKey = _config["Stripe:SecretKey"];
-
-            var options = new PaymentIntentCreateOptions
-            {
-                Amount = (long)(amount * 100), // Stripe uses smallest currency unit (e.g., 100 JOD = 10000)
-                Currency = currency,
-                PaymentMethodTypes = new List<string> { "card" }
-            };
-
-            var service = new PaymentIntentService();
-            return await service.CreateAsync(options);*/
 
             StripeConfiguration.ApiKey = _config["Stripe:SecretKey"];
 
@@ -321,34 +311,35 @@ namespace Tamrinak_API.Services.PaymentService
                 SuccessUrl = $"{_config["ClientApp:BaseUrl"]}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{_config["ClientApp:BaseUrl"]}/payment-cancelled",
                 LineItems = new List<SessionLineItemOptions>
-    {
-        new SessionLineItemOptions
-        {
-            PriceData = new SessionLineItemPriceDataOptions
-            {
-                Currency = dto.Currency,
-                UnitAmount = dto.Amount,
-                ProductData = new SessionLineItemPriceDataProductDataOptions
-                {
-                    Name = "Tamrinak Payment"
-                }
-            },
-            Quantity = 1
-        }
-    },
+                    {
+                        new SessionLineItemOptions
+                        {
+                            PriceData = new SessionLineItemPriceDataOptions
+                            {
+                                Currency = dto.Currency,
+                                UnitAmount = (dto.Amount * 100),        
+
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                                {
+                                    Name = "Tamrinak Payment"
+                                }
+                            },
+                            Quantity = 1
+                        }
+                    },
                 PaymentIntentData = new SessionPaymentIntentDataOptions
                 {
                     Metadata = new Dictionary<string, string>
-        {
-          { "userId", userId.ToString() },
-            { "bookingId", dto.BookingId?.ToString() ?? string.Empty },
-            { "membershipId", dto.MembershipId?.ToString() ?? string.Empty },
-            { "amount", dto.Amount.ToString() },
-            { "currency", dto.Currency }
-        }
-                }
-            };
-
+                        {
+                            { "userId", userId.ToString() },
+                            { "bookingId", dto.BookingId?.ToString() ?? string.Empty },
+                            { "membershipId", dto.MembershipId?.ToString() ?? string.Empty },
+                            { "amount", dto.Amount.ToString() },
+                            { "currency", dto.Currency }
+                        }
+                    }
+                };
+            
             var service = new SessionService();
             var session = await service.CreateAsync(options);
             return session.Id;
