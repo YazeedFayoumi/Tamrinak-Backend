@@ -4,6 +4,7 @@ using Google.Apis.Util.Store;
 using Google.Apis.Services;
 using MimeKit;
 using Google.Apis.Gmail.v1.Data;
+using Tamrinak_API.DTO.AdminDtos;
 
 namespace Tamrinak_API.Services.EmailService
 {
@@ -118,6 +119,20 @@ namespace Tamrinak_API.Services.EmailService
 
             await SendEmailAsync(toEmail, subject, htmlBody, plainTextBody);
         }
+
+        public async Task SendContactMessageAsync(ContactMessageDto dto)
+        {
+            var subject = $"New Contact Message from {dto.Name}";
+            var body = $@"
+			<h3>New message from Tamrinak contact form</h3>
+			<p><strong>Name:</strong> {dto.Name}</p>
+			<p><strong>Email:</strong> {dto.Email}</p>
+			<p><strong>Message:</strong></p>
+			<p>{dto.Message}</p>";
+
+            await SendEmailAsync("yazeed.fayoumi@gmail.com", subject, body); 
+        }
+
 
     }
 }

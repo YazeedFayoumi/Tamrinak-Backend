@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Tamrinak_API.DTO.AdminDtos;
 using Tamrinak_API.Services.AdminService;
+using Tamrinak_API.Services.EmailService;
 using Tamrinak_API.Services.UserService;
 
 namespace Tamrinak_API.Controllers
@@ -14,10 +16,11 @@ namespace Tamrinak_API.Controllers
 	public class AdminController : ControllerBase
 	{
 		private readonly IAdminService _adminService;
-
-		public AdminController(IAdminService adminService)
+		private readonly IEmailService _emailService;
+		public AdminController(IAdminService adminService, IEmailService emailService)
 		{
 			_adminService = adminService;
+			_emailService = emailService;
 		}
 
 		[HttpGet("users")]
@@ -406,5 +409,22 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-	}
+        ////
+        [HttpPost("contact")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendContactMessage([FromBody] ContactMessageDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name) ||
+                string.IsNullOrWhiteSpace(dto.Email) ||
+                string.IsNullOrWhiteSpace(dto.Message))
+            {
+                return BadRequest("All fields are required.");
+            }
+
+            await _emailService.SendContactMessageAsync(dto);
+            return Ok("Your message has been sent.");
+        }
+
+
+    }
 }
