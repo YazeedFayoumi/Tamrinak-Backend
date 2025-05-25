@@ -360,6 +360,16 @@ namespace Tamrinak_API.Services.PaymentService
             await _paymentRepo.SaveAsync();
         }
 
+        public async Task HandleStripePaymentFailedAsync(string transactionId, string failureReason)
+        {
+            var payment = await _paymentRepo.GetByConditionAsync(p => p.TransactionId == transactionId);
+            if (payment == null) return;
+
+            payment.Status = PaymentStatus.Failed;
+           // payment.FailureReason = failureReason;
+            await _paymentRepo.UpdateAsync(payment);
+            await _paymentRepo.SaveAsync();
+        }
 
         private PaymentDto ToDto(Payment p)
         {

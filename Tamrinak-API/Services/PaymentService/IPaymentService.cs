@@ -12,5 +12,6 @@ namespace Tamrinak_API.Services.PaymentService
 
         Task<string> CreateStripeIntentAsync(int userId, StripeIntentRequestDto dto);
         Task MarkStripePaymentAsPaidAsync(string transactionId);
+        Task HandleStripePaymentFailedAsync(string transactionId, string failureReason);
     }
 }

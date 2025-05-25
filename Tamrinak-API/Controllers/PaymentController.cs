@@ -93,13 +93,13 @@ namespace Tamrinak_API.Controllers
 		}
 
 		[HttpPost("stripe/create-intent")]
-		//[Authorize]
+		[Authorize]
 		public async Task<IActionResult> CreateStripePaymentIntent([FromBody] StripeIntentRequestDto dto)
 		{
 			try
 			{
-				/*int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-				?? throw new Exception("User ID not found"));*/
+				int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+				?? throw new Exception("User ID not found"));
 
 		
                 var sessionId = await _paymentService.CreateStripeIntentAsync(12, dto);
@@ -115,7 +115,6 @@ namespace Tamrinak_API.Controllers
 		{
 			var json = await new StreamReader(Request.Body).ReadToEndAsync();
 
-			Console.WriteLine("📥 Webhook Raw Body: " + json);
 
 			try
 			{
@@ -125,9 +124,7 @@ namespace Tamrinak_API.Controllers
 					_config["Stripe:WebhookSecret"]
 				);
 
-				// Log basic info
-				Console.WriteLine($"✅ Stripe event: {stripeEvent.Type} - ID: {stripeEvent.Id}");
-
+				
 				// Call your service based on event type
 				if (stripeEvent.Type == "checkout.session.completed")
 				{
@@ -161,11 +158,17 @@ namespace Tamrinak_API.Controllers
 					};
 
 					var result = await _paymentService.CreatePaymentAsync(userId, dto, fromWebHook: true);
-					Console.WriteLine($"✅ Payment created via webhook. ID: {result}");
-				}
+                    
+                }
+				else if(stripeEvent.Type == "payment_intent.payment_failed")
+				{
+                    var failedIntent = stripeEvent.Data.Object as PaymentIntent;
+                    var failureMessage = failedIntent?.LastPaymentError?.Message ?? "Unknown failure";
+                    await _paymentService.HandleStripePaymentFailedAsync(failedIntent.Id, failureMessage);
+                }
+                return Ok();
 
-				return Ok();
-			}
+            }
 			catch (StripeException ex)
 			{
 				Console.WriteLine($"❌ Stripe webhook error: {ex.Message}");
