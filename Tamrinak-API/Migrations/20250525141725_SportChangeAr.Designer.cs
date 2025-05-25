@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tamrinak_API.DataAccess;
 
@@ -11,9 +12,11 @@ using Tamrinak_API.DataAccess;
 namespace Tamrinak_API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250525141725_SportChangeAr")]
+    partial class SportChangeAr
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -574,7 +577,7 @@ namespace Tamrinak_API.Migrations
                         {
                             SportId = 4,
                             Description = "Racket sport played individually or in pairs",
-                            Name = "التنس"
+                            Name = "تنس"
                         },
                         new
                         {
@@ -598,7 +601,7 @@ namespace Tamrinak_API.Migrations
                         {
                             SportId = 8,
                             Description = "Combat sport involving punching and defensive techniques",
-                            Name = "الملاكمة"
+                            Name = "ملاكمة"
                         },
                         new
                         {
