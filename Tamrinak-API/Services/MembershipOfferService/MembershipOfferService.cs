@@ -1,4 +1,5 @@
-﻿using Tamrinak_API.DataAccess.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.MembershipOfferDtos;
 using Tamrinak_API.Repository.GenericRepo;
 
@@ -96,6 +97,22 @@ namespace Tamrinak_API.Services.MembershipOfferService
 				Price = offer.Price
 			};
 		}
+        public async Task<List<MembershipOfferDto>> GetAllOffersAsync()
+        {
+            var offers = await _offerRepo.GetListByConditionIncludeAsync(
+                predicate: o => true,
+                include: q => q.Include(o => o.Facility)
+            );
 
-	}
+            return offers.Select(o => new MembershipOfferDto
+            {
+                OfferId = o.OfferId,
+                FacilityId = o.FacilityId,
+               // FacilityName = o.Facility?.Name,
+                Price = o.Price,
+                DurationInMonths = o.DurationInMonths
+            }).ToList();
+        }
+
+    }
 }

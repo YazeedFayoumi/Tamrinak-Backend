@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Tamrinak_API.DTO.MembershipOfferDtos;
 using Tamrinak_API.Services.MembershipOfferService;
 
@@ -71,6 +72,14 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-	}
+        [HttpGet("offers")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllOffers()
+        {
+            var offers = await _service.GetAllOffersAsync();
+            return Ok(offers);
+        }
+
+    }
 
 }

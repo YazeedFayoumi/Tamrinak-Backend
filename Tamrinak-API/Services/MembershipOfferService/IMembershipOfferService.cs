@@ -8,5 +8,7 @@ namespace Tamrinak_API.Services.MembershipOfferService
 		Task<MembershipOfferDto> AddOfferAsync(AddMembershipOfferDto dto);
 		Task<bool> DeleteOfferAsync(int offerId);
 		Task<MembershipOfferDto> UpdateOfferAsync(int offerId, UpdateMembershipOfferDto dto);
-	}
+		Task<List<MembershipOfferDto>> GetAllOffersAsync();
+
+    }
 }
