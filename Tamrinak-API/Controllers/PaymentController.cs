@@ -141,7 +141,7 @@ namespace Tamrinak_API.Controllers
 
 					var userId = int.Parse(paymentIntent.Metadata["userId"]);
 					var bookingId = int.Parse(paymentIntent.Metadata["bookingId"]);
-					var amount = (decimal)(paymentIntent.AmountReceived / 10000.0m);
+					var amount = (decimal)(paymentIntent.AmountReceived / 1000.0m);
 					//var amount = paymentIntent.AmountReceived;
 
 					Console.WriteLine($"✅ Got metadata: userId={userId}, bookingId={bookingId}, amount={amount}");

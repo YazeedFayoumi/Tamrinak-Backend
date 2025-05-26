@@ -15,6 +15,7 @@ namespace Tamrinak_API.Controllers
 			_service = service;
 		}
 
+
 		[HttpPost("add-offer")]
 		public async Task<IActionResult> AddOffer([FromBody] AddMembershipOfferDto dto)
 		{
@@ -28,7 +29,7 @@ namespace Tamrinak_API.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
-
+		
 		[HttpGet("get/{facilityId}")]
 		public async Task<IActionResult> GetOffers(int facilityId)
 		{
