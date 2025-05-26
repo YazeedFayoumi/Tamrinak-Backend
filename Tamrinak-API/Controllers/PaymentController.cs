@@ -102,7 +102,7 @@ namespace Tamrinak_API.Controllers
 				?? throw new Exception("User ID not found"));
 
 		
-                var sessionId = await _paymentService.CreateStripeIntentAsync(12, dto);
+                var sessionId = await _paymentService.CreateStripeIntentAsync(userId, dto);
 				return Ok(new { sessionId });
 			}
 			catch (Exception ex)
@@ -141,7 +141,8 @@ namespace Tamrinak_API.Controllers
 
 					var userId = int.Parse(paymentIntent.Metadata["userId"]);
 					var bookingId = int.Parse(paymentIntent.Metadata["bookingId"]);
-					var amount = (decimal)(paymentIntent.AmountReceived / 100.0m);
+					var amount = (decimal)(paymentIntent.AmountReceived / 10000.0m);
+					//var amount = paymentIntent.AmountReceived;
 
 					Console.WriteLine($"✅ Got metadata: userId={userId}, bookingId={bookingId}, amount={amount}");
 
