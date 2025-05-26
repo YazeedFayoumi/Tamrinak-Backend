@@ -157,7 +157,7 @@ namespace Tamrinak_API.Controllers
 		}
 
 		[HttpGet("availability")] // shows from 00:00 to 03:00 the next day 
-		public async Task<IActionResult> GetFieldAvailability(int fieldId, DateTime date)
+		public async Task<IActionResult> GetFieldAvailability([FromQuery]int fieldId, [FromQuery]DateTime date)
 		{
 			try
 			{
