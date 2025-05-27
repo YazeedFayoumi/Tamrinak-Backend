@@ -39,16 +39,16 @@ namespace Tamrinak_API.Services.BookingService
 			var field = await _fieldRepo.GetAsync(dto.FieldId);
 
 
-			decimal noP = dto.NumberOfPeople;
+			/*decimal noP = dto.NumberOfPeople;
 			if (field.PricePerHour == null)
-				throw new Exception("Start time and end time are required.");
+				throw new Exception("Start time and end time are required.");*/
 
 			var start = TimeOnly.Parse(dto.StartTime);
 			var end = TimeOnly.Parse(dto.EndTime);
 
 			decimal price = (decimal)field.PricePerHour.Value;
 			decimal duration = (decimal)(end - start).TotalHours;
-			decimal totalCost = noP * price * duration;
+		    decimal totalCost =  price * duration;//noP *
 
 			var booking = new Booking
 			{
@@ -274,7 +274,8 @@ namespace Tamrinak_API.Services.BookingService
             // Load relevant bookings
             var bookings = await _bookingRepo.GetListByConditionAsync(
                 b => b.FieldId == fieldId &&
-                    (b.BookingDate == date || b.BookingDate == date.AddDays(1) || b.BookingDate == date.AddDays(-1))
+                    (b.BookingDate == date || b.BookingDate == date.AddDays(1) || b.BookingDate == date.AddDays(-1))&&
+				   b.Status != BookingStatus.Cancelled
             );
 
             // Build list of blocked time ranges
@@ -400,8 +401,9 @@ namespace Tamrinak_API.Services.BookingService
 			var relevantBookings = await _bookingRepo.GetListByConditionAsync(
 				b => b.FieldId == bookingDto.FieldId &&
 					 (b.BookingDate == bookingDto.BookingDate || b.BookingDate == bookingDto.BookingDate.AddDays(1) ||
-					 b.BookingDate == bookingDto.BookingDate.AddDays(-1))
-			);
+					 b.BookingDate == bookingDto.BookingDate.AddDays(-1))&&
+				     b.Status != BookingStatus.Cancelled
+            );
 
 			bool isConflict = relevantBookings.Any(b =>
 			{

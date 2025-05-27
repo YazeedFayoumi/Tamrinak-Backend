@@ -43,8 +43,8 @@ namespace Tamrinak_API.Services.ImageService
 			}
 			else if (folderName == "facilities" || folderName == "fields")
 			{
-				if (width < 800 || height < 600)
-					throw new InvalidOperationException("Image resolution too low for field/facility. Minimum 800x600 required.");
+				if (width < 400 || height < 400)
+					throw new InvalidOperationException("Image resolution too low for field/facility. Minimum 400x400 required.");
 			}
 			else
 			{
