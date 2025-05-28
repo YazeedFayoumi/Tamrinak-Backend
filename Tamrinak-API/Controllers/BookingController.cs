@@ -90,8 +90,8 @@ namespace Tamrinak_API.Controllers
 				if (!success)
 					return NotFound();
 
-				return Ok("Booking Cancelled successfully.");
-			}
+                return Ok("تم إلغاء الحجز بنجاح.");
+            }
 			catch (Exception ex)
 			{
 				return BadRequest(ex.Message);
@@ -121,7 +121,7 @@ namespace Tamrinak_API.Controllers
 			try
 			{
 				var result = await _bookingService.ChangeBookingAsync(id, dto);
-				return result == null ? Ok("Booking updated successfully.") : BadRequest(result);
+				return result == null ? Ok("تم تحديث الحجز بنجاح.") : BadRequest(result);
 			}
 			catch (Exception ex)
 			{

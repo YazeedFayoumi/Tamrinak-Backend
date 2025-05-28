@@ -28,11 +28,11 @@ namespace Tamrinak_API.Services.BookingService
 			var user = await _userRepo.GetByConditionAsync(u => u.Email == email);
 
 			if (!user.IsEmailConfirmed)
-				throw new InvalidOperationException("Please verify your email to continue.");
+                throw new InvalidOperationException("يرجى تأكيد بريدك الإلكتروني للمتابعة. (Please verify your email to continue.)");
 
-			// Now use user.UserId to create the booking
+            // Now use user.UserId to create the booking
 
-			var validationError = await ValidateBookingAsync(dto);
+            var validationError = await ValidateBookingAsync(dto);
 			if (validationError != null)
 				throw new Exception(validationError);
 
@@ -164,15 +164,15 @@ namespace Tamrinak_API.Services.BookingService
 				return "Booking not found.";
 
 			if (booking.Status == BookingStatus.Cancelled)
-				return "Cannot edit a cancelled booking.";
+				return "لا يمكن تعديل حجز تم إلغاؤه.";
 
 			if (booking.BookingDate < DateTime.Now.Date ||
 				(booking.BookingDate == DateTime.Now.Date && start <= TimeOnly.FromDateTime(DateTime.Now)))
-				return "Cannot modify a past or ongoing booking.";
+				return "لا يمكن تعديل حجز سابق أو جاري.";
 
 			int id = (int)booking.FieldId;
 			var field = await _fieldRepo.GetAsync(id);
-			if (field == null) return "Field not found.";
+			if (field == null) return "الملعب غير موجود.";
 
 			//TODO: check feild capasety before updating no. of people
 
@@ -254,10 +254,10 @@ namespace Tamrinak_API.Services.BookingService
 				   ?? throw new Exception("Field not found");
 
             if (date.Date < DateTime.UtcNow.Date)
-                throw new Exception("Cannot check availability for past dates.");
+                throw new Exception("لا يمكن عرض الأوقات المتاحة لتواريخ سابقة.");
 
             if (date.Date > DateTime.UtcNow.Date.AddDays(90))
-                throw new Exception("You can only view availability up to 90 days in advance.");
+                throw new Exception("يمكنك فقط عرض الأوقات المتاحة لمدة تصل إلى 90 يومًا مقدمًا.");
 
             var open = field.OpenTime;
             var close = field.CloseTime;
@@ -349,37 +349,39 @@ namespace Tamrinak_API.Services.BookingService
 
 			var bookingStartDateTime = bookingDto.BookingDate.Add(start.ToTimeSpan());
 			if (bookingStartDateTime < DateTime.Now)
-				return "Booking date cannot be in the past.";
+				return "لا يمكن الحجز في وقتٍ مضى.";
 
 			int maxBookingDaysAhead = 90; // Or make this configurable via appsettings
 			if (bookingDto.BookingDate.Date > DateTime.UtcNow.Date.AddDays(maxBookingDaysAhead))
 			{
-				return $"You can only book up to {maxBookingDaysAhead} days in advance.";
-			}
+                return $"يمكنك الحجز قبل {maxBookingDaysAhead} يوم كحد أقصى.";
+            }
 
-			var field = await _fieldRepo.GetAsync(bookingDto.FieldId);
+            var field = await _fieldRepo.GetAsync(bookingDto.FieldId);
 			if (field == null)
 				return "Field does not exist.";
+
 			if (!field.IsAvailable)
 			{
-				return "Field not available.";
+				return "الملعب غير متاح حالياً.";
 
             }
 			if (field.Capacity < bookingDto.NumberOfPeople)
-				return "Number of players exceeds field capacity. عدد اللاعبين يتعدى استيعاب المرفق";
+				return ".عدد اللاعبين يتعدى استيعاب المرفق";
+
 
 			bool isOpen24Hours = field.OpenTime == TimeOnly.MinValue && field.CloseTime == TimeOnly.MaxValue;
 
 			// Validate time input
 			if (bookingDto.StartTime == bookingDto.EndTime)
-				return "Start and end time cannot be the same.";
+				return "لا يمكن أن يكون وقت البداية ووقت النهاية متماثلين.";
 
 			if (!isOpen24Hours)
 			{
 				if (!IsWithinOperatingHours(start, end, field.OpenTime, field.CloseTime))
 				{
-					return $"Booking time must be within the field's working hours ({field.OpenTime:hh\\:mm} - {field.CloseTime:hh\\:mm}).";
-				}
+                    return $"يجب أن يكون وقت الحجز ضمن ساعات العمل للملعب ({field.OpenTime:hh\\:mm} - {field.CloseTime:hh\\:mm}).";
+                }
 			}
 
 			// Calculate duration
@@ -388,11 +390,11 @@ namespace Tamrinak_API.Services.BookingService
 				: (TimeOnly.MaxValue - start + end.ToTimeSpan() + TimeSpan.FromSeconds(1)); // accounts for overnight
 
 			if (duration.TotalMinutes < 30 || duration.TotalHours > 4)
-				return "Booking duration must be between 30 minutes and 4 hours.";
+                return "مدة الحجز يجب أن تكون بين 30 دقيقة و4 ساعات.";
 
-			// Build absolute DateTime ranges
-			// Step 1: Convert input times to DateTime
-			var startDateTime = bookingDto.BookingDate.Add(start.ToTimeSpan());
+            // Build absolute DateTime ranges
+            // Step 1: Convert input times to DateTime
+            var startDateTime = bookingDto.BookingDate.Add(start.ToTimeSpan());
 			var endDateTime = start < end
 				? bookingDto.BookingDate.Add(end.ToTimeSpan())
 				: bookingDto.BookingDate.AddDays(1).Add(end.ToTimeSpan());
@@ -418,8 +420,8 @@ namespace Tamrinak_API.Services.BookingService
 					(startDateTime <= bStart && endDateTime >= bEnd);
 			});
 
-			return isConflict ? "The selected time slot is already booked." : null;
-		}
+            return isConflict ? "الوقت المحدد محجوز مسبقًا." : null;
+        }
 
 		private bool IsWithinOperatingHours(TimeOnly start, TimeOnly end, TimeOnly open, TimeOnly close)
 		{
