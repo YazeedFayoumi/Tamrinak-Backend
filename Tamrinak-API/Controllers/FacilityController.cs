@@ -208,9 +208,10 @@ namespace Tamrinak_API.Controllers
 				if (image == null)
 					return NotFound("Image not found.");
 
-				// Return the Base64 data as the response
-				return Ok(image.Base64Data);
-			}
+                var dataUri = $"data:image/jpeg;base64,{image.Base64Data}";
+
+                return Ok(new { Image = dataUri });
+            }
 			catch (Exception ex)
 			{
 				return BadRequest(ex.Message);
