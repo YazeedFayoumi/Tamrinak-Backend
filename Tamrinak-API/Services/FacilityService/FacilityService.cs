@@ -275,6 +275,7 @@ namespace Tamrinak_API.Services.FacilityService
 				Id = f.FacilityId,
 				Name = f.Name,
 				Description = f.Description,
+				PricePerMonth = f.PricePerMonth,
 				Type = (int)f.Type,
 				Sports = f.SportFacilities.Select(sf => new SportBasicDto
 				{

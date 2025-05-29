@@ -8,6 +8,7 @@ namespace Tamrinak_API.DTO.FacilityDtos
 		public string Name { get; set; }
 		public string Description { get; set; }
 		public int Type { get; set; } // e.g. "Gym", "Club"
+		public decimal? PricePerMonth { get; set; }
 		public List<SportBasicDto> Sports { get; set; }
 		public List<string>? Images { get; set; }
 
