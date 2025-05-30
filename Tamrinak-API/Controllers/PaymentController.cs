@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.PaymentDtos;
+using Tamrinak_API.Services.EmailService;
 using Tamrinak_API.Services.PaymentService;
 
 namespace Tamrinak_API.Controllers
@@ -21,6 +22,7 @@ namespace Tamrinak_API.Controllers
 	{
 		private readonly IPaymentService _paymentService;
 		private readonly IConfiguration _config;
+		
 		public PaymentController(IPaymentService paymentService, IConfiguration configuration)
 		{
 			_paymentService = paymentService;
@@ -159,7 +161,8 @@ namespace Tamrinak_API.Controllers
 					};
 
 					var result = await _paymentService.CreatePaymentAsync(userId, dto, fromWebHook: true);
-                    
+					
+                   // var email = User.FindFirst(ClaimTypes.Email)?.Value;
                 }
 				else if(stripeEvent.Type == "payment_intent.payment_failed")
 				{
@@ -172,12 +175,10 @@ namespace Tamrinak_API.Controllers
             }
 			catch (StripeException ex)
 			{
-				Console.WriteLine($"❌ Stripe webhook error: {ex.Message}");
 				return BadRequest();
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"❌ Webhook general error: {ex.Message}");
 				return StatusCode(500);
 			}
 		}

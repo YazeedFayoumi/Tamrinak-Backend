@@ -5,6 +5,9 @@ using Google.Apis.Services;
 using MimeKit;
 using Google.Apis.Gmail.v1.Data;
 using Tamrinak_API.DTO.AdminDtos;
+using Tamrinak_API.DTO.PaymentDtos;
+using Stripe.V2;
+using Tamrinak_API.DataAccess.Models;
 
 namespace Tamrinak_API.Services.EmailService
 {
@@ -133,6 +136,35 @@ namespace Tamrinak_API.Services.EmailService
             await SendEmailAsync("yazeed.fayoumi@gmail.com", subject, body); 
         }
 
+        public async Task SendPaymentEmailAsync(string email, object emailInfo)
+        {
+            if (string.IsNullOrEmpty(email))
+                throw new ArgumentException("Email address is required", nameof(email));
 
+            // Use dynamic typing to access properties
+            dynamic info = emailInfo;
+
+            string subject = "Payment Confirmation - Tamrinak";
+
+            var body = $@"
+				<h3>✅ Payment Confirmation</h3>
+				<p>Dear user,</p>
+
+				<p>We’re pleased to inform you that your payment was successfully processed. Here are the details:</p>
+
+				<p><strong> Venue:</strong> {info.VenueName}</p>
+				<p><strong> Event Date:</strong> {((DateTime)info.EventDate).ToString("yyyy-MM-dd")}</p>
+				<p><strong> Payment Date:</strong> {((DateTime)info.PaymentDate).ToString("yyyy-MM-dd HH:mm")}</p>
+				<p><strong> Amount Paid:</strong> {info.AmountPayed:F2} JOD</p>
+				<p><strong> Payment Method:</strong> {info.MethodUsed}</p>
+
+				<p>Thank you for choosing <strong>Tamrinak</strong>!<br />
+				We look forward to serving you again.</p>
+
+				<p>Best regards,<br />
+				Tamrinak Team</p>";
+
+            await SendEmailAsync(email, subject, body);
+        }
     }
 }

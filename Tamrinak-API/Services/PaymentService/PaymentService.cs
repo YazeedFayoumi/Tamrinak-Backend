@@ -6,6 +6,7 @@ using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.PaymentDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
 using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Services.EmailService;
 using PaymentMethod = Tamrinak_API.DataAccess.Models.PaymentMethod;
 
 namespace Tamrinak_API.Services.PaymentService
@@ -17,15 +18,17 @@ namespace Tamrinak_API.Services.PaymentService
 		private readonly IGenericRepo<Booking> _bookingRepo;
 		private readonly IGenericRepo<Membership> _membershipRepo;
         private readonly IConfiguration _config;
+        private readonly IEmailService _emailService;
 
-		public PaymentService(IGenericRepo<Payment> paymentRepo, IGenericRepo<User> userRepo, IConfiguration configuration,
-           IGenericRepo<Booking> bookingRepo, IGenericRepo<Membership> membershipRepo )
+        public PaymentService(IGenericRepo<Payment> paymentRepo, IGenericRepo<User> userRepo, IConfiguration configuration,
+           IGenericRepo<Booking> bookingRepo, IGenericRepo<Membership> membershipRepo, IEmailService emailService)
 		{
 			_paymentRepo = paymentRepo;
 			_userRepo = userRepo;
             _bookingRepo = bookingRepo;
             _membershipRepo = membershipRepo;
             _config = configuration;
+            _emailService = emailService;
 		}
 
         /*  public async Task<int> CreatePaymentAsync(int userId, AddPaymentDto dto)
@@ -104,23 +107,19 @@ namespace Tamrinak_API.Services.PaymentService
             try
             {
                 var user = await _userRepo.GetAsync(userId);
+                var email = user.Email;
+                var venueName="";
+                DateTime eventDate = DateTime.UtcNow;
+
                 if (user == null)
                 {
-                    /*if (fromWebhook)
-                    {
-                        Console.WriteLine($"⚠️ Webhook: User with ID {userId} not found. Skipping.");
-                        return 0;
-                    }*/
+                   
                     throw new Exception("User not found or unauthorized.");
                 }
 
                 if ((dto.BookingId.HasValue && dto.MembershipId.HasValue) || (!dto.BookingId.HasValue && !dto.MembershipId.HasValue))
                 {
-                   /* if (fromWebhook)
-                    {
-                        Console.WriteLine("⚠️ Webhook: Must provide either BookingId or MembershipId. Skipping.");
-                        return 0;
-                    }*/
+                   
                     throw new Exception("You must provide either a BookingId or MembershipId.");
                 }
 
@@ -128,24 +127,18 @@ namespace Tamrinak_API.Services.PaymentService
 
                 if (dto.BookingId.HasValue)
                 {
-                    var booking = await _bookingRepo.GetByConditionIncludeAsync(b => b.BookingId == dto.BookingId.Value, q=>q.Include(b=> b.User));
+                    var booking = await _bookingRepo.GetByConditionIncludeAsync(b => b.BookingId == dto.BookingId.Value, 
+                        q=>q.Include(b=> b.User).Include(b => b.Field));
+
                     if (booking == null)
                     {
-                        /*if (fromWebhook)
-                        {
-                            Console.WriteLine($"⚠️ Webhook: Booking {dto.BookingId} not found. Skipping.");
-                            return 0;
-                        }*/
+
                         throw new Exception("Booking not found.");
                     }
 
                     if (booking.UserId != userId)
                     {
-                       /* if (fromWebhook)
-                        {
-                            Console.WriteLine($"❌ Booking belongs to {booking.UserId}, but metadata says {userId}");
-                            return 0;
-                        }*/
+                     
                         throw new Exception("You cannot pay for another user's booking.");
                     }
 
@@ -157,37 +150,28 @@ namespace Tamrinak_API.Services.PaymentService
 
                     if (existingPayment != null)
                     {
-                        /*if (fromWebhook)
-                        {
-                            Console.WriteLine($"⚠️ Webhook: Booking {dto.BookingId} already has a confirmed payment. Skipping.");
-                            return existingPayment.PaymentId; // Make sure this exists!
-                        }*/
-                        Console.WriteLine("‼️ Booking already has a confirmed payment. Throwing exception.");
+                     
                         throw new Exception("This booking already has a confirmed payment.");
                     }
 
-                    Console.WriteLine("🧭 No existing confirmed payment found. Proceeding...");
+                    venueName = booking.Field.Name;
+                    eventDate = booking.BookingDate;
                 }
                 else if (dto.MembershipId.HasValue)
                 {
-                    var membership = await _membershipRepo.GetAsync(dto.MembershipId.Value);
+                    var membership = await _membershipRepo.GetByConditionIncludeAsync(b => b.MembershipId == dto.MembershipId.Value,
+                        q => q.Include(m => m.User).Include(m => m.Facility));
+
+             
                     if (membership == null)
                     {
-                        /*if (fromWebhook)
-                        {
-                            Console.WriteLine($"⚠️ Webhook: Membership {dto.MembershipId} not found. Skipping.");
-                            return 0;
-                        }*/
+                       
                         throw new Exception("Membership not found.");
                     }
 
                     if (membership.UserId != userId)
                     {
-                       /* if (fromWebhook)
-                        {
-                            Console.WriteLine($"⚠️ Webhook: Membership {dto.MembershipId} does not belong to user {userId}. Skipping.");
-                            return 0;
-                        }*/
+                       
                         throw new Exception("You cannot pay for another user's membership.");
                     }
 
@@ -198,35 +182,20 @@ namespace Tamrinak_API.Services.PaymentService
 
                     if (existingPayment != null)
                     {
-                       /* if (fromWebhook)
-                        {
-                            Console.WriteLine($"⚠️ Webhook: Membership {dto.MembershipId} already has a confirmed payment. Skipping.");
-                            return existingPayment.PaymentId;
-                        }*/
+                       
                         throw new Exception("This membership already has a confirmed payment.");
                     }
+
+                    venueName = membership.Facility.Name;
+                    eventDate = membership.StartDate;
                 }
 
                 Console.WriteLine($"🔍 Expected: {expectedAmount}, Provided: {dto.Amount}");
                 if (decimal.Round(dto.Amount, 2) != decimal.Round(expectedAmount, 2))
                 {
-                   /* if (fromWebhook)
-                    {
-                        Console.WriteLine($"❌ Payment amount mismatch: expected {expectedAmount}, got {dto.Amount}");
-                        return 0;
-                    }*/
+                  
                     throw new Exception("Incorrect payment amount.");
                 }
-
-        /*        if (dto.Method == PaymentMethod.Stripe && string.IsNullOrEmpty(dto.TransactionId))
-                {
-                    if (fromWebhook)
-                    {
-                        Console.WriteLine("⚠️ Webhook: Stripe transaction ID missing. Skipping.");
-                        return 0;
-                    }
-                    throw new Exception("Stripe payment requires a transaction ID.");
-                }*/
 
                 var payment = new Payment
                 {
@@ -242,9 +211,19 @@ namespace Tamrinak_API.Services.PaymentService
                 };
 
                 await _paymentRepo.AddAsync(payment);
+
+                var emailInfo = new
+                {
+                    PaymentDate = payment.PaymentDate,
+                    VenueName = venueName,
+                    EventDate = eventDate,
+                    AmountPayed =  payment.Amount,
+                    MethodUsed = payment.Method.ToString()
+                };
+             
+                await _emailService.SendPaymentEmailAsync(email, emailInfo);
                 await _paymentRepo.SaveAsync();
 
-                Console.WriteLine($"✅ Payment created successfully for user {userId}. PaymentId: {payment.PaymentId}");
 
                 return payment.PaymentId;
             }

@@ -1,4 +1,5 @@
 ﻿using Tamrinak_API.DTO.AdminDtos;
+using Tamrinak_API.DTO.PaymentDtos;
 
 namespace Tamrinak_API.Services.EmailService
 {
@@ -9,6 +10,8 @@ namespace Tamrinak_API.Services.EmailService
 		Task SendPasswordResetEmailAsync(string toEmail, string resetLink);
 		Task SendMembershipExpiryReminderAsync(string toEmail, string userName, string facilityName, DateTime expirationDate);
 		Task SendContactMessageAsync(ContactMessageDto dto);
+
+		Task SendPaymentEmailAsync(string email, object emialInfo);
 
     }
 }
