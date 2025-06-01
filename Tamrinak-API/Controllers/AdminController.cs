@@ -422,8 +422,8 @@ namespace Tamrinak_API.Controllers
             }
 
             await _emailService.SendContactMessageAsync(dto);
-            return Ok("Your message has been sent.");
-        }
+			return Ok(new { success = true, message = "Your message has been sent." });
+		}
 
 
     }
