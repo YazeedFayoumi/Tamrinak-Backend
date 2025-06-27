@@ -371,6 +371,5 @@ appsettings.Local.json
 
 
 # Google API keys
-google-credentials.json
-token.json
+Tamrinak-API/token.json/
 Tamrinak-API/credentials.json
