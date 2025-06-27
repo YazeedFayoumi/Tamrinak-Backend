@@ -82,7 +82,7 @@ namespace Tamrinak_API.Controllers
 
 		}
 		[HttpPost("forgot-password")]
-		public async Task<IActionResult> ForgotPassword([FromBody] string email)//TODO
+		public async Task<IActionResult> ForgotPassword([FromBody] string email)
 		{
 			try
 			{

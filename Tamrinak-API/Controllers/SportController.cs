@@ -123,23 +123,19 @@ namespace Tamrinak_API.Controllers
 				if (sport == null)
 					return NotFound("Sport not found");
 
-				// Get existing images for the sport
 				var existingImages = await _imageService.GetImagesAsync(id, "sport");
 
-				// Delete existing images from the database
 				foreach (var img in existingImages.ToList())
 				{
-					await _imageService.DeleteImageAsync(img.Base64Data); // Use Base64Data for deletion
+					await _imageService.DeleteImageAsync(img.Base64Data); 
 				}
 
-				// Upload new image as Base64
 				var base64Image = await _imageService.UploadImageAsync(formFile, "sports");
 
-				// Create a new image entity
 				var image = new Image
 				{
 					SportId = id,
-					Base64Data = base64Image // Save the Base64 image data
+					Base64Data = base64Image 
 				};
 
 				await _imageService.AddImageAsync(image);

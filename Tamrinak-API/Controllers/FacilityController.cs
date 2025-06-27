@@ -75,7 +75,7 @@ namespace Tamrinak_API.Controllers
 		{
 			try
 			{
-				var newFacility = await _facilityService.UpdateFacilityDtoAsync(id, dto);// _facilityService.GetFacilityAsync(id);
+				var newFacility = await _facilityService.UpdateFacilityDtoAsync(id, dto);
 				return Ok(newFacility);
 			}
 			catch (Exception ex)
@@ -83,32 +83,6 @@ namespace Tamrinak_API.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
-
-		//[HttpPost("facility-image")]
-		//public async Task<IActionResult> AddFacilityImage(int facilityId, IFormFile formFile)
-		//{
-		//	var facility = await _facilityService.GetFacilityAsync(facilityId);
-		//	var canAdd = await _imageService.CanAddEntityImagesAsync<Facility>(facilityId, 15);
-		//	if (canAdd)
-		//	{
-		//		// Upload the image as Base64
-		//		var base64Image = await _imageService.UploadImageAsync(formFile, "facilities");
-
-		//		var image = new Image
-		//		{
-		//			FacilityId = facilityId,
-		//			Base64Data = base64Image // Store as Base64
-		//		};
-		//		await _imageService.AddImageAsync(image);
-		//		await _imageService.UpdateImageAsync(image);
-		//		await _facilityService.UpdateFacilityAsync(facility);
-		//		return Ok();
-		//	}
-		//	else
-		//	{
-		//		return BadRequest("Max number of images for this facility");
-		//	}
-		//}
 
 		[HttpPost("facility-images")]
 		public async Task<IActionResult> AddFacilityImages([FromForm] int facilityId, List<IFormFile> formFiles)
@@ -165,7 +139,7 @@ namespace Tamrinak_API.Controllers
 				var facilityImages = facility.Images.ToList();
 				foreach (var image in facilityImages)
 				{
-					await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+					await _imageService.DeleteImageAsync(image.Base64Data); 
 				}
 
 				var result = await _facilityService.DeleteFacilityAsync(facilityId);
@@ -189,7 +163,7 @@ namespace Tamrinak_API.Controllers
 				if (image == null || image.FacilityId != facilityId)
 					return NotFound("Image not found for this Facility.");
 
-				await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+				await _imageService.DeleteImageAsync(image.Base64Data); 
 
 				return Ok("Image deleted successfully.");
 			}
@@ -229,7 +203,6 @@ namespace Tamrinak_API.Controllers
 
 				var base64Image = image.Base64Data;
 
-				// Return the Base64 data as a response
 				return Ok(base64Image);
 			}
 			catch (Exception ex)
@@ -277,18 +250,6 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-		/*   [HttpDelete("delete-facility-images/{facilityId}")]
-		   //[Authorize(Roles = "Admin,SuperAdmin")]
-		   public async Task<IActionResult> DeleteFieldImages(int fieldId)
-		   {
-			   var images = await _imageService.GetImagesAsync(fieldId, "facility");
-			   foreach (var img in images)
-			   {
-				   await _imageService.DeleteImageAsync(img.Url);
-			   }
-			   return Ok("All images deleted.");
-		   }
-   */
 		[HttpPut("{facilityId}/archive")]
 		//[Authorize(Roles = "Admin,SuperAdmin")]
 		public async Task<IActionResult> SetUnavailableFacility(int facilityId)

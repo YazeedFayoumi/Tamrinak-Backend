@@ -98,7 +98,6 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-		//TODO get all Memberships
 	}
 
 }

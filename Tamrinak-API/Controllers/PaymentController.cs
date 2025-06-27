@@ -112,11 +112,11 @@ namespace Tamrinak_API.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
+
 		[HttpPost("webhook")]
 		public async Task<IActionResult> StripeWebhook()
 		{
 			var json = await new StreamReader(Request.Body).ReadToEndAsync();
-
 
 			try
 			{
@@ -126,8 +126,6 @@ namespace Tamrinak_API.Controllers
 					_config["Stripe:WebhookSecret"]
 				);
 
-				
-				// Call your service based on event type
 				if (stripeEvent.Type == "checkout.session.completed")
 				{
 					var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
@@ -144,14 +142,7 @@ namespace Tamrinak_API.Controllers
 					var userId = int.Parse(paymentIntent.Metadata["userId"]);
 					var bookingId = int.Parse(paymentIntent.Metadata["bookingId"]);
 					var amount = (decimal)(paymentIntent.AmountReceived / 1000.0m);
-					//var amount = paymentIntent.AmountReceived;
-
-					Console.WriteLine($"✅ Got metadata: userId={userId}, bookingId={bookingId}, amount={amount}");
-
-					// continue with payment logic...
-
-
-
+				
 					var dto = new AddPaymentDto
 					{
 						BookingId = bookingId,
@@ -162,7 +153,6 @@ namespace Tamrinak_API.Controllers
 
 					var result = await _paymentService.CreatePaymentAsync(userId, dto, fromWebHook: true);
 					
-                   // var email = User.FindFirst(ClaimTypes.Email)?.Value;
                 }
 				else if(stripeEvent.Type == "payment_intent.payment_failed")
 				{

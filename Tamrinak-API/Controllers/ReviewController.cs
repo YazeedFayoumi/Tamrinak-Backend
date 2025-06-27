@@ -205,8 +205,6 @@ namespace Tamrinak_API.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
-
-
 	}
 
 }

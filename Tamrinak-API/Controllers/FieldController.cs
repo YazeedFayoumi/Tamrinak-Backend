@@ -106,12 +106,11 @@ namespace Tamrinak_API.Controllers
 
 				foreach (var file in filesToUpload)
 				{
-					// Upload image as Base64 and save in the database
 					var base64Image = await _imageService.UploadImageAsync(file, "fields");
 					var image = new Image
 					{
 						FieldId = fieldId,
-						Base64Data = base64Image // Save Base64 image data
+						Base64Data = base64Image 
 					};
 					await _imageService.AddImageAsync(image);
 				}
@@ -126,10 +125,6 @@ namespace Tamrinak_API.Controllers
 			}
 		}
 
-
-
-
-
 		[HttpDelete("field")]
 		public async Task<IActionResult> DeleteField(int fieldId)
 		{
@@ -139,11 +134,10 @@ namespace Tamrinak_API.Controllers
 				if (field == null)
 					return NotFound();
 
-				// Delete images based on Base64 data
 				var fieldImages = field.Images.ToList();
 				foreach (var image in fieldImages)
 				{
-					await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+					await _imageService.DeleteImageAsync(image.Base64Data);
 				}
 
 				var result = await _fieldService.DeleteFieldAsync(fieldId);
@@ -167,7 +161,7 @@ namespace Tamrinak_API.Controllers
 				if (image == null || image.FieldId != fieldId)
 					return NotFound("Image not found for this field.");
 
-				await _imageService.DeleteImageAsync(image.Base64Data); // Use Base64Data for deletion
+				await _imageService.DeleteImageAsync(image.Base64Data); 
 				return Ok("Image deleted successfully.");
 			}
 			catch (Exception ex)
@@ -185,7 +179,6 @@ namespace Tamrinak_API.Controllers
 				if (image == null)
 					return NotFound("Image not found.");
 
-				// Return Base64 image as data URI
 				var base64Image = image.Base64Data;
 				var dataUri = $"data:image/jpeg;base64,{base64Image}";
 
@@ -206,7 +199,7 @@ namespace Tamrinak_API.Controllers
 				if (image == null)
 					return NotFound("Image not found.");
 
-				// Return Base64 image as file content
+
 				var base64Image = image.Base64Data;
 				var byteArray = Convert.FromBase64String(base64Image);
 				var contentType = _imageService.GetContentTypeFromBase64(base64Image);
@@ -228,7 +221,6 @@ namespace Tamrinak_API.Controllers
 				if (images == null)
 					return NotFound("Images not found.");
 
-				// Return Base64 data for each image
 				var result = images.Select(img => new
 				{
 					img.Id,
@@ -278,17 +270,6 @@ namespace Tamrinak_API.Controllers
 				return BadRequest(ex.Message);
 			}
 		}
-		/*[HttpDelete("delete-field-images/{fieldId}")]
-        //[Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<IActionResult> DeleteFieldImages(int fieldId)
-        {
-            var images = await _imageService.GetImagesAsync(fieldId, "field");
-            foreach (var img in images)
-            {
-                await _imageService.DeleteImageAsync();
-            }
-            return Ok("All images deleted.");
-        }*/
 
 		[HttpPut("{fieldId}/archive")]
 		//[Authorize(Roles = "Admin,SuperAdmin")]
