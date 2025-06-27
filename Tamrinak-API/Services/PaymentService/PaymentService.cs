@@ -31,75 +31,6 @@ namespace Tamrinak_API.Services.PaymentService
             _emailService = emailService;
 		}
 
-        /*  public async Task<int> CreatePaymentAsync(int userId, AddPaymentDto dto)
-          {
-              var user = await _userRepo.GetAsync(userId)
-                         ?? throw new Exception("User not found or unauthorized.");
-
-              if ((dto.BookingId.HasValue && dto.MembershipId.HasValue) || (!dto.BookingId.HasValue && !dto.MembershipId.HasValue))
-                  throw new Exception("You must provide either a BookingId or MembershipId.");
-
-              decimal expectedAmount = 0;
-
-              if (dto.BookingId.HasValue)
-              {
-                  var booking = await _bookingRepo.GetAsync(dto.BookingId.Value)
-                      ?? throw new Exception("Booking not found.");
-
-                  if (booking.UserId != userId)
-                      throw new Exception("You cannot pay for another user's booking.");
-
-                  expectedAmount = booking.TotalCost;
-
-                  var existingPayment = await _paymentRepo.GetByConditionAsync(p =>
-                  p.BookingId == dto.BookingId.Value && p.IsConfirmed);
-
-                  if (existingPayment != null)
-                      throw new Exception("This booking already has a confirmed payment.");
-
-              }
-              else if (dto.MembershipId.HasValue)
-              {
-                  var membership = await _membershipRepo.GetAsync(dto.MembershipId.Value)
-                      ?? throw new Exception("Membership not found.");
-
-                  if (membership.UserId != userId)
-                      throw new Exception("You cannot pay for another user's membership.");
-
-                  expectedAmount = membership.TotalOfferPaid ?? membership.MonthlyFee;
-
-                  var existingPayment = await _paymentRepo.GetByConditionAsync(p =>
-                   p.MembershipId == dto.MembershipId.Value && p.IsConfirmed);
-
-                  if (existingPayment != null)
-                      throw new Exception("This membership already has a confirmed payment.");
-              }
-
-              if (dto.Amount != expectedAmount)
-                  throw new Exception("Incorrect payment amount.");
-
-
-              if (dto.Method == PaymentMethod.Stripe && string.IsNullOrEmpty(dto.TransactionId))
-                  throw new Exception("Stripe payment requires a transaction ID.");
-
-              var payment = new Payment
-              {
-                  BookingId = dto.BookingId,
-                  MembershipId = dto.MembershipId,
-                  Amount = dto.Amount,
-                  Method = dto.Method,
-                  Status = PaymentStatus.Pending,
-                  PaymentDate = DateTime.UtcNow,
-                  TransactionId = dto.TransactionId,
-                  IsConfirmed = false
-              };
-
-              await _paymentRepo.AddAsync(payment);
-              await _paymentRepo.SaveAsync();
-
-              return payment.PaymentId;
-          }
-  */
         public async Task<int> CreatePaymentAsync(int userId, AddPaymentDto dto, bool fromWebhook = false)
         {
 
@@ -214,7 +145,7 @@ namespace Tamrinak_API.Services.PaymentService
 
                 var emailInfo = new
                 {
-                    PaymentDate = payment.PaymentDate,
+                    PaymentDate = payment.PaymentDate.AddMinutes(180),
                     VenueName = venueName,
                     EventDate = eventDate,
                     AmountPayed =  payment.Amount,
@@ -229,12 +160,9 @@ namespace Tamrinak_API.Services.PaymentService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Exception in CreatePaymentAsync: {ex.Message}");
-               // if (fromWebhook) return 0;
                 throw;
             }
-          
-        }
+           }
 
         public async Task<PaymentDto?> GetPaymentByIdAsync(int paymentId)
         {
