@@ -40,6 +40,7 @@ namespace Tamrinak_API.Services.UserService
 				Email = user.Email,
 				PasswordHash = hashedPassword,
 				Name = user.Name,
+				IsEmailConfirmed = true,
 				UserRoles = new List<UserRole>()
 
 			};
