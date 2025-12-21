@@ -364,12 +364,12 @@ FodyWeavers.xsd
 
 
 
-# Local secrets
-appsettings.Development.json
-appsettings.Local.json
-.env
+# # Local secrets
+# appsettings.Development.json
+# appsettings.Local.json
+# .env
 
 
-# Google API keys
-Tamrinak-API/token.json/
-Tamrinak-API/credentials.json 
+# # Google API keys
+# Tamrinak-API/token.json/
+# Tamrinak-API/credentials.json 
