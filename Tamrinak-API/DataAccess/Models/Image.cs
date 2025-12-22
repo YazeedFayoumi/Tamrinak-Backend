@@ -14,5 +14,9 @@
 
 		public int? SportId { get; set; }//TODO
 		public Sport? Sport { get; set; }
-	}
+
+        public int? ItemId  { get; set; }
+        public Items? Item { get; set; }
+
+    }
 }

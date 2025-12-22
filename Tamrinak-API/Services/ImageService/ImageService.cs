@@ -75,12 +75,14 @@ namespace Tamrinak_API.Services.ImageService
 
         public async Task<bool> CanAddEntityImagesAsync<TEntity>(int entityId, int maxImages) where TEntity : class
 		{
-			Expression<Func<Image, bool>> condition = entity =>
-				typeof(TEntity) == typeof(Facility) && entity.FacilityId == entityId ||
-				typeof(TEntity) == typeof(Field) && entity.FieldId == entityId ||
-				typeof(TEntity) == typeof(Sport) && entity.SportId == entityId;
+            Expression<Func<Image, bool>> condition = entity =>
+			(typeof(TEntity) == typeof(Facility) && entity.FacilityId == entityId) ||
+			(typeof(TEntity) == typeof(Field) && entity.FieldId == entityId) ||
+			(typeof(TEntity) == typeof(Sport) && entity.SportId == entityId) ||
+			(typeof(TEntity) == typeof(Items) && entity.ItemId == entityId);
 
-			var images = await _imageRepo.GetListByConditionAsync(condition);
+
+            var images = await _imageRepo.GetListByConditionAsync(condition);
 			return images.Count() < maxImages;
 		}
 
@@ -146,13 +148,14 @@ namespace Tamrinak_API.Services.ImageService
 
 		public async Task<IEnumerable<Image>> GetImagesAsync(int entityId, string entityType)
 		{
-			var images = await _imageRepo.GetListByConditionAsync(i =>
-				(entityType == "field" && i.FieldId == entityId) ||
-				(entityType == "sport" && i.SportId == entityId) ||
-				(entityType == "facility" && i.FacilityId == entityId)
-			);
+            var images = await _imageRepo.GetListByConditionAsync(i =>
+					(entityType == "field" && i.FieldId == entityId) ||
+					(entityType == "sport" && i.SportId == entityId) ||
+					(entityType == "facility" && i.FacilityId == entityId) ||
+					(entityType == "item" && i.ItemId == entityId)
+				);
 
-			return images;
+            return images;
 		}
 		public string GetContentTypeFromBase64(string base64Data)
 		{
