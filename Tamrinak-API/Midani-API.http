@@ -1,0 +1,6 @@
+@Midani_API_HostAddress = http://localhost:5114
+
+GET {{Midani_API_HostAddress}}
+Accept: application/json
+
+###
