@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
+<<<<<<< HEAD
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Midani-API", "Tamrinak-API\Midani-API.csproj", "{B38F4892-8FAD-4D94-A0F0-DF9E6DAC8BC2}"
+=======
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tamrinak-API", "Tamrinak-API\Tamrinak-API.csproj", "{B38F4892-8FAD-4D94-A0F0-DF9E6DAC8BC2}"
+>>>>>>> parent of 19ccf90 (m)
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
