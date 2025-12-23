@@ -80,7 +80,7 @@ namespace Tamrinak_API.Controllers
         // TAKES: CreateItemDto (Form)
         // RETURNS: { id }
         // =========================================================
-        [Authorize(Roles = "Admin,FacilityOwner")]
+        [Authorize(Roles = "Admin,VenueManager")]
         [HttpPost("items")]
         public async Task<IActionResult> AddItem([FromForm] CreateItemDto dto)
         {
@@ -124,7 +124,7 @@ namespace Tamrinak_API.Controllers
         // DELETE /store/items/{id}
         // RETURNS: 200 OK
         // =========================================================
-        [Authorize(Roles = "Admin,FacilityOwner")]
+        [Authorize(Roles = "Admin,VenueManager")]
         [HttpDelete("items/{id}")]
         public async Task<IActionResult> DeleteItem(int id)
         {
