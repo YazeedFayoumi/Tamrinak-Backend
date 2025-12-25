@@ -27,6 +27,11 @@ namespace Tamrinak_API.DataAccess.Configurartions
 				.HasForeignKey(i => i.SportId)
 				.OnDelete(DeleteBehavior.Restrict);
 
-		}
+            builder.HasOne(i => i.Item)
+                .WithMany( it=> it.Images)
+                .HasForeignKey(it => it.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        }
 	}
 }
