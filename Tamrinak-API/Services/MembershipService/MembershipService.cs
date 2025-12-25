@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.MembershipDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 using Tamrinak_API.Services.EmailService;
 
 namespace Tamrinak_API.Services.MembershipService
 {
-	public class MembershipService : IMembershipService
+    public class MembershipService : IMembershipService
 	{
 		private readonly IGenericRepo<Membership> _membershipRepo;
 		private readonly IGenericRepo<Facility> _facilityRepo;

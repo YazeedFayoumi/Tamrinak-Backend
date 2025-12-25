@@ -3,11 +3,11 @@ using System.Data;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.AdminDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 
 namespace Tamrinak_API.Services.UserService
 {
-	public class UserService : IUserService
+    public class UserService : IUserService
 	{
 		private readonly IGenericRepo<User> _genericRepo;
 		private readonly IGenericRepo<Role> _roleRepo;

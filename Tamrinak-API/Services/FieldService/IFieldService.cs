@@ -1,10 +1,10 @@
 ﻿using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FieldDtos;
-using Tamrinak_API.DTO.PaginationDto;
+using Tamrinak_API.DTO.PaginationDtos;
 
 namespace Tamrinak_API.Services.FieldService
 {
-	public interface IFieldService
+    public interface IFieldService
 	{
 		Task<FieldDto> AddFieldAsync(AddFieldDto dto, int userId);
 		Task<Field> GetFieldAsync(int id);

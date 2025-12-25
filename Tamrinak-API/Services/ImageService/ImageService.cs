@@ -1,13 +1,13 @@
 ﻿using System.Linq.Expressions;
 using Tamrinak_API.DataAccess.Models;
-using Tamrinak_API.Repository.GenericRepo;
 using SystemImage = System.Drawing.Image;
 using Image = Tamrinak_API.DataAccess.Models.Image;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Tamrinak_API.Repositories.GenericRepo;
 
 namespace Tamrinak_API.Services.ImageService
 {
-	public class ImageService : IImageService
+    public class ImageService : IImageService
 	{
 		private readonly IWebHostEnvironment _env;
 		private readonly IGenericRepo<Image> _imageRepo;

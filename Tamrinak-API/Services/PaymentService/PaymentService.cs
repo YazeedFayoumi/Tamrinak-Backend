@@ -5,31 +5,31 @@ using Stripe.V2;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.PaymentDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 using Tamrinak_API.Services.EmailService;
 using PaymentMethod = Tamrinak_API.DataAccess.Models.PaymentMethod;
 
 namespace Tamrinak_API.Services.PaymentService
 {
-	public class PaymentService : IPaymentService
-	{
-		private readonly IGenericRepo<Payment> _paymentRepo;
-		private readonly IGenericRepo<User> _userRepo;
-		private readonly IGenericRepo<Booking> _bookingRepo;
-		private readonly IGenericRepo<Membership> _membershipRepo;
+    public class PaymentService : IPaymentService
+    {
+        private readonly IGenericRepo<Payment> _paymentRepo;
+        private readonly IGenericRepo<User> _userRepo;
+        private readonly IGenericRepo<Booking> _bookingRepo;
+        private readonly IGenericRepo<Membership> _membershipRepo;
         private readonly IConfiguration _config;
         private readonly IEmailService _emailService;
 
         public PaymentService(IGenericRepo<Payment> paymentRepo, IGenericRepo<User> userRepo, IConfiguration configuration,
            IGenericRepo<Booking> bookingRepo, IGenericRepo<Membership> membershipRepo, IEmailService emailService)
-		{
-			_paymentRepo = paymentRepo;
-			_userRepo = userRepo;
+        {
+            _paymentRepo = paymentRepo;
+            _userRepo = userRepo;
             _bookingRepo = bookingRepo;
             _membershipRepo = membershipRepo;
             _config = configuration;
             _emailService = emailService;
-		}
+        }
 
         public async Task<int> CreatePaymentAsync(int userId, AddPaymentDto dto, bool fromWebhook = false)
         {
@@ -39,18 +39,18 @@ namespace Tamrinak_API.Services.PaymentService
             {
                 var user = await _userRepo.GetAsync(userId);
                 var email = user.Email;
-                var venueName="";
+                var venueName = "";
                 DateTime eventDate = DateTime.UtcNow;
 
                 if (user == null)
                 {
-                   
+
                     throw new Exception("User not found or unauthorized.");
                 }
 
                 if ((dto.BookingId.HasValue && dto.MembershipId.HasValue) || (!dto.BookingId.HasValue && !dto.MembershipId.HasValue))
                 {
-                   
+
                     throw new Exception("You must provide either a BookingId or MembershipId.");
                 }
 
@@ -58,8 +58,8 @@ namespace Tamrinak_API.Services.PaymentService
 
                 if (dto.BookingId.HasValue)
                 {
-                    var booking = await _bookingRepo.GetByConditionIncludeAsync(b => b.BookingId == dto.BookingId.Value, 
-                        q=>q.Include(b=> b.User).Include(b => b.Field));
+                    var booking = await _bookingRepo.GetByConditionIncludeAsync(b => b.BookingId == dto.BookingId.Value,
+                        q => q.Include(b => b.User).Include(b => b.Field));
 
                     if (booking == null)
                     {
@@ -69,7 +69,7 @@ namespace Tamrinak_API.Services.PaymentService
 
                     if (booking.UserId != userId)
                     {
-                     
+
                         throw new Exception("You cannot pay for another user's booking.");
                     }
 
@@ -81,7 +81,7 @@ namespace Tamrinak_API.Services.PaymentService
 
                     if (existingPayment != null)
                     {
-                     
+
                         throw new Exception("This booking already has a confirmed payment.");
                     }
 
@@ -93,16 +93,16 @@ namespace Tamrinak_API.Services.PaymentService
                     var membership = await _membershipRepo.GetByConditionIncludeAsync(b => b.MembershipId == dto.MembershipId.Value,
                         q => q.Include(m => m.User).Include(m => m.Facility));
 
-             
+
                     if (membership == null)
                     {
-                       
+
                         throw new Exception("Membership not found.");
                     }
 
                     if (membership.UserId != userId)
                     {
-                       
+
                         throw new Exception("You cannot pay for another user's membership.");
                     }
 
@@ -113,7 +113,7 @@ namespace Tamrinak_API.Services.PaymentService
 
                     if (existingPayment != null)
                     {
-                       
+
                         throw new Exception("This membership already has a confirmed payment.");
                     }
 
@@ -124,7 +124,7 @@ namespace Tamrinak_API.Services.PaymentService
                 Console.WriteLine($"🔍 Expected: {expectedAmount}, Provided: {dto.Amount}");
                 if (decimal.Round(dto.Amount, 2) != decimal.Round(expectedAmount, 2))
                 {
-                  
+
                     throw new Exception("Incorrect payment amount.");
                 }
 
@@ -148,10 +148,10 @@ namespace Tamrinak_API.Services.PaymentService
                     PaymentDate = payment.PaymentDate.AddMinutes(180),
                     VenueName = venueName,
                     EventDate = eventDate,
-                    AmountPayed =  payment.Amount,
+                    AmountPayed = payment.Amount,
                     MethodUsed = payment.Method.ToString()
                 };
-             
+
                 await _emailService.SendPaymentEmailAsync(email, emailInfo);
                 await _paymentRepo.SaveAsync();
 
@@ -162,7 +162,7 @@ namespace Tamrinak_API.Services.PaymentService
             {
                 throw;
             }
-           }
+        }
 
         public async Task<PaymentDto?> GetPaymentByIdAsync(int paymentId)
         {
@@ -224,7 +224,7 @@ namespace Tamrinak_API.Services.PaymentService
                             PriceData = new SessionLineItemPriceDataOptions
                             {
                                 Currency = dto.Currency,
-                                UnitAmount = (dto.Amount * 100),        
+                                UnitAmount = (dto.Amount * 100),
 
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                                 {
@@ -244,9 +244,9 @@ namespace Tamrinak_API.Services.PaymentService
                             { "amount", dto.Amount.ToString() },
                             { "currency", dto.Currency }
                         }
-                    }
-                };
-            
+                }
+            };
+
             var service = new SessionService();
             var session = await service.CreateAsync(options);
             return session.Id;
@@ -273,7 +273,7 @@ namespace Tamrinak_API.Services.PaymentService
             if (payment == null) return;
 
             payment.Status = PaymentStatus.Failed;
-           // payment.FailureReason = failureReason;
+            // payment.FailureReason = failureReason;
             await _paymentRepo.UpdateAsync(payment);
             await _paymentRepo.SaveAsync();
         }

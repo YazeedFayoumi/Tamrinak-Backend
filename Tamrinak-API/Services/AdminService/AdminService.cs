@@ -3,7 +3,7 @@ using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.AdminDtos;
 using Tamrinak_API.DTO.PaginationDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 
 namespace Tamrinak_API.Services.AdminService
 {

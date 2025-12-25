@@ -5,12 +5,12 @@ using System.Security.Claims;
 using System.Text;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.UserAuthDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 using Tamrinak_API.Services.EmailService;
 
 namespace Tamrinak_API.Services.AuthenticationService
 {
-	public class AuthenticationService : IAuthenticationService
+    public class AuthenticationService : IAuthenticationService
 	{
 		private readonly IGenericRepo<User> _genericRepo;
 		private readonly IGenericRepo<Role> _roleRepo;

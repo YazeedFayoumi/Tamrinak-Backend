@@ -22,7 +22,7 @@ namespace Tamrinak_API.Controllers
 	{
 		private readonly IPaymentService _paymentService;
 		private readonly IConfiguration _config;
-		
+
 		public PaymentController(IPaymentService paymentService, IConfiguration configuration)
 		{
 			_paymentService = paymentService;
@@ -103,8 +103,8 @@ namespace Tamrinak_API.Controllers
 				int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value
 				?? throw new Exception("User ID not found"));
 
-		
-                var sessionId = await _paymentService.CreateStripeIntentAsync(userId, dto);
+
+				var sessionId = await _paymentService.CreateStripeIntentAsync(userId, dto);
 				return Ok(new { sessionId });
 			}
 			catch (Exception ex)
@@ -142,7 +142,7 @@ namespace Tamrinak_API.Controllers
 					var userId = int.Parse(paymentIntent.Metadata["userId"]);
 					var bookingId = int.Parse(paymentIntent.Metadata["bookingId"]);
 					var amount = (decimal)(paymentIntent.AmountReceived / 1000.0m);
-				
+
 					var dto = new AddPaymentDto
 					{
 						BookingId = bookingId,
@@ -152,17 +152,17 @@ namespace Tamrinak_API.Controllers
 					};
 
 					var result = await _paymentService.CreatePaymentAsync(userId, dto, fromWebHook: true);
-					
-                }
-				else if(stripeEvent.Type == "payment_intent.payment_failed")
-				{
-                    var failedIntent = stripeEvent.Data.Object as PaymentIntent;
-                    var failureMessage = failedIntent?.LastPaymentError?.Message ?? "Unknown failure";
-                    await _paymentService.HandleStripePaymentFailedAsync(failedIntent.Id, failureMessage);
-                }
-                return Ok();
 
-            }
+				}
+				else if (stripeEvent.Type == "payment_intent.payment_failed")
+				{
+					var failedIntent = stripeEvent.Data.Object as PaymentIntent;
+					var failureMessage = failedIntent?.LastPaymentError?.Message ?? "Unknown failure";
+					await _paymentService.HandleStripePaymentFailedAsync(failedIntent.Id, failureMessage);
+				}
+				return Ok();
+
+			}
 			catch (StripeException ex)
 			{
 				return BadRequest();

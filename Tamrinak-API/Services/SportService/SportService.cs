@@ -2,12 +2,12 @@
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.SportDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 using Tamrinak_API.Services.ImageService;
 
 namespace Tamrinak_API.Services.SportService
 {
-	public class SportService : ISportService
+    public class SportService : ISportService
 	{
 		private readonly IGenericRepo<Sport> _sportRepo;
 		private readonly IImageService _imageService;

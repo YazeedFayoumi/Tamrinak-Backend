@@ -5,14 +5,14 @@ using System.Security.Claims;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FacilityDtos;
 using Tamrinak_API.DTO.FieldDtos;
-using Tamrinak_API.DTO.PaginationDto;
+using Tamrinak_API.DTO.PaginationDtos;
 using Tamrinak_API.Services.FacilityService;
 using Tamrinak_API.Services.ImageService;
 using Tamrinak_API.Services.MembershipOfferService;
 
 namespace Tamrinak_API.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class FacilityController : ControllerBase
 	{

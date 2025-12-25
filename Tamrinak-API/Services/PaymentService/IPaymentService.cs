@@ -3,8 +3,8 @@ using Tamrinak_API.DTO.PaymentDtos;
 
 namespace Tamrinak_API.Services.PaymentService
 {
-	public interface IPaymentService
-	{
+    public interface IPaymentService
+    {
         Task<int> CreatePaymentAsync(int userId, AddPaymentDto dto, bool fromWebHook);
         Task<PaymentDto?> GetPaymentByIdAsync(int paymentId);
         Task<List<PaymentDto>> GetPaymentsByUserAsync(int userId);

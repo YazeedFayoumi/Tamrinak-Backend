@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.MembershipOfferDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 
 namespace Tamrinak_API.Services.MembershipOfferService
 {
-	public class MembershipOfferService : IMembershipOfferService
+    public class MembershipOfferService : IMembershipOfferService
 	{
 		private readonly IGenericRepo<MembershipOffer> _offerRepo;
 		private readonly IGenericRepo<Facility> _facilityRepo;

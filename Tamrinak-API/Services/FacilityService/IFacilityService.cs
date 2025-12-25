@@ -1,11 +1,11 @@
 ﻿using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FacilityDtos;
 using Tamrinak_API.DTO.FieldDtos;
-using Tamrinak_API.DTO.PaginationDto;
+using Tamrinak_API.DTO.PaginationDtos;
 
 namespace Tamrinak_API.Services.FacilityService
 {
-	public interface IFacilityService
+    public interface IFacilityService
 	{
 		Task<FacilityDto> AddFacilityAsync(AddFacilityDto dto, int userId);
 		Task<Facility> GetFacilityAsync(int id);

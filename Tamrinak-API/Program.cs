@@ -8,7 +8,7 @@ using System.Text;
 using Tamrinak_API.DataAccess;
 using Tamrinak_API.DataAccess.Seeding;
 using Tamrinak_API.Helpers;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 using Tamrinak_API.Services.AdminService;
 using Tamrinak_API.Services.AuthenticationService;
 using Tamrinak_API.Services.BookingService;
@@ -19,6 +19,8 @@ using Tamrinak_API.Services.ImageService;
 using Tamrinak_API.Services.MembershipOfferService;
 using Tamrinak_API.Services.MembershipService;
 using Tamrinak_API.Services.PaymentService;
+
+//using Tamrinak_API.Services.PaymentService;
 using Tamrinak_API.Services.ReviewService;
 using Tamrinak_API.Services.SportService;
 using Tamrinak_API.Services.UserService;

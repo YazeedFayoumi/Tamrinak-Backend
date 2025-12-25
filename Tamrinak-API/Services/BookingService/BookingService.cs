@@ -2,12 +2,12 @@
 using System.Security.Claims;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.BookingDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Tamrinak_API.Services.BookingService
 {
-	public class BookingService : IBookingService
+    public class BookingService : IBookingService
 	{
 		private readonly IGenericRepo<Booking> _bookingRepo;
 		private readonly IGenericRepo<Field> _fieldRepo;

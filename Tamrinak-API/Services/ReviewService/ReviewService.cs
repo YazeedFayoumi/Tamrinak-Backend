@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.ReviewDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 
 namespace Tamrinak_API.Services.ReviewService
 {

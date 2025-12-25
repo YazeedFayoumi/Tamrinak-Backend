@@ -2,14 +2,14 @@
 using Org.BouncyCastle.Asn1.X9;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FieldDtos;
-using Tamrinak_API.DTO.PaginationDto;
+using Tamrinak_API.DTO.PaginationDtos;
 using Tamrinak_API.DTO.SportDtos;
 using Tamrinak_API.DTO.UserAuthDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 
 namespace Tamrinak_API.Services.FieldService
 {
-	public class FieldService : IFieldService
+    public class FieldService : IFieldService
 	{
 		private readonly IGenericRepo<Field> _fieldRepo;
 		private readonly IGenericRepo<Booking> _bookingRepo;

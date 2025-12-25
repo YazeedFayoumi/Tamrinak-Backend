@@ -4,13 +4,13 @@ using Tamrinak_API.DataAccess.Configurartions;
 using Tamrinak_API.DataAccess.Models;
 using Tamrinak_API.DTO.FacilityDtos;
 using Tamrinak_API.DTO.FieldDtos;
-using Tamrinak_API.DTO.PaginationDto;
+using Tamrinak_API.DTO.PaginationDtos;
 using Tamrinak_API.DTO.SportDtos;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 
 namespace Tamrinak_API.Services.FacilityService
 {
-	public class FacilityService : IFacilityService
+    public class FacilityService : IFacilityService
 	{
 		private readonly IGenericRepo<Facility> _facilityRepo;
 		private readonly IGenericRepo<SportFacility> _sportFacilityRepo;

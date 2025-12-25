@@ -7,7 +7,7 @@ namespace Tamrinak_API.DataAccess.Models
         public int Id { get; set; }
 
         public int OrderId { get; set; }
-        public Order Order { get; set; } = null!;
+        public Orders Order { get; set; } = null!;
 
         public int ItemId { get; set; }
         public Items Item { get; set; } = null!;

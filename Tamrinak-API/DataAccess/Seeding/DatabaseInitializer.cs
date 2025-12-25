@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Tamrinak_API.DataAccess.Models;
-using Tamrinak_API.Repository.GenericRepo;
+using Tamrinak_API.Repositories.GenericRepo;
 
 namespace Tamrinak_API.DataAccess.Seeding
 {
-	public class DatabaseInitializer
+    public class DatabaseInitializer
 	{
 		private readonly IServiceProvider _serviceProvider;
 		private readonly ILogger<DatabaseInitializer> _logger;
